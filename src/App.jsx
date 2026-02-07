@@ -454,6 +454,39 @@ const INSIGHT_DECISIONS = [
   },
 ];
 
+// ─── FRESHNESS & STALENESS ───────────────────────────────────
+const FRESHNESS_CONFIG = {
+  active:   { label: "Active",   color: "#10B981", icon: "●" },
+  cooling:  { label: "Cooling",  color: "#F59E0B", icon: "◐" },
+  dormant:  { label: "Dormant",  color: "#64748B", icon: "○" },
+  archived: { label: "Archived", color: "#475569", icon: "◻" },
+};
+
+const MONTH_MAP = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+const DEMO_NOW = new Date(2026, 1, 7); // Feb 7 2026 — the demo "today"
+
+const getTopicFreshness = (topic) => {
+  if (topic.archived) return "archived";
+  const [m, y] = topic.lastSeen.split(" ");
+  const last = new Date(parseInt(y), MONTH_MAP[m], 28);
+  const days = Math.floor((DEMO_NOW - last) / 864e5);
+  if (days <= 30) return "active";
+  if (days <= 90) return "cooling";
+  return "dormant";
+};
+
+const getInsightStaleness = (dateStr) => {
+  const d = new Date(dateStr);
+  const months = Math.round((DEMO_NOW - d) / (864e5 * 30.44));
+  if (months >= 6) return `This was made ${months} months ago — still relevant?`;
+  return null;
+};
+
+// Simulated uncurated-conversation counts per topic since last review
+const RECURATION_COUNTS = {
+  courtcollect: 5, hmprg: 3, jobsearch: 7, webdev: 4, automation: 2,
+};
+
 // ─── TOPIC CURATION DATA ────────────────────────────────────
 const CURATED_PALETTE = [
   "#F59E0B", "#3B82F6", "#EF4444", "#8B5CF6", "#10B981",
@@ -516,6 +549,7 @@ const CSS = `
   @keyframes starPop { 0% { transform: scale(1); } 50% { transform: scale(1.35); } 100% { transform: scale(1); } }
   @keyframes cardDismiss { 0% { opacity: 1; transform: translateX(0) scale(1); } 100% { opacity: 0; transform: translateX(60px) scale(0.92); } }
   @keyframes cardPromote { 0% { opacity: 1; transform: translateY(0); } 50% { box-shadow: 0 0 24px rgba(16,185,129,0.3); } 100% { opacity: 0; transform: translateY(-30px) scale(0.95); } }
+  @keyframes freshPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); } 50% { box-shadow: 0 0 12px 3px rgba(251,191,36,0.25); } }
   .fade-up { animation: fadeUp 0.6s ease both; }
   .slide-in { animation: slideIn 0.5s ease both; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -966,6 +1000,21 @@ const StatCard = ({ label, value, sub, delay, accent, mobile }) => {
   );
 };
 
+const FreshnessBadge = ({ topic, style }) => {
+  const freshness = getTopicFreshness(topic);
+  const cfg = FRESHNESS_CONFIG[freshness];
+  return (
+    <span style={{
+      fontFamily: BODY, fontSize: 9, padding: "2px 7px", borderRadius: 10,
+      background: `${cfg.color}15`, color: cfg.color,
+      border: `1px solid ${cfg.color}30`, fontWeight: 500,
+      letterSpacing: "0.03em", whiteSpace: "nowrap", ...style,
+    }}>
+      {cfg.icon} {cfg.label}
+    </span>
+  );
+};
+
 const TopicBubble = ({ topic, maxCount, onClick, index, mobile }) => {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -973,6 +1022,10 @@ const TopicBubble = ({ topic, maxCount, onClick, index, mobile }) => {
   const scaleRange = mobile ? 56 : 80;
   const size = baseSize + (topic.count / maxCount) * scaleRange;
   useEffect(() => { const t = setTimeout(() => setVisible(true), 600 + index * 50); return () => clearTimeout(t); }, [index]);
+
+  const freshness = getTopicFreshness(topic);
+  const isDormant = freshness === "dormant" || freshness === "archived";
+  const hasUncurated = RECURATION_COUNTS[topic.id] > 0;
 
   return (
     <div onClick={() => onClick(topic)}
@@ -986,7 +1039,9 @@ const TopicBubble = ({ topic, maxCount, onClick, index, mobile }) => {
         transform: `scale(${visible ? (hovered ? 1.15 : 1) : 0.5})`,
         opacity: visible ? 1 : 0, transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
         cursor: "pointer", position: "relative", flexShrink: 0,
+        filter: isDormant ? "saturate(0.35)" : "none",
         boxShadow: hovered ? `0 0 30px ${topic.color}20, inset 0 0 15px ${topic.color}08` : "none",
+        animation: hasUncurated && visible ? "freshPulse 3s ease-in-out infinite" : "none",
       }}>
       <span style={{ fontSize: size > 80 ? 22 : size > 60 ? 16 : 13 }}>{topic.icon}</span>
       {size > (mobile ? 65 : 75) && (
@@ -1001,13 +1056,21 @@ const TopicBubble = ({ topic, maxCount, onClick, index, mobile }) => {
           padding: "10px 14px", whiteSpace: "nowrap", zIndex: 50, minWidth: 180,
           boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
         }}>
-          <div style={{ fontFamily: BODY, fontSize: 13, color: "#fff", fontWeight: 600 }}>{topic.icon} {topic.name}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontFamily: BODY, fontSize: 13, color: "#fff", fontWeight: 600 }}>{topic.icon} {topic.name}</span>
+            <FreshnessBadge topic={topic} />
+          </div>
           <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 5 }}>{topic.count} conversations · {(topic.words / 1000).toFixed(0)}k words</div>
           <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>{topic.firstSeen} → {topic.lastSeen}</div>
           <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
             <span style={{ fontSize: 10, fontFamily: MONO, color: "#FBBF24" }}>Claude {topic.platform.claude}</span>
             <span style={{ fontSize: 10, fontFamily: MONO, color: "#3B82F6" }}>GPT {topic.platform.gpt}</span>
           </div>
+          {RECURATION_COUNTS[topic.id] > 0 && (
+            <div style={{ fontFamily: BODY, fontSize: 10, color: "#F59E0B", marginTop: 5, fontWeight: 500 }}>
+              {RECURATION_COUNTS[topic.id]} new conversations since last review
+            </div>
+          )}
           <div style={{ fontFamily: BODY, fontSize: 10, color: topic.color, marginTop: 5, fontWeight: 500 }}>Click to explore →</div>
         </div>
       )}
@@ -1063,7 +1126,10 @@ const TimelineView = ({ topic, onBack, onEventClick, mobile }) => {
       <div style={{ display: "flex", alignItems: mobile ? "flex-start" : "center", gap: mobile ? 12 : 16, marginBottom: 6, flexDirection: mobile ? "column" : "row" }}>
         <span style={{ fontSize: mobile ? 32 : 40 }}>{topic.icon}</span>
         <div>
-          <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 32, fontWeight: 700, color: "#fff" }}>{topic.name}</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 32, fontWeight: 700, color: "#fff" }}>{topic.name}</h2>
+            <FreshnessBadge topic={topic} style={{ fontSize: 10, padding: "3px 9px" }} />
+          </div>
           <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>{topic.count} conversations · {(topic.words / 1000).toFixed(0)}k words · {topic.firstSeen} → {topic.lastSeen}</p>
         </div>
       </div>
@@ -3503,6 +3569,39 @@ export default function App() {
                 {TOPICS.map((topic, i) => <TopicBubble key={topic.id} topic={topic} maxCount={maxCount} index={i} onClick={handleTopicClick} mobile={mobile} />)}
               </div>
             </div>
+
+            {/* ── Staleness & Re-curation Alerts ── */}
+            {(() => {
+              const staleInsights = INSIGHT_DECISIONS.map(d => ({ ...d, warning: getInsightStaleness(d.date) })).filter(d => d.warning);
+              const recurationTopics = TOPICS.filter(t => RECURATION_COUNTS[t.id] > 0);
+              if (staleInsights.length === 0 && recurationTopics.length === 0) return null;
+              return (
+                <div style={{ marginBottom: mobile ? 28 : 40, display: "flex", flexDirection: "column", gap: 8 }}>
+                  {staleInsights.slice(0, 3).map((d, i) => {
+                    const topic = TOPICS.find(t => t.id === d.topicId);
+                    return (
+                      <div key={`stale-${i}`} style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.12)", borderRadius: 10, padding: mobile ? "10px 12px" : "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontSize: 14, flexShrink: 0 }}>⏳</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>
+                            <span style={{ color: topic?.color || "#fff", fontWeight: 600 }}>{topic?.name}:</span> {d.aiProposal.length > 80 ? d.aiProposal.slice(0, 77) + "…" : d.aiProposal}
+                          </div>
+                          <div style={{ fontFamily: BODY, fontSize: 10, color: "#EF4444", marginTop: 3, fontWeight: 500 }}>{d.warning}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {recurationTopics.map((t, i) => (
+                    <div key={`recur-${i}`} style={{ background: "rgba(251,191,36,0.04)", border: "1px solid rgba(251,191,36,0.12)", borderRadius: 10, padding: mobile ? "10px 12px" : "10px 16px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => handleTopicClick(t)}>
+                      <span style={{ fontSize: 14, flexShrink: 0 }}>{t.icon}</span>
+                      <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>
+                        <span style={{ color: "#F59E0B", fontWeight: 600 }}>{RECURATION_COUNTS[t.id]} new conversations</span> touch <span style={{ color: t.color, fontWeight: 500 }}>{t.name}</span> since your last review
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
             <div style={{ display: "grid", gridTemplateColumns: insightGrid, gap: mobile ? 24 : 20 }}>
               <div>
