@@ -3991,6 +3991,123 @@ tyler,Tyler Technologies,work,89,234500,Mar 2023,Dec 2025,3.4`}
   );
 };
 
+// ═══════════════════════════════════════════════════════════════
+// GUIDED TOUR MODE (7A)
+// ═══════════════════════════════════════════════════════════════
+
+const TOUR_STEPS = [
+  { title: "Welcome to Atlas", description: "Let's take a quick tour of your AI Knowledge Atlas. We'll highlight the key features that make this platform unique.", icon: "🗺️", position: "center" },
+  { title: "Navigation", description: "Switch between views: Overview for your dashboard, Connections for your knowledge graph, Evolution for decisions & milestones, Search, and Export.", icon: "◈", position: "top" },
+  { title: "Knowledge Map", description: "Your topics are visualized as interactive bubbles — sized by conversation count. Click any topic to dive into its timeline.", icon: "🧠", position: "middle" },
+  { title: "AI Journey", description: "Track your activity over time and see the shift between AI platforms. The heatmap reveals your thinking patterns across months.", icon: "📊", position: "middle" },
+  { title: "Human-Curated Pipeline", description: "This is what makes Atlas different. Every insight passes through your curation — the AI proposes, you decide. Your knowledge base is human-verified, not just AI-generated.", icon: "⚖️", position: "middle", highlight: true },
+  { title: "Quick Navigation", description: "Press ⌘K (or Ctrl+K) anytime to open the command palette. Jump to any topic or view instantly.", icon: "⌕", position: "top" },
+  { title: "Incremental Sync", description: "Atlas isn't a one-time tool. Hit Sync to pull in new conversations and keep your knowledge base current.", icon: "⟳", position: "top" },
+  { title: "You're All Set!", description: "Explore your 3 years of AI conversations, mapped and curated. Your mind, your atlas.", icon: "✨", position: "center" },
+];
+
+const TOUR_STORAGE_KEY = "atlas_tour_completed";
+
+const GuidedTour = ({ active, onClose, mobile }) => {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (!active) setStep(0);
+  }, [active]);
+
+  useEffect(() => {
+    if (!active) return;
+    const handleKey = (e) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); step < TOUR_STEPS.length - 1 ? setStep(s => s + 1) : handleFinish(); }
+      if (e.key === "ArrowLeft" && step > 0) { e.preventDefault(); setStep(s => s - 1); }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  });
+
+  const handleFinish = () => {
+    try { localStorage.setItem(TOUR_STORAGE_KEY, "true"); } catch {}
+    onClose();
+  };
+
+  if (!active) return null;
+
+  const current = TOUR_STEPS[step];
+  const isFirst = step === 0;
+  const isLast = step === TOUR_STEPS.length - 1;
+  const topPos = current.position === "top" ? (mobile ? 80 : 100) : current.position === "middle" ? (mobile ? "35%" : "30%") : "50%";
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: current.position === "center" ? "center" : "flex-start", justifyContent: "center", paddingTop: current.position !== "center" ? topPos : 0 }} onClick={handleFinish}>
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", transition: "opacity 0.3s" }} />
+      <div onClick={e => e.stopPropagation()} style={{
+        position: "relative", width: mobile ? "90%" : 420, maxWidth: "90vw",
+        background: current.highlight ? "linear-gradient(135deg, #131318 0%, rgba(251,191,36,0.06) 100%)" : "#131318",
+        border: `1px solid ${current.highlight ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)"}`,
+        borderRadius: 16, padding: mobile ? "24px 20px" : "28px 28px 24px",
+        boxShadow: current.highlight ? "0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(251,191,36,0.08)" : "0 24px 80px rgba(0,0,0,0.5)",
+        animation: "fadeUp 0.25s ease both",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: mobile ? 22 : 26 }}>{current.icon}</span>
+            <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 21, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>{current.title}</h3>
+          </div>
+          <button onClick={handleFinish} style={{
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 6, padding: "3px 8px", cursor: "pointer",
+            fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.25)",
+          }}>ESC</button>
+        </div>
+        <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.55)", lineHeight: 1.65, marginBottom: 24 }}>{current.description}</p>
+        {current.highlight && (
+          <div style={{
+            background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.15)",
+            borderRadius: 8, padding: "8px 12px", marginBottom: 20,
+            fontFamily: BODY, fontSize: 11, color: "#FBBF24", fontWeight: 500,
+          }}>The curation pipeline is Atlas's key differentiator — your judgment shapes the knowledge base.</div>
+        )}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", gap: 4 }}>
+            {TOUR_STEPS.map((_, i) => (
+              <div key={i} style={{
+                width: i === step ? 18 : 6, height: 6, borderRadius: 3,
+                background: i === step ? "#FBBF24" : i < step ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)",
+                transition: "all 0.25s",
+              }} />
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {!isFirst && (
+              <button onClick={() => setStep(s => s - 1)} style={{
+                fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.4)",
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 8, padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
+              }}>Back</button>
+            )}
+            {isFirst && (
+              <button onClick={handleFinish} style={{
+                fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.3)",
+                background: "transparent", border: "none", padding: "7px 10px", cursor: "pointer",
+              }}>Skip tour</button>
+            )}
+            <button onClick={() => isLast ? handleFinish() : setStep(s => s + 1)} style={{
+              fontFamily: BODY, fontSize: 12, fontWeight: 600,
+              color: "#08080C", background: "#FBBF24",
+              border: "none", borderRadius: 8, padding: "7px 20px",
+              cursor: "pointer", transition: "all 0.2s",
+            }}>{isLast ? "Get Started" : "Next"}</button>
+          </div>
+        </div>
+        <div style={{ textAlign: "center", marginTop: 12, fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
+          {step + 1} / {TOUR_STEPS.length} · Use arrow keys to navigate
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── MAIN APP ───────────────────────────────────────────────
 
 export default function App() {
@@ -4012,6 +4129,21 @@ export default function App() {
 
   // ─── COMMAND PALETTE & KEYBOARD NAV ──────────────
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
+
+  // ─── GUIDED TOUR ────────────────────────────────
+  const [tourActive, setTourActive] = useState(false);
+  const tourLaunched = useRef(false);
+
+  useEffect(() => {
+    if (view === "dashboard" && !tourLaunched.current) {
+      tourLaunched.current = true;
+      try {
+        if (!localStorage.getItem(TOUR_STORAGE_KEY)) {
+          setTimeout(() => setTourActive(true), 600);
+        }
+      } catch {}
+    }
+  }, [view]);
 
   useEffect(() => {
     const handleGlobalKey = (e) => {
@@ -4253,8 +4385,20 @@ export default function App() {
           <div style={{ fontFamily: BODY, fontSize: mobile ? 9 : 11, color: "rgba(255,255,255,0.08)", marginTop: 5 }}>Atlas · v5 · Data simulated from real conversation patterns</div>
         </div>
       </div>
+      {!mobile && (
+        <button onClick={() => setTourActive(true)} title="Take a guided tour" style={{
+          position: "fixed", bottom: 24, left: 24, zIndex: 1000,
+          fontFamily: BODY, fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.35)",
+          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 8, padding: "7px 12px", cursor: "pointer", transition: "all 0.25s",
+          display: "flex", alignItems: "center", gap: 6,
+        }}>
+          <span style={{ fontSize: 13 }}>🗺️</span> Tour
+        </button>
+      )}
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
       <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={setView} onTopicClick={handleTopicClick} mobile={mobile} />
+      <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
     </div>
   );
 }
