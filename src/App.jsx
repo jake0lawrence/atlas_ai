@@ -245,6 +245,91 @@ const REDISCOVERIES = [
   { icon: "🔄", ago: "2 years ago", text: "Your first conversation about AI automation — 'how do I connect APIs without coding.' Look how far that's come." },
 ];
 
+// ─── CONVERSATION PREVIEW DATA ──────────────────────────────
+const CONVERSATION_PREVIEWS = {
+  "courtcollect:4": {
+    topicId: "courtcollect",
+    eventIndex: 4,
+    platform: "Claude",
+    date: "2024-10-05",
+    wordCount: 3420,
+    whyItMatters: "This was the moment CourtCollect went from concept to real codebase — the first commit established the engineering foundation.",
+    entities: ["GitHub", "CI/CD", "Jest", "GitHub Actions", "Vercel"],
+    topicTags: ["CourtCollect", "Web Development"],
+    messages: [
+      { role: "user", text: "I want to set up the GitHub organization for CourtCollect today. I'm thinking a monorepo with the Next.js frontend and Supabase edge functions together. Can you help me plan the repo structure and get CI/CD running?" },
+      { role: "ai", text: "Great call on the monorepo approach for this stage — it keeps deployment simple while you're the sole developer. Here's what I'd recommend for your repo structure:", extractions: [{ type: "entity", text: "monorepo", start: 18, end: 26 }] },
+      { role: "ai", text: "```\ncourtcollect/\n├── apps/\n│   └── web/          # Next.js 14 app\n├── packages/\n│   └── db/           # Supabase types & migrations\n├── .github/\n│   └── workflows/\n│       └── ci.yml    # GitHub Actions\n├── turbo.json\n└── package.json\n```" },
+      { role: "user", text: "Perfect. What should the CI pipeline look like? I want tests, linting, and auto-deploy to Vercel on merge to main." },
+      { role: "ai", text: "Here's a GitHub Actions workflow that covers all three. The key decision is whether to gate deployments on test passage — I'd recommend yes, even though it slows things down slightly.", extractions: [{ type: "decision", text: "gate deployments on test passage", start: 80, end: 111 }] },
+      { role: "user", text: "Yeah, let's gate it. I've been burned by shipping broken builds at Tyler. What testing framework do you recommend for this stack?" },
+      { role: "ai", text: "For Next.js + Supabase, I'd go with Jest for unit tests and Playwright for e2e. Jest integrates cleanly with the Next.js toolchain, and Playwright handles the auth flows you'll need to test for multi-tenant access. Start with Jest — you can add Playwright once you have actual UI flows to test.", extractions: [{ type: "decision", text: "Jest for unit tests and Playwright for e2e", start: 46, end: 88 }] },
+      { role: "user", text: "Makes sense. Let me push the initial commit and see if the pipeline runs. One more thing — should I set up branch protection rules now or wait?" },
+      { role: "ai", text: "Set them up now. Future-you will thank present-you. Require PR reviews (even if it's just you reviewing your own after a beat), require CI to pass, and prevent force-pushes to main. It builds good habits and protects you when you're coding at 2am.", extractions: [{ type: "decision", text: "Require PR reviews", start: 52, end: 71 }] },
+    ],
+  },
+  "courtcollect:3": {
+    topicId: "courtcollect",
+    eventIndex: 3,
+    platform: "Claude",
+    date: "2024-09-22",
+    wordCount: 5180,
+    whyItMatters: "The database schema became the backbone of the entire product — every feature since traces back to decisions made here.",
+    entities: ["PostgreSQL", "Supabase", "RLS", "multi-tenant", "row-level security"],
+    topicTags: ["CourtCollect", "Gov Tech & Policy"],
+    messages: [
+      { role: "user", text: "I need to design the core database schema for CourtCollect. The system needs to handle: courts (clients), cases with amounts owed, payments from defendants, and collection agency assignments. Multi-tenant is critical — agencies should only see their assigned cases." },
+      { role: "ai", text: "This is a classic multi-tenant SaaS schema problem, but with a government twist — you need audit trails for everything. Let me walk through the core tables and then we'll handle the tenancy model.", extractions: [{ type: "entity", text: "multi-tenant SaaS schema", start: 19, end: 43 }] },
+      { role: "user", text: "Exactly. And I need to think about Supabase's row-level security for the tenancy. Each collection agency should only see cases assigned to them, but court admins see everything." },
+      { role: "ai", text: "Perfect use case for Supabase RLS. Here's my recommended approach: use a `tenant_id` column on every table, then write RLS policies that check the user's JWT claims against the tenant_id. Court admin roles bypass with a separate policy.", extractions: [{ type: "decision", text: "use a `tenant_id` column on every table", start: 56, end: 94 }, { type: "entity", text: "RLS policies", start: 101, end: 113 }] },
+      { role: "user", text: "What about the payments table? Defendants might pay in installments, and we need to track which agency gets credit for the collection." },
+      { role: "ai", text: "I'd model payments as a separate table with a foreign key to both the case and the collecting agency. Each payment record tracks: amount, date, method (online/in-person/mail), and a `collected_by` reference. This lets you run commission reports per agency and track partial payments against total owed." },
+      { role: "user", text: "This is coming together. One concern — what if a case gets reassigned from one agency to another? We need history." },
+      { role: "ai", text: "Add an `assignments` junction table instead of a direct agency-case link. Each row has: case_id, agency_id, assigned_date, unassigned_date (nullable), and status. Active assignment has null unassigned_date. This preserves full reassignment history and makes the audit trail trivial to query.", extractions: [{ type: "decision", text: "assignments junction table instead of a direct agency-case link", start: 7, end: 69 }] },
+    ],
+  },
+  "tyler:5": {
+    topicId: "tyler",
+    eventIndex: 5,
+    platform: "ChatGPT",
+    date: "2024-09-20",
+    wordCount: 4210,
+    whyItMatters: "The Clearwater KS project became the template for all future data conversions — and later directly informed CourtCollect's import system.",
+    entities: ["Clearwater KS", "data conversion", "legacy systems", "CSV", "SQL Server"],
+    topicTags: ["Tyler Technologies", "Gov Tech & Policy"],
+    messages: [
+      { role: "user", text: "I'm working on the Clearwater Kansas data conversion for their municipal court. Their legacy system exports to CSV but the date formats are inconsistent and there are duplicate case numbers. How should I approach this?" },
+      { role: "ai", text: "Data conversion for municipal courts is notoriously messy. Let me suggest a three-phase approach: 1) Profile the data to catalog inconsistencies, 2) Build a transformation pipeline with validation rules, 3) Run parallel testing against the legacy system before cutover." },
+      { role: "user", text: "The date formats are the biggest headache. I'm seeing MM/DD/YYYY, M/D/YY, and even some with dashes. And about 200 cases have dates that seem wrong — like court dates in 1901." },
+      { role: "ai", text: "The 1901 dates are almost certainly null/default values from the legacy SQL Server database — that's a known pattern. For the format inconsistencies, build a date parser that tries formats in order of frequency. Flag anything that doesn't parse for manual review rather than guessing.", extractions: [{ type: "entity", text: "SQL Server", start: 65, end: 75 }] },
+      { role: "user", text: "Good catch on the 1901 dates. What about the duplicate case numbers? Some look like real duplicates (same defendant, same charges) and others seem like different cases that reused numbers." },
+      { role: "ai", text: "You need a deduplication strategy. I'd suggest: match on case_number + defendant_last_name + charge_date. If all three match, it's a true duplicate — keep the most recent record. If only case_number matches, append a suffix (-A, -B) to preserve both. Document every merge and split decision for the court clerk to review.", extractions: [{ type: "decision", text: "match on case_number + defendant_last_name + charge_date", start: 43, end: 99 }] },
+      { role: "user", text: "That makes sense. I think I'll build this as a reusable script since we have 4 more conversions coming up this quarter." },
+      { role: "ai", text: "Smart. Parameterize the date format list and the deduplication rules. Each court will have different quirks, but the three-phase approach (profile → transform → validate) stays the same. Build a summary report that shows: records imported, duplicates merged, records flagged, and validation failures. The court clerks will want that paper trail.", extractions: [{ type: "decision", text: "Parameterize the date format list and the deduplication rules", start: 7, end: 68 }] },
+    ],
+  },
+  "courtcollect:9": {
+    topicId: "courtcollect",
+    eventIndex: 9,
+    platform: "Claude",
+    date: "2024-12-01",
+    wordCount: 3890,
+    whyItMatters: "The pivot from technical builder to business storyteller — this conversation shaped how CourtCollect would be presented to investors.",
+    entities: ["pitch deck", "TAM", "municipal courts", "SaaS metrics", "demo environment"],
+    topicTags: ["CourtCollect", "Job Search"],
+    messages: [
+      { role: "user", text: "I need to build a pitch deck for CourtCollect. I have the product working but I've never pitched to investors before. Where do I start?" },
+      { role: "ai", text: "Start with the problem, not the product. Investors need to feel the pain before they see the solution. For CourtCollect, the pain is quantifiable: municipal courts lose millions annually to outdated collections processes. Lead with that number." },
+      { role: "user", text: "I know from my Tyler days that courts lose about 23% of collectible revenue to process inefficiency. Is that a strong enough hook?" },
+      { role: "ai", text: "That's a strong hook — it's specific, credible (comes from your direct experience), and implies a large TAM. Frame it as: 'Municipal courts lose 23% of collectible revenue — that's $X billion nationally.' Then show how CourtCollect closes that gap. Your insider experience is your unfair advantage; make that explicit.", extractions: [{ type: "entity", text: "TAM", start: 127, end: 130 }, { type: "decision", text: "Lead with the 23% revenue loss statistic", start: 49, end: 89 }] },
+      { role: "user", text: "What about the demo? I want something that feels real but I can't use actual court data obviously." },
+      { role: "ai", text: "Build a demo environment with synthetic data that mirrors real patterns. Create 3-4 fictional courts with realistic case volumes, payment histories, and agency assignments. The key is making the data feel lived-in — include some overdue cases, partial payments, and recently assigned cases. Investors should see the dashboard and immediately understand the value.", extractions: [{ type: "decision", text: "synthetic data that mirrors real patterns", start: 31, end: 71 }] },
+      { role: "user", text: "Great. I'll put together the deck this week and set up the demo environment. Any last thoughts on the presentation itself?" },
+      { role: "ai", text: "Three things: 1) Keep it to 12 slides max — problem, solution, market, traction, team, ask. 2) Your 'team' slide is really about your unfair advantage: 100+ municipal court implementations at Tyler gave you domain expertise no competitor has. 3) End with a live demo, not more slides. Let the product speak." },
+    ],
+  },
+};
+
 // ─── REVIEW QUEUE DATA ──────────────────────────────────────
 const REVIEW_QUEUE_DATA = [
   {
@@ -958,7 +1043,7 @@ const ActivityChart = ({ mobile }) => {
   );
 };
 
-const TimelineView = ({ topic, onBack, mobile }) => {
+const TimelineView = ({ topic, onBack, onEventClick, mobile }) => {
   const events = TIMELINE_DATA[topic.id] || [];
   const [visibleCount, setVisibleCount] = useState(0);
   useEffect(() => {
@@ -1000,13 +1085,21 @@ const TimelineView = ({ topic, onBack, mobile }) => {
         {events.map((event, i) => {
           const meta = TYPE_META[event.type] || TYPE_META.build;
           const isVisible = i < visibleCount;
+          const previewKey = `${topic.id}:${i}`;
+          const hasPreview = !!CONVERSATION_PREVIEWS[previewKey];
           return (
-            <div key={i} style={{ marginBottom: 14, position: "relative", opacity: isVisible ? 1 : 0, transform: isVisible ? "translateX(0)" : "translateX(-10px)", transition: "all 0.45s cubic-bezier(0.16,1,0.3,1)" }}>
+            <div key={i} onClick={() => hasPreview && onEventClick && onEventClick(topic.id, i)} style={{ marginBottom: 14, position: "relative", opacity: isVisible ? 1 : 0, transform: isVisible ? "translateX(0)" : "translateX(-10px)", transition: "all 0.45s cubic-bezier(0.16,1,0.3,1)", cursor: hasPreview ? "pointer" : "default" }}>
               <div style={{ position: "absolute", left: mobile ? -24 : -30, top: 10, width: mobile ? 12 : 14, height: mobile ? 12 : 14, borderRadius: "50%", background: meta.color, border: "3px solid #08080C", boxShadow: `0 0 8px ${meta.color}35` }} />
-              <div style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 11, padding: mobile ? "12px 14px" : "14px 18px", borderLeft: `3px solid ${meta.color}` }}>
+              <div style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${hasPreview ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.06)"}`, borderRadius: 11, padding: mobile ? "12px 14px" : "14px 18px", borderLeft: `3px solid ${meta.color}`, transition: "border-color 0.2s, background 0.2s" }}
+                onMouseEnter={e => { if (hasPreview) { e.currentTarget.style.background = "rgba(255,255,255,0.045)"; e.currentTarget.style.borderColor = "rgba(251,191,36,0.25)"; } }}
+                onMouseLeave={e => { if (hasPreview) { e.currentTarget.style.background = "rgba(255,255,255,0.025)"; e.currentTarget.style.borderColor = "rgba(251,191,36,0.15)"; } }}
+              >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5, flexWrap: "wrap", gap: 6 }}>
                   <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: `${meta.color}12`, color: meta.color, fontWeight: 500 }}>{meta.icon} {meta.label}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{event.date}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {hasPreview && <span style={{ fontFamily: BODY, fontSize: 9, padding: "2px 7px", borderRadius: 10, background: "rgba(251,191,36,0.1)", color: "#FBBF24", fontWeight: 500 }}>View thread →</span>}
+                    <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{event.date}</span>
+                  </div>
                 </div>
                 <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 14 : 16, color: "#fff", margin: "5px 0 3px", fontWeight: 600 }}>{event.title}</h3>
                 <p style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>{event.summary}</p>
@@ -1015,6 +1108,187 @@ const TimelineView = ({ topic, onBack, mobile }) => {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+};
+
+// ─── CONVERSATION DRILLDOWN VIEW ─────────────────────────────
+const ConversationDrilldown = ({ topicId, eventIndex, onBack, mobile }) => {
+  const previewKey = `${topicId}:${eventIndex}`;
+  const convo = CONVERSATION_PREVIEWS[previewKey];
+  const topic = TOPICS.find(t => t.id === topicId);
+  const events = TIMELINE_DATA[topicId] || [];
+  const event = events[eventIndex];
+  const meta = TYPE_META[event?.type] || TYPE_META.build;
+  const [visibleMsgs, setVisibleMsgs] = useState(0);
+
+  useEffect(() => {
+    setVisibleMsgs(0);
+    if (!convo) return;
+    const interval = setInterval(() => {
+      setVisibleMsgs(prev => { if (prev >= convo.messages.length) { clearInterval(interval); return prev; } return prev + 1; });
+    }, 120);
+    return () => clearInterval(interval);
+  }, [previewKey, convo]);
+
+  if (!convo || !topic || !event) return null;
+
+  const renderHighlightedText = (msg) => {
+    if (!msg.extractions || msg.extractions.length === 0) return msg.text;
+    const parts = [];
+    let lastIndex = 0;
+    const sorted = [...msg.extractions].sort((a, b) => a.start - b.start);
+    sorted.forEach((ext, i) => {
+      if (ext.start > lastIndex) parts.push(<span key={`t${i}`}>{msg.text.slice(lastIndex, ext.start)}</span>);
+      if (ext.type === "decision") {
+        parts.push(<span key={`e${i}`} style={{ background: "rgba(251,191,36,0.18)", color: "#FBBF24", padding: "1px 4px", borderRadius: 3, fontWeight: 500 }}>{msg.text.slice(ext.start, ext.end)}</span>);
+      } else if (ext.type === "entity") {
+        parts.push(<span key={`e${i}`} style={{ textDecoration: "underline", textDecorationColor: "rgba(251,191,36,0.4)", textUnderlineOffset: 3 }}>{msg.text.slice(ext.start, ext.end)}</span>);
+      }
+      lastIndex = ext.end;
+    });
+    if (lastIndex < msg.text.length) parts.push(<span key="tail">{msg.text.slice(lastIndex)}</span>);
+    return parts;
+  };
+
+  return (
+    <div style={{ padding: "0 0 40px" }}>
+      <button onClick={onBack} style={{ fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "8px 16px", cursor: "pointer", marginBottom: 24 }}>← Back to timeline</button>
+
+      {/* Event header */}
+      <div style={{ display: "flex", alignItems: mobile ? "flex-start" : "center", gap: mobile ? 10 : 14, marginBottom: 8, flexDirection: mobile ? "column" : "row" }}>
+        <span style={{ fontSize: mobile ? 28 : 34 }}>{topic.icon}</span>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+            <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: `${meta.color}12`, color: meta.color, fontWeight: 500 }}>{meta.icon} {meta.label}</span>
+            <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: convo.platform === "Claude" ? "rgba(251,191,36,0.1)" : "rgba(59,130,246,0.1)", color: convo.platform === "Claude" ? "#FBBF24" : "#3B82F6", fontWeight: 500 }}>{convo.platform}</span>
+          </div>
+          <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 22 : 28, fontWeight: 700, color: "#fff" }}>{event.title}</h2>
+          <p style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.3)", marginTop: 3 }}>{topic.name} · {convo.date} · {event.messages} messages</p>
+        </div>
+      </div>
+
+      {/* Why this matters */}
+      <div style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06), rgba(251,191,36,0.02))", border: "1px solid rgba(251,191,36,0.15)", borderRadius: 10, padding: mobile ? "12px 14px" : "14px 18px", margin: "16px 0 20px", display: "flex", gap: 10, alignItems: "flex-start" }}>
+        <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>💡</span>
+        <div>
+          <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(251,191,36,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 4 }}>Why this matters</div>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.55 }}>{convo.whyItMatters}</div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: mobile ? 0 : 24, flexDirection: mobile ? "column" : "row" }}>
+        {/* Thread view */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 14 }}>Conversation thread</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {convo.messages.map((msg, i) => {
+              const isUser = msg.role === "user";
+              const isVisible = i < visibleMsgs;
+              return (
+                <div key={i} style={{
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? "translateY(0)" : "translateY(12px)",
+                  transition: "all 0.4s cubic-bezier(0.16,1,0.3,1)",
+                  display: "flex",
+                  justifyContent: isUser ? "flex-end" : "flex-start",
+                }}>
+                  <div style={{
+                    maxWidth: mobile ? "92%" : "82%",
+                    background: isUser
+                      ? "linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.04))"
+                      : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${isUser ? "rgba(251,191,36,0.2)" : "rgba(255,255,255,0.06)"}`,
+                    borderRadius: isUser ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
+                    padding: mobile ? "10px 13px" : "12px 16px",
+                  }}>
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: isUser ? "rgba(251,191,36,0.45)" : "rgba(255,255,255,0.2)", marginBottom: 5, fontWeight: 500 }}>
+                      {isUser ? "You" : convo.platform}
+                    </div>
+                    <div style={{
+                      fontFamily: msg.text.startsWith("```") ? MONO : BODY,
+                      fontSize: msg.text.startsWith("```") ? (mobile ? 10 : 11) : (mobile ? 12 : 13),
+                      color: "rgba(255,255,255,0.65)",
+                      lineHeight: 1.6,
+                      whiteSpace: msg.text.startsWith("```") ? "pre-wrap" : "normal",
+                    }}>
+                      {isUser ? msg.text : renderHighlightedText(msg)}
+                    </div>
+                    {/* Topic tags in margin for AI messages with extractions */}
+                    {!isUser && msg.extractions && msg.extractions.length > 0 && (
+                      <div style={{ display: "flex", gap: 4, marginTop: 8, flexWrap: "wrap" }}>
+                        {msg.extractions.map((ext, j) => (
+                          <span key={j} style={{
+                            fontFamily: MONO, fontSize: 8, padding: "2px 6px", borderRadius: 8,
+                            background: ext.type === "decision" ? "rgba(251,191,36,0.1)" : "rgba(255,255,255,0.04)",
+                            color: ext.type === "decision" ? "#FBBF24" : "rgba(255,255,255,0.3)",
+                            border: `1px solid ${ext.type === "decision" ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.06)"}`,
+                          }}>
+                            {ext.type === "decision" ? "🎯 Decision" : "📌 Entity"}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.15)", marginTop: 16, textAlign: "center", fontStyle: "italic" }}>
+            Showing excerpt · {event.messages} total messages in this thread
+          </div>
+        </div>
+
+        {/* Metadata sidebar */}
+        <div style={{
+          width: mobile ? "100%" : 220, flexShrink: 0,
+          marginTop: mobile ? 24 : 0,
+          background: "rgba(255,255,255,0.02)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: 12,
+          padding: mobile ? "16px" : "18px",
+          alignSelf: "flex-start",
+        }}>
+          <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 14 }}>Metadata</div>
+
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 4 }}>Platform</div>
+            <div style={{ fontFamily: BODY, fontSize: 13, color: convo.platform === "Claude" ? "#FBBF24" : "#3B82F6", fontWeight: 500 }}>{convo.platform}</div>
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 4 }}>Date</div>
+            <div style={{ fontFamily: MONO, fontSize: 12, color: "rgba(255,255,255,0.55)" }}>{convo.date}</div>
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 4 }}>Word count</div>
+            <div style={{ fontFamily: MONO, fontSize: 12, color: "rgba(255,255,255,0.55)" }}>{convo.wordCount.toLocaleString()}</div>
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 6 }}>Extracted entities</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {convo.entities.map((ent, i) => (
+                <span key={i} style={{ fontFamily: BODY, fontSize: 10, padding: "3px 8px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}>{ent}</span>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 6 }}>Topic assignments</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {convo.topicTags.map((tag, i) => {
+                const tagTopic = TOPICS.find(t => t.name === tag);
+                const tagColor = tagTopic ? tagTopic.color : "#FBBF24";
+                return (
+                  <span key={i} style={{ fontFamily: BODY, fontSize: 10, padding: "3px 8px", borderRadius: 12, background: `${tagColor}12`, border: `1px solid ${tagColor}25`, color: tagColor, fontWeight: 500 }}>{tag}</span>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -3110,12 +3384,14 @@ export default function App() {
   const tablet = w >= 640 && w < 1024;
   const [view, setView] = useState("onboarding");
   const [selectedTopic, setSelectedTopic] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const maxCount = Math.max(...TOPICS.map(t => t.count));
   const totalWords = TOPICS.reduce((a, t) => a + t.words, 0) + 680000;
   const totalConvos = 3847;
 
   const handleTopicClick = (topic) => { setSelectedTopic(topic); setView("timeline"); };
+  const handleEventClick = useCallback((topicId, eventIndex) => { setSelectedEvent({ topicId, eventIndex }); setView("conversation"); }, []);
   const handleStartProcessing = useCallback(() => setView("loading"), []);
   const handleLoadingComplete = useCallback(() => setView("curation"), []);
   const handleCurationComplete = useCallback(() => setView("topicCuration"), []);
@@ -3159,12 +3435,22 @@ export default function App() {
     return <CurationSummary onComplete={handleCurationSummaryComplete} mobile={mobile} w={w} />;
   }
 
+  // ─── CONVERSATION DRILLDOWN ─────────────────────
+  if (view === "conversation" && selectedEvent) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#08080C", padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 960, margin: "0 auto" }}>
+        <style>{CSS}</style>
+        <ConversationDrilldown topicId={selectedEvent.topicId} eventIndex={selectedEvent.eventIndex} onBack={() => { setView("timeline"); setSelectedEvent(null); }} mobile={mobile} />
+      </div>
+    );
+  }
+
   // ─── TIMELINE ────────────────────────────────────
   if (view === "timeline" && selectedTopic) {
     return (
       <div style={{ minHeight: "100vh", background: "#08080C", padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 820, margin: "0 auto" }}>
         <style>{CSS}</style>
-        <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} mobile={mobile} />
+        <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} />
       </div>
     );
   }
