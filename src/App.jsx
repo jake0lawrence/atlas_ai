@@ -487,6 +487,13 @@ const RECURATION_COUNTS = {
   courtcollect: 5, hmprg: 3, jobsearch: 7, webdev: 4, automation: 2,
 };
 
+// New events surfaced after an incremental sync (demo data)
+const SYNC_NEW_EVENTS = {
+  courtcollect: { date: "2026-02-07", title: "Payment processing edge case fix", summary: "Resolved edge case in partial payment calculations for Josephine TX accounts.", type: "build", messages: 18 },
+  automation: { date: "2026-02-06", title: "Claude API integration for n8n workflows", summary: "Connected Claude API to n8n for automated document classification.", type: "build", messages: 24 },
+  jobsearch: { date: "2026-02-07", title: "Follow-up strategy after second interview", summary: "Prepared targeted follow-up materials with portfolio highlights.", type: "decision", messages: 12 },
+};
+
 // ─── TOPIC CURATION DATA ────────────────────────────────────
 const CURATED_PALETTE = [
   "#F59E0B", "#3B82F6", "#EF4444", "#8B5CF6", "#10B981",
@@ -550,6 +557,8 @@ const CSS = `
   @keyframes cardDismiss { 0% { opacity: 1; transform: translateX(0) scale(1); } 100% { opacity: 0; transform: translateX(60px) scale(0.92); } }
   @keyframes cardPromote { 0% { opacity: 1; transform: translateY(0); } 50% { box-shadow: 0 0 24px rgba(16,185,129,0.3); } 100% { opacity: 0; transform: translateY(-30px) scale(0.95); } }
   @keyframes freshPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); } 50% { box-shadow: 0 0 12px 3px rgba(251,191,36,0.25); } }
+  @keyframes syncSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes newGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); border-color: rgba(16,185,129,0.15); } 50% { box-shadow: 0 0 16px 4px rgba(16,185,129,0.25); border-color: rgba(16,185,129,0.4); } }
   .fade-up { animation: fadeUp 0.6s ease both; }
   .slide-in { animation: slideIn 0.5s ease both; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -944,7 +953,7 @@ const AnimatedNumber = ({ value, delay = 0 }) => {
   return <>{count.toLocaleString()}</>;
 };
 
-const Nav = ({ view, onNavigate, mobile }) => {
+const Nav = ({ view, onNavigate, mobile, lastSyncTime, newCount, isSyncing, onSync }) => {
   const tabs = [
     { id: "dashboard", label: "Overview", icon: "◈" },
     { id: "connections", label: "Connections", icon: "◎" },
@@ -952,29 +961,105 @@ const Nav = ({ view, onNavigate, mobile }) => {
     { id: "search", label: "Search", icon: "⌕" },
   ];
   return (
-    <nav style={{
-      display: "flex", gap: 3, padding: 3,
-      background: "rgba(255,255,255,0.03)", borderRadius: 10,
-      border: "1px solid rgba(255,255,255,0.06)",
-      margin: mobile ? "0 0 28px" : "0 auto 36px",
-      width: mobile ? "100%" : "fit-content",
-      overflowX: mobile ? "auto" : "visible",
-      WebkitOverflowScrolling: "touch", flexShrink: 0,
+    <div style={{
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      margin: mobile ? "0 0 28px" : "0 auto 36px", gap: mobile ? 8 : 12,
+      flexWrap: mobile ? "wrap" : "nowrap",
     }}>
-      {tabs.map(tab => (
-        <button key={tab.id} onClick={() => onNavigate(tab.id)}
+      <nav style={{
+        display: "flex", gap: 3, padding: 3,
+        background: "rgba(255,255,255,0.03)", borderRadius: 10,
+        border: "1px solid rgba(255,255,255,0.06)",
+        overflowX: mobile ? "auto" : "visible",
+        WebkitOverflowScrolling: "touch", flexShrink: 0,
+      }}>
+        {tabs.map(tab => (
+          <button key={tab.id} onClick={() => onNavigate(tab.id)}
+            style={{
+              fontFamily: BODY, fontSize: mobile ? 12 : 13, fontWeight: view === tab.id ? 600 : 400,
+              color: view === tab.id ? "#08080C" : "rgba(255,255,255,0.4)",
+              background: view === tab.id ? "#FBBF24" : "transparent",
+              border: "none", borderRadius: 8,
+              padding: mobile ? "9px 14px" : "10px 20px",
+              cursor: "pointer", transition: "all 0.25s", whiteSpace: "nowrap",
+            }}
+          >{tab.icon} {tab.label}</button>
+        ))}
+      </nav>
+      <div style={{ display: "flex", alignItems: "center", gap: mobile ? 6 : 10, flexShrink: 0 }}>
+        {!isSyncing && lastSyncTime && (
+          <span style={{ fontFamily: MONO, fontSize: mobile ? 9 : 10, color: "rgba(255,255,255,0.2)" }}>
+            Synced {lastSyncTime}
+          </span>
+        )}
+        {!isSyncing && newCount > 0 && (
+          <span style={{
+            fontFamily: BODY, fontSize: mobile ? 9 : 10, fontWeight: 600,
+            color: "#FBBF24", background: "rgba(251,191,36,0.1)",
+            border: "1px solid rgba(251,191,36,0.2)",
+            padding: "3px 8px", borderRadius: 12,
+            animation: "freshPulse 2s ease infinite",
+          }}>
+            +{newCount} new
+          </span>
+        )}
+        <button onClick={onSync} disabled={isSyncing}
           style={{
-            fontFamily: BODY, fontSize: mobile ? 12 : 13, fontWeight: view === tab.id ? 600 : 400,
-            color: view === tab.id ? "#08080C" : "rgba(255,255,255,0.4)",
-            background: view === tab.id ? "#FBBF24" : "transparent",
-            border: "none", borderRadius: 8,
-            padding: mobile ? "9px 14px" : "10px 20px",
-            cursor: "pointer", transition: "all 0.25s",
-            whiteSpace: "nowrap", flex: mobile ? 1 : "none", minWidth: mobile ? 0 : "auto",
+            fontFamily: BODY, fontSize: mobile ? 10 : 11, fontWeight: 500,
+            color: isSyncing ? "rgba(255,255,255,0.3)" : "#FBBF24",
+            background: isSyncing ? "rgba(255,255,255,0.03)" : "rgba(251,191,36,0.08)",
+            border: `1px solid ${isSyncing ? "rgba(255,255,255,0.06)" : "rgba(251,191,36,0.2)"}`,
+            borderRadius: 8, padding: mobile ? "7px 10px" : "8px 14px",
+            cursor: isSyncing ? "default" : "pointer", transition: "all 0.25s",
+            display: "flex", alignItems: "center", gap: 5,
           }}
-        >{tab.icon} {tab.label}</button>
+        >
+          <span style={{ display: "inline-block", animation: isSyncing ? "syncSpin 1s linear infinite" : "none" }}>⟳</span>
+          {isSyncing ? "Syncing…" : "Sync"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const SyncOverlay = ({ isSyncing, syncPhase, syncProgress, newCount, mobile }) => {
+  if (!isSyncing) return null;
+  const phases = [
+    { key: "connecting", label: "Connecting to API…" },
+    { key: "downloading", label: `Fetching ${newCount} new conversations…` },
+    { key: "processing", label: "Processing & classifying…" },
+    { key: "complete", label: "Sync complete!" },
+  ];
+  const activeIdx = phases.findIndex(p => p.key === syncPhase);
+  return (
+    <div style={{
+      position: "fixed", bottom: mobile ? 16 : 24, right: mobile ? 16 : 24,
+      background: "rgba(8,8,12,0.95)", border: "1px solid rgba(251,191,36,0.2)",
+      borderRadius: 14, padding: mobile ? "14px 16px" : "16px 20px",
+      minWidth: mobile ? 240 : 280, zIndex: 1000,
+      animation: "fadeUp 0.4s ease", boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+    }}>
+      <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.5)", marginBottom: 10, fontWeight: 500 }}>
+        Incremental Sync
+      </div>
+      {phases.map((p, i) => (
+        <div key={p.key} style={{
+          fontFamily: BODY, fontSize: mobile ? 11 : 12,
+          color: i < activeIdx ? "#10B981" : i === activeIdx ? "#FBBF24" : "rgba(255,255,255,0.2)",
+          marginBottom: 6, display: "flex", alignItems: "center", gap: 8, transition: "color 0.3s",
+        }}>
+          <span style={{ fontSize: 10 }}>{i < activeIdx ? "✓" : i === activeIdx ? "●" : "○"}</span>
+          {p.label}
+        </div>
       ))}
-    </nav>
+      <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
+        <div style={{
+          width: `${syncProgress}%`, height: "100%",
+          background: syncPhase === "complete" ? "#10B981" : "linear-gradient(90deg, #FBBF24, #F59E0B)",
+          borderRadius: 2, transition: "width 0.4s ease",
+        }} />
+      </div>
+    </div>
   );
 };
 
@@ -1015,7 +1100,7 @@ const FreshnessBadge = ({ topic, style }) => {
   );
 };
 
-const TopicBubble = ({ topic, maxCount, onClick, index, mobile }) => {
+const TopicBubble = ({ topic, maxCount, onClick, index, mobile, recentlySynced }) => {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
   const baseSize = mobile ? 44 : 52;
@@ -1026,6 +1111,7 @@ const TopicBubble = ({ topic, maxCount, onClick, index, mobile }) => {
   const freshness = getTopicFreshness(topic);
   const isDormant = freshness === "dormant" || freshness === "archived";
   const hasUncurated = RECURATION_COUNTS[topic.id] > 0;
+  const isNewlySynced = recentlySynced && recentlySynced.includes(topic.id);
 
   return (
     <div onClick={() => onClick(topic)}
@@ -1034,14 +1120,14 @@ const TopicBubble = ({ topic, maxCount, onClick, index, mobile }) => {
       style={{
         width: size, height: size, borderRadius: "50%",
         background: `radial-gradient(circle at 30% 30%, ${topic.color}35, ${topic.color}10)`,
-        border: `2px solid ${hovered ? topic.color : topic.color + "40"}`,
+        border: `2px solid ${hovered ? topic.color : isNewlySynced ? "#10B981" : topic.color + "40"}`,
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
         transform: `scale(${visible ? (hovered ? 1.15 : 1) : 0.5})`,
         opacity: visible ? 1 : 0, transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
         cursor: "pointer", position: "relative", flexShrink: 0,
         filter: isDormant ? "saturate(0.35)" : "none",
         boxShadow: hovered ? `0 0 30px ${topic.color}20, inset 0 0 15px ${topic.color}08` : "none",
-        animation: hasUncurated && visible ? "freshPulse 3s ease-in-out infinite" : "none",
+        animation: isNewlySynced && visible ? "newGlow 2s ease-in-out 3" : hasUncurated && visible ? "freshPulse 3s ease-in-out infinite" : "none",
       }}>
       <span style={{ fontSize: size > 80 ? 22 : size > 60 ? 16 : 13 }}>{topic.icon}</span>
       {size > (mobile ? 65 : 75) && (
@@ -1106,8 +1192,10 @@ const ActivityChart = ({ mobile }) => {
   );
 };
 
-const TimelineView = ({ topic, onBack, onEventClick, mobile }) => {
-  const events = TIMELINE_DATA[topic.id] || [];
+const TimelineView = ({ topic, onBack, onEventClick, mobile, newEvents }) => {
+  const baseEvents = TIMELINE_DATA[topic.id] || [];
+  const syncedEvent = newEvents && newEvents[topic.id];
+  const events = syncedEvent ? [...baseEvents, syncedEvent] : baseEvents;
   const [visibleCount, setVisibleCount] = useState(0);
   useEffect(() => {
     setVisibleCount(0);
@@ -1153,15 +1241,19 @@ const TimelineView = ({ topic, onBack, onEventClick, mobile }) => {
           const isVisible = i < visibleCount;
           const previewKey = `${topic.id}:${i}`;
           const hasPreview = !!CONVERSATION_PREVIEWS[previewKey];
+          const isNewEvent = syncedEvent && i === events.length - 1;
           return (
             <div key={i} onClick={() => hasPreview && onEventClick && onEventClick(topic.id, i)} style={{ marginBottom: 14, position: "relative", opacity: isVisible ? 1 : 0, transform: isVisible ? "translateX(0)" : "translateX(-10px)", transition: "all 0.45s cubic-bezier(0.16,1,0.3,1)", cursor: hasPreview ? "pointer" : "default" }}>
-              <div style={{ position: "absolute", left: mobile ? -24 : -30, top: 10, width: mobile ? 12 : 14, height: mobile ? 12 : 14, borderRadius: "50%", background: meta.color, border: "3px solid #08080C", boxShadow: `0 0 8px ${meta.color}35` }} />
-              <div style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${hasPreview ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.06)"}`, borderRadius: 11, padding: mobile ? "12px 14px" : "14px 18px", borderLeft: `3px solid ${meta.color}`, transition: "border-color 0.2s, background 0.2s" }}
+              <div style={{ position: "absolute", left: mobile ? -24 : -30, top: 10, width: mobile ? 12 : 14, height: mobile ? 12 : 14, borderRadius: "50%", background: isNewEvent ? "#10B981" : meta.color, border: "3px solid #08080C", boxShadow: `0 0 8px ${isNewEvent ? "#10B981" : meta.color}35` }} />
+              <div style={{ background: isNewEvent ? "rgba(16,185,129,0.04)" : "rgba(255,255,255,0.025)", border: `1px solid ${isNewEvent ? "rgba(16,185,129,0.2)" : hasPreview ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.06)"}`, borderRadius: 11, padding: mobile ? "12px 14px" : "14px 18px", borderLeft: `3px solid ${isNewEvent ? "#10B981" : meta.color}`, transition: "border-color 0.2s, background 0.2s", animation: isNewEvent ? "newGlow 2s ease-in-out 3" : "none" }}
                 onMouseEnter={e => { if (hasPreview) { e.currentTarget.style.background = "rgba(255,255,255,0.045)"; e.currentTarget.style.borderColor = "rgba(251,191,36,0.25)"; } }}
                 onMouseLeave={e => { if (hasPreview) { e.currentTarget.style.background = "rgba(255,255,255,0.025)"; e.currentTarget.style.borderColor = "rgba(251,191,36,0.15)"; } }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5, flexWrap: "wrap", gap: 6 }}>
-                  <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: `${meta.color}12`, color: meta.color, fontWeight: 500 }}>{meta.icon} {meta.label}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: `${meta.color}12`, color: meta.color, fontWeight: 500 }}>{meta.icon} {meta.label}</span>
+                    {isNewEvent && <span style={{ fontFamily: BODY, fontSize: 9, padding: "2px 7px", borderRadius: 10, background: "rgba(16,185,129,0.15)", color: "#10B981", fontWeight: 600 }}>NEW</span>}
+                  </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     {hasPreview && <span style={{ fontFamily: BODY, fontSize: 9, padding: "2px 7px", borderRadius: 10, background: "rgba(251,191,36,0.1)", color: "#FBBF24", fontWeight: 500 }}>View thread →</span>}
                     <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{event.date}</span>
@@ -3452,6 +3544,15 @@ export default function App() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  // ─── SYNC STATE ──────────────────────────────────
+  const [lastSyncTime, setLastSyncTime] = useState("2:34 PM");
+  const [newSyncCount, setNewSyncCount] = useState(47);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncPhase, setSyncPhase] = useState(null);
+  const [syncProgress, setSyncProgress] = useState(0);
+  const [recentlySynced, setRecentlySynced] = useState([]);
+  const [syncedNewEvents, setSyncedNewEvents] = useState({});
+
   const maxCount = Math.max(...TOPICS.map(t => t.count));
   const totalWords = TOPICS.reduce((a, t) => a + t.words, 0) + 680000;
   const totalConvos = 3847;
@@ -3465,6 +3566,26 @@ export default function App() {
   const handleConnectionValidationComplete = useCallback(() => setView("insightReview"), []);
   const handleInsightReviewComplete = useCallback(() => setView("curationSummary"), []);
   const handleCurationSummaryComplete = useCallback(() => setView("dashboard"), []);
+
+  // ─── SYNC HANDLER ────────────────────────────────
+  const handleSync = useCallback(() => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    setSyncPhase("connecting");
+    setSyncProgress(10);
+    setTimeout(() => { setSyncPhase("downloading"); setSyncProgress(40); }, 800);
+    setTimeout(() => { setSyncPhase("processing"); setSyncProgress(75); }, 2000);
+    setTimeout(() => { setSyncPhase("complete"); setSyncProgress(100); }, 3200);
+    setTimeout(() => {
+      setIsSyncing(false);
+      setSyncPhase(null);
+      setSyncProgress(0);
+      setLastSyncTime("Just now");
+      setNewSyncCount(0);
+      setRecentlySynced(Object.keys(SYNC_NEW_EVENTS));
+      setSyncedNewEvents(SYNC_NEW_EVENTS);
+    }, 4200);
+  }, [isSyncing]);
 
   // ─── ONBOARDING ──────────────────────────────────
   if (view === "onboarding") {
@@ -3516,7 +3637,7 @@ export default function App() {
     return (
       <div style={{ minHeight: "100vh", background: "#08080C", padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 820, margin: "0 auto" }}>
         <style>{CSS}</style>
-        <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} />
+        <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} newEvents={syncedNewEvents} />
       </div>
     );
   }
@@ -3537,7 +3658,7 @@ export default function App() {
           <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.25)", marginTop: 6 }}>Jan 2023 — Feb 2026 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
         </div>
 
-        <Nav view={view === "timeline" ? "dashboard" : view} onNavigate={setView} mobile={mobile} />
+        <Nav view={view === "timeline" ? "dashboard" : view} onNavigate={setView} mobile={mobile} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} />
 
         {view === "dashboard" && (
           <>
@@ -3566,7 +3687,7 @@ export default function App() {
               <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: "#fff", marginBottom: 3 }}>Knowledge Map</h3>
               <p style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: "rgba(255,255,255,0.2)", marginBottom: 14 }}>Sized by conversation count. {mobile ? "Tap" : "Click"} to explore.</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: mobile ? 8 : 12, justifyContent: "center", alignItems: "center", padding: mobile ? "20px 10px" : "28px 16px", background: "rgba(255,255,255,0.015)", borderRadius: 18, border: "1px solid rgba(255,255,255,0.04)" }}>
-                {TOPICS.map((topic, i) => <TopicBubble key={topic.id} topic={topic} maxCount={maxCount} index={i} onClick={handleTopicClick} mobile={mobile} />)}
+                {TOPICS.map((topic, i) => <TopicBubble key={topic.id} topic={topic} maxCount={maxCount} index={i} onClick={handleTopicClick} mobile={mobile} recentlySynced={recentlySynced} />)}
               </div>
             </div>
 
@@ -3646,6 +3767,7 @@ export default function App() {
           <div style={{ fontFamily: BODY, fontSize: mobile ? 9 : 11, color: "rgba(255,255,255,0.08)", marginTop: 5 }}>Atlas · v5 · Data simulated from real conversation patterns</div>
         </div>
       </div>
+      <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
     </div>
   );
 }
