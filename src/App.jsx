@@ -628,16 +628,24 @@ const DropZone = ({ platform, icon, color, subtitle, accepted, onDrop, onFile, m
   );
 };
 
+const DEMO_PERSONAS = [
+  { id: "power", label: "Power User", convos: "3,847", detail: "3 years · ChatGPT + Claude", icon: "⚡", color: "#FBBF24", enabled: true },
+  { id: "new", label: "New User", convos: "200", detail: "3 months · ChatGPT only", icon: "🌱", color: "#10B981", enabled: true },
+  { id: "team", label: "Team Lead", convos: "—", detail: "Multi-user · Coming soon", icon: "👥", color: "#8B5CF6", enabled: false },
+];
+
 const OnboardingView = ({ onStart, mobile, w }) => {
   const [gptFile, setGptFile] = useState(null);
   const [claudeFile, setClaudeFile] = useState(null);
   const [hovering, setHovering] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState(null);
 
   const hasAnyFile = gptFile || claudeFile;
 
-  const handleDemo = () => {
+  const handleDemo = (personaId) => {
+    setSelectedPersona(personaId);
     setGptFile("conversations.json");
-    setClaudeFile("claude-export-2026-02.zip");
+    setClaudeFile(personaId === "new" ? null : "claude-export-2026-02.zip");
     setTimeout(() => onStart(), 800);
   };
 
@@ -721,21 +729,34 @@ const OnboardingView = ({ onStart, mobile, w }) => {
           <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
         </div>
 
-        {/* Demo button */}
+        {/* Demo persona selector */}
         <div style={{ textAlign: "center" }}>
-          <button onClick={handleDemo}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.borderColor = "rgba(251,191,36,0.3)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
-            style={{
-              fontFamily: BODY, fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.6)",
-              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 10, padding: "12px 28px", cursor: "pointer", transition: "all 0.25s",
-            }}
-          >
-            ✨ Use demo data instead
-          </button>
-          <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.15)", marginTop: 8 }}>
-            3,847 conversations · 3 years · ChatGPT + Claude
+          <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.3)", marginBottom: 12, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+            ✨ Try a demo persona
+          </div>
+          <div style={{ display: "flex", gap: mobile ? 8 : 12, justifyContent: "center", flexWrap: "wrap" }}>
+            {DEMO_PERSONAS.map(p => (
+              <button key={p.id} disabled={!p.enabled || selectedPersona !== null}
+                onClick={() => p.enabled && handleDemo(p.id)}
+                onMouseEnter={e => { if (p.enabled && !selectedPersona) { e.currentTarget.style.background = `${p.color}11`; e.currentTarget.style.borderColor = `${p.color}55`; } }}
+                onMouseLeave={e => { if (p.enabled && selectedPersona !== p.id) { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; } }}
+                style={{
+                  fontFamily: BODY, fontSize: 13, color: !p.enabled ? "rgba(255,255,255,0.2)" : selectedPersona === p.id ? p.color : "rgba(255,255,255,0.6)",
+                  background: selectedPersona === p.id ? `${p.color}11` : "rgba(255,255,255,0.02)",
+                  border: `1px solid ${selectedPersona === p.id ? `${p.color}55` : "rgba(255,255,255,0.08)"}`,
+                  borderRadius: 10, padding: mobile ? "10px 14px" : "12px 20px", cursor: p.enabled ? "pointer" : "default",
+                  transition: "all 0.25s", opacity: !p.enabled ? 0.5 : 1, minWidth: mobile ? 0 : 160,
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>{p.icon}</span>
+                <span style={{ fontWeight: 600 }}>{p.label}</span>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", fontWeight: 400 }}>
+                  {p.convos !== "—" ? `${p.convos} convos` : "Preview"}
+                </span>
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.15)", fontWeight: 400 }}>{p.detail}</span>
+              </button>
+            ))}
           </div>
         </div>
 
