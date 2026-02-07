@@ -309,6 +309,66 @@ const REVIEW_QUEUE_DATA = [
   },
 ];
 
+// ─── INSIGHT & DECISION DATA (for Curation Step 4) ──────────
+const INSIGHT_DECISIONS = [
+  {
+    id: 1, type: "decision",
+    topicId: "courtcollect", date: "2024-09-15",
+    aiProposal: "Chose Supabase + Next.js as the tech stack after evaluating Firebase, AWS Amplify, and custom solutions.",
+    sourceSnippet: { user: "Can you help me design the database schema for tracking court cases, payments, and collection agency assignments?", ai: "I'll design a normalized schema with four core tables: courts, cases, payments, and agencies..." },
+    sourceRef: "CourtCollect · Sep 15, 2024 · 42 messages",
+  },
+  {
+    id: 2, type: "pivot",
+    topicId: "courtcollect", date: "2024-11-16",
+    aiProposal: "Pivoted from Docker + Railway deployment to Vercel + Supabase Cloud after 3 days of containerization issues.",
+    sourceSnippet: { user: "Docker keeps failing on Railway. Multi-stage builds conflict with the Prisma client generation.", ai: "Given 3 days of deployment friction, Vercel + Supabase Cloud simplifies everything. The serverless model fits your architecture..." },
+    sourceRef: "CourtCollect · Nov 16, 2024 · 35 messages",
+  },
+  {
+    id: 3, type: "decision",
+    topicId: "keymaster", date: "2024-07-28",
+    aiProposal: "Selected zero-knowledge encryption architecture for Keymaster — server never sees plaintext credentials.",
+    sourceSnippet: { user: "For Keymaster's security architecture, should we go with zero-knowledge encryption or standard E2EE?", ai: "Zero-knowledge is the right call for a password manager. Use SRP for auth and AES-256-GCM..." },
+    sourceRef: "Keymaster · Jul 28, 2024 · 40 messages",
+  },
+  {
+    id: 4, type: "pivot",
+    topicId: "hmprg", date: "2025-01-15",
+    aiProposal: "Shifted HMPRG ad budget from equal split to 70/30 Instagram-heavy after Instagram outperformed Facebook 3:1.",
+    sourceSnippet: { user: "The Instagram campaigns are outperforming Facebook 3:1. Should we reallocate the budget?", ai: "With a 3:1 ratio, reallocating makes sense. Shift to 70/30 Instagram-heavy while keeping Facebook for older demographics..." },
+    sourceRef: "HMPRG · Jan 15, 2025 · 26 messages",
+  },
+  {
+    id: 5, type: "milestone",
+    topicId: "tyler", date: "2024-06-01",
+    aiProposal: "Reached 100th Tyler Technologies implementation — a career milestone spanning 4+ years of municipal software deployments.",
+    sourceSnippet: { user: "I just completed my 100th implementation at Tyler. Can you help me reflect on lessons learned?", ai: "100 implementations is a remarkable body of work. Key patterns: your data conversion methodology evolved significantly..." },
+    sourceRef: "Tyler · Jun 1, 2024 · 16 messages",
+  },
+  {
+    id: 6, type: "decision",
+    topicId: "gamedev", date: "2024-10-22",
+    aiProposal: "Defined Dice or Die core gameplay loop: Roll → Risk/Reward → Score/Bust → Upgrade shop with roguelike progression.",
+    sourceSnippet: { user: "Let's finalize the core gameplay loop. I want a push-your-luck mechanic with roguelike progression.", ai: "Here's the loop: Roll phase → Risk/Reward decision → Score or Bust → Upgrade shop between rounds..." },
+    sourceRef: "Dice or Die · Oct 22, 2024 · 36 messages",
+  },
+  {
+    id: 7, type: "decision",
+    topicId: "obsidian", date: "2024-12-01",
+    aiProposal: "Committed to Zettelkasten-based Obsidian vault architecture with atomic notes, MOCs, and daily journals.",
+    sourceSnippet: { user: "I want to set up my Obsidian vault properly. What structure should I use?", ai: "For your use case, a Zettelkasten-inspired structure works best: atomic notes, Maps of Content for navigation, daily journals..." },
+    sourceRef: "Knowledge Mgmt · Dec 1, 2024 · 30 messages",
+  },
+  {
+    id: 8, type: "milestone",
+    topicId: "courtcollect", date: "2025-01-28",
+    aiProposal: "Shipped CourtCollect collections agency portal MVP — first working agency-facing product with case assignment.",
+    sourceSnippet: { user: "The agency portal is live! Can you help me plan the next iteration?", ai: "Congratulations on the MVP launch. For the next iteration, focus on the highest-friction workflows: bulk case assignment..." },
+    sourceRef: "CourtCollect · Jan 28, 2025 · 61 messages",
+  },
+];
+
 // ─── TOPIC CURATION DATA ────────────────────────────────────
 const CURATED_PALETTE = [
   "#F59E0B", "#3B82F6", "#EF4444", "#8B5CF6", "#10B981",
@@ -369,6 +429,8 @@ const CSS = `
   @keyframes topicCardIn { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
   @keyframes mergeOut { 0% { opacity: 1; transform: scale(1); } 60% { opacity: 0.6; transform: scale(0.85); } 100% { opacity: 0; transform: scale(0.7) translateX(20px); height: 0; margin: 0; padding: 0; overflow: hidden; } }
   @keyframes starPop { 0% { transform: scale(1); } 50% { transform: scale(1.35); } 100% { transform: scale(1); } }
+  @keyframes cardDismiss { 0% { opacity: 1; transform: translateX(0) scale(1); } 100% { opacity: 0; transform: translateX(60px) scale(0.92); } }
+  @keyframes cardPromote { 0% { opacity: 1; transform: translateY(0); } 50% { box-shadow: 0 0 24px rgba(16,185,129,0.3); } 100% { opacity: 0; transform: translateY(-30px) scale(0.95); } }
   .fade-up { animation: fadeUp 0.6s ease both; }
   .slide-in { animation: slideIn 0.5s ease both; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -2312,6 +2374,482 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
   );
 };
 
+// ═══════════════════════════════════════════════════════════════
+// INSIGHT & DECISION REVIEW (v5 Curation Pipeline — Section 1D)
+// ═══════════════════════════════════════════════════════════════
+
+const InsightDecisionReview = ({ onComplete, mobile, w }) => {
+  const [decisions, setDecisions] = useState(() =>
+    INSIGHT_DECISIONS.map(d => ({ ...d, status: "pending", humanEdit: null }))
+  );
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState("");
+  const [done, setDone] = useState(false);
+  const [showTrail, setShowTrail] = useState(null);
+  const [dismissAnim, setDismissAnim] = useState(null); // "correct" | "reject" | null
+
+  const topicMap = {};
+  TOPICS.forEach(t => { topicMap[t.id] = t; });
+
+  const reviewed = decisions.filter(d => d.status !== "pending").length;
+  const total = decisions.length;
+  const progress = total > 0 ? (reviewed / total) * 100 : 0;
+  const active = activeIdx !== null && activeIdx < total ? decisions[activeIdx] : null;
+
+  const typeMeta = {
+    decision: { label: "Decision", color: "#EF4444", icon: "🎯" },
+    pivot: { label: "Pivot", color: "#A855F7", icon: "↩️" },
+    milestone: { label: "Milestone", color: "#EAB308", icon: "🏆" },
+  };
+
+  const moveNext = (fromIdx) => {
+    const start = (fromIdx ?? activeIdx ?? -1) + 1;
+    let next = decisions.findIndex((d, i) => i >= start && d.status === "pending");
+    if (next < 0) next = decisions.findIndex(d => d.status === "pending");
+    setActiveIdx(next >= 0 ? next : null);
+  };
+
+  const handleCorrect = (idx) => {
+    setDismissAnim("correct");
+    setTimeout(() => {
+      setDecisions(prev => prev.map((d, i) => i === idx ? { ...d, status: "correct" } : d));
+      setDismissAnim(null);
+      moveNext(idx);
+    }, 400);
+  };
+
+  const handleEdit = (idx) => {
+    setEditing(true);
+    setEditText(decisions[idx].aiProposal);
+  };
+
+  const commitEdit = (idx) => {
+    if (editText.trim() && editText.trim() !== decisions[idx].aiProposal) {
+      setDismissAnim("correct");
+      setTimeout(() => {
+        setDecisions(prev => prev.map((d, i) =>
+          i === idx ? { ...d, status: "edited", humanEdit: editText.trim() } : d
+        ));
+        setDismissAnim(null);
+        setEditing(false);
+        setEditText("");
+        moveNext(idx);
+      }, 400);
+    } else {
+      setEditing(false);
+      setEditText("");
+    }
+  };
+
+  const handleReject = (idx) => {
+    setDismissAnim("reject");
+    setTimeout(() => {
+      setDecisions(prev => prev.map((d, i) => i === idx ? { ...d, status: "rejected" } : d));
+      setDismissAnim(null);
+      moveNext(idx);
+    }, 400);
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (editing || done) return;
+      if (activeIdx === null) return;
+      if (e.key === "Enter") { e.preventDefault(); handleCorrect(activeIdx); }
+      else if (e.key === "e" || e.key === "E") { e.preventDefault(); handleEdit(activeIdx); }
+      else if (e.key === "x" || e.key === "X") { e.preventDefault(); handleReject(activeIdx); }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (reviewed === total && total > 0 && !done) setTimeout(() => setDone(true), 500);
+  }, [reviewed, total, done]);
+
+  const correct = decisions.filter(d => d.status === "correct").length;
+  const edited = decisions.filter(d => d.status === "edited").length;
+  const rejected = decisions.filter(d => d.status === "rejected").length;
+  const promoted = correct + edited;
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#08080C", display: "flex", flexDirection: "column", padding: mobile ? "24px 16px" : "32px 40px" }}>
+      <style>{CSS}</style>
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at 50% 30%, rgba(234,179,8,0.04) 0%, transparent 50%)", pointerEvents: "none" }} />
+
+      <div style={{ maxWidth: 800, width: "100%", margin: "0 auto", position: "relative", zIndex: 1 }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: mobile ? 20 : 28 }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "4px 14px", borderRadius: 20, marginBottom: 14,
+            background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.2)",
+            fontFamily: MONO, fontSize: 10, color: "#EAB308", fontWeight: 600, letterSpacing: "0.08em",
+          }}>
+            CURATION · STEP 4
+          </div>
+          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 36, fontWeight: 800, color: "#fff", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+            Review <span style={{ color: "#EAB308" }}>Decisions & Insights</span>
+          </h1>
+          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
+            AI extracted {total} key decisions, pivots, and milestones. Confirm accuracy before they join your timeline.
+          </p>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{ marginBottom: mobile ? 20 : 28 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{reviewed} / {total} reviewed</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? "#10B981" : "rgba(234,179,8,0.5)" }}>{Math.round(progress)}%</span>
+          </div>
+          <div style={{ width: "100%", height: 6, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+            <div style={{
+              width: `${progress}%`, height: "100%",
+              background: progress === 100 ? "linear-gradient(90deg, #10B981, #059669)" : "linear-gradient(90deg, #EAB308CC, #EAB308)",
+              borderRadius: 3, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)",
+              boxShadow: progress === 100 ? "0 0 16px rgba(16,185,129,0.4)" : "0 0 12px rgba(234,179,8,0.3)",
+            }} />
+          </div>
+        </div>
+
+        {done ? (
+          <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "48px 20px" : "64px 40px" }}>
+            <div style={{ fontSize: 56, marginBottom: 16 }}>🎯</div>
+            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: "#EAB308", marginBottom: 8 }}>
+              Insights Reviewed
+            </h2>
+            <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: "rgba(255,255,255,0.4)", marginBottom: 6, lineHeight: 1.6 }}>
+              {correct} confirmed, {edited} edited, {rejected} rejected
+            </p>
+            <p style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.2)", marginBottom: 28 }}>
+              {promoted} insight{promoted !== 1 ? "s" : ""} promoted to your Evolution timeline.
+            </p>
+            <button onClick={onComplete} style={{
+              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: "#08080C",
+              background: "linear-gradient(135deg, #EAB308, #CA8A04)", border: "none",
+              borderRadius: 12, padding: "14px 40px", cursor: "pointer",
+              boxShadow: "0 4px 24px rgba(234,179,8,0.25)", transition: "all 0.25s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(234,179,8,0.35)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(234,179,8,0.25)"; }}
+            >
+              Continue →
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Active card (card stack top) */}
+            {active && (
+              <div
+                key={active.id}
+                className="fade-up"
+                style={{
+                  background: "rgba(255,255,255,0.03)", borderRadius: 18,
+                  border: "1px solid rgba(234,179,8,0.2)", overflow: "hidden",
+                  marginBottom: 16, position: "relative",
+                  animation: dismissAnim === "correct" ? "cardPromote 0.4s ease both"
+                    : dismissAnim === "reject" ? "cardDismiss 0.4s ease both" : undefined,
+                }}
+              >
+                {/* Card header with type badge and topic */}
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: mobile ? "14px 16px 10px" : "16px 24px 12px",
+                  borderBottom: "1px solid rgba(255,255,255,0.04)",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: 5,
+                      padding: "3px 10px", borderRadius: 12,
+                      background: `${typeMeta[active.type].color}15`,
+                      border: `1px solid ${typeMeta[active.type].color}30`,
+                      fontFamily: MONO, fontSize: 10, color: typeMeta[active.type].color, fontWeight: 600,
+                    }}>
+                      {typeMeta[active.type].icon} {typeMeta[active.type].label}
+                    </span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <span style={{ fontSize: 14 }}>{topicMap[active.topicId]?.icon}</span>
+                      <span style={{ fontFamily: BODY, fontSize: 13, color: topicMap[active.topicId]?.color, fontWeight: 600 }}>
+                        {topicMap[active.topicId]?.name}
+                      </span>
+                    </span>
+                  </div>
+                  <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
+                    {activeIdx + 1} / {total}
+                  </span>
+                </div>
+
+                {/* AI proposal */}
+                <div style={{ padding: mobile ? "16px 16px 12px" : "20px 24px 16px" }}>
+                  <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
+                    AI-Extracted Insight
+                  </div>
+                  {editing ? (
+                    <div>
+                      <textarea
+                        value={editText}
+                        onChange={e => setEditText(e.target.value)}
+                        autoFocus
+                        rows={3}
+                        style={{
+                          fontFamily: BODY, fontSize: mobile ? 15 : 17, fontWeight: 500, color: "#fff",
+                          background: "rgba(255,255,255,0.06)", border: "1px solid rgba(234,179,8,0.3)",
+                          borderRadius: 10, padding: "12px 14px", width: "100%", outline: "none",
+                          lineHeight: 1.5, resize: "vertical",
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); commitEdit(activeIdx); }
+                          if (e.key === "Escape") { setEditing(false); setEditText(""); }
+                        }}
+                      />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.15)" }}>
+                          Enter to save · Escape to cancel
+                        </span>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button onClick={() => { setEditing(false); setEditText(""); }} style={{
+                            fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.3)",
+                            background: "none", border: "1px solid rgba(255,255,255,0.1)",
+                            borderRadius: 8, padding: "6px 14px", cursor: "pointer",
+                          }}>Cancel</button>
+                          <button onClick={() => commitEdit(activeIdx)} style={{
+                            fontFamily: BODY, fontSize: 12, fontWeight: 600, color: "#08080C",
+                            background: "#EAB308", border: "none",
+                            borderRadius: 8, padding: "6px 14px", cursor: "pointer",
+                          }}>Save Edit</button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{
+                      fontFamily: BODY, fontSize: mobile ? 16 : 19, fontWeight: 500,
+                      color: "rgba(255,255,255,0.75)", lineHeight: 1.5,
+                      padding: "12px 16px", borderRadius: 12,
+                      background: "rgba(234,179,8,0.04)", border: "1px solid rgba(234,179,8,0.1)",
+                    }}>
+                      {active.aiProposal}
+                    </div>
+                  )}
+                </div>
+
+                {/* Source conversation snippet */}
+                <div style={{ padding: mobile ? "0 16px 16px" : "0 24px 20px" }}>
+                  <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
+                    Source Conversation
+                  </div>
+                  <div style={{
+                    background: "rgba(255,255,255,0.02)", borderRadius: 10,
+                    border: "1px solid rgba(255,255,255,0.04)", padding: mobile ? "10px 12px" : "12px 16px",
+                  }}>
+                    <div style={{ marginBottom: 8 }}>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.35)", marginRight: 6 }}>YOU</span>
+                      <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.35)", lineHeight: 1.5 }}>
+                        {active.sourceSnippet.user}
+                      </span>
+                    </div>
+                    <div>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(168,85,247,0.4)", marginRight: 6 }}>AI</span>
+                      <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.25)", lineHeight: 1.5 }}>
+                        {active.sourceSnippet.ai}
+                      </span>
+                    </div>
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.1)", marginTop: 8 }}>
+                      {active.sourceRef}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                {!editing && (
+                  <div style={{
+                    display: "flex", gap: 8, padding: mobile ? "0 16px 16px" : "0 24px 20px",
+                    flexDirection: mobile ? "column" : "row",
+                  }}>
+                    {[
+                      { action: "correct", label: "Correct", color: "#10B981", icon: "✓", desc: "Promote to timeline" },
+                      { action: "edit", label: "Partially Correct", color: "#3B82F6", icon: "✎", desc: "Edit & promote" },
+                      { action: "reject", label: "Not a Real Decision", color: "#EF4444", icon: "✕", desc: "Dismiss" },
+                    ].map(btn => (
+                      <button key={btn.action}
+                        onClick={() => {
+                          if (btn.action === "correct") handleCorrect(activeIdx);
+                          else if (btn.action === "edit") handleEdit(activeIdx);
+                          else handleReject(activeIdx);
+                        }}
+                        style={{
+                          flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                          padding: mobile ? "12px 14px" : "14px 16px",
+                          fontFamily: BODY, fontSize: 13, fontWeight: 600,
+                          color: btn.action === "correct" ? "#08080C" : btn.color,
+                          background: btn.action === "correct" ? btn.color : `${btn.color}10`,
+                          border: `1px solid ${btn.action === "correct" ? btn.color : btn.color + "30"}`,
+                          borderRadius: 12, cursor: "pointer", transition: "all 0.2s",
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 4px 16px ${btn.color}25`; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                      >
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: 14, lineHeight: 1 }}>{btn.icon}</span>
+                          {btn.label}
+                        </span>
+                        <span style={{
+                          fontSize: 9, fontWeight: 400, opacity: 0.7,
+                          color: btn.action === "correct" ? "#08080C" : btn.color,
+                        }}>{btn.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Keyboard hints */}
+                {!editing && !mobile && (
+                  <div style={{
+                    padding: "0 24px 14px", fontFamily: MONO, fontSize: 9,
+                    color: "rgba(255,255,255,0.1)", textAlign: "center",
+                  }}>
+                    Enter correct · E edit · X reject
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Stacked cards behind (visual depth) */}
+            {active && decisions.filter(d => d.status === "pending").length > 1 && (
+              <div style={{ position: "relative", height: 12, marginBottom: 12 }}>
+                {[1, 2].map(offset => {
+                  const remaining = decisions.filter(d => d.status === "pending").length - 1;
+                  if (offset > remaining) return null;
+                  return (
+                    <div key={offset} style={{
+                      position: "absolute", left: offset * 6, right: offset * 6, top: -4 - offset * 4,
+                      height: 8, borderRadius: "0 0 14px 14px",
+                      background: `rgba(255,255,255,${0.015 - offset * 0.005})`,
+                      border: "1px solid rgba(255,255,255,0.03)",
+                      borderTop: "none", zIndex: -offset,
+                    }} />
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Reviewed items (edit trail) */}
+            {reviewed > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{
+                  fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)",
+                  textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600,
+                  display: "flex", alignItems: "center", gap: 6,
+                }}>
+                  <span>Edit Trail</span>
+                  <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.08)" }}>
+                    — AI proposed vs. human confirmed
+                  </span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {decisions.filter(d => d.status !== "pending").map(d => {
+                    const topic = topicMap[d.topicId];
+                    const meta = typeMeta[d.type];
+                    const isTrailOpen = showTrail === d.id;
+                    return (
+                      <div key={d.id} style={{
+                        background: "rgba(255,255,255,0.015)", borderRadius: 12,
+                        border: `1px solid rgba(255,255,255,0.04)`,
+                        overflow: "hidden", transition: "all 0.3s",
+                      }}>
+                        <div
+                          style={{
+                            display: "flex", alignItems: "center", gap: mobile ? 8 : 12,
+                            padding: mobile ? "10px 12px" : "11px 16px",
+                            cursor: d.status === "edited" ? "pointer" : "default",
+                          }}
+                          onClick={() => d.status === "edited" && setShowTrail(isTrailOpen ? null : d.id)}
+                        >
+                          <div style={{
+                            width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+                            background: d.status === "correct" ? "#10B981" : d.status === "edited" ? "#3B82F6" : "#EF4444",
+                          }} />
+                          <span style={{ fontSize: 13, flexShrink: 0 }}>{meta.icon}</span>
+                          <span style={{ fontSize: 12, flexShrink: 0 }}>{topic?.icon}</span>
+                          <span style={{
+                            fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.4)",
+                            fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          }}>
+                            {d.humanEdit || d.aiProposal}
+                          </span>
+                          <span style={{
+                            fontFamily: MONO, fontSize: 10, flexShrink: 0, textTransform: "uppercase",
+                            color: d.status === "correct" ? "#10B981" : d.status === "edited" ? "#3B82F6" : "#EF4444",
+                          }}>
+                            {d.status === "correct" ? "promoted" : d.status === "edited" ? "edited ▾" : "dismissed"}
+                          </span>
+                        </div>
+                        {/* Expanded edit trail for edited items */}
+                        {isTrailOpen && d.status === "edited" && (
+                          <div className="fade-up" style={{
+                            padding: mobile ? "0 12px 12px" : "0 16px 14px",
+                            display: "flex", flexDirection: "column", gap: 8,
+                          }}>
+                            <div style={{
+                              background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.1)",
+                              borderRadius: 8, padding: "8px 12px",
+                            }}>
+                              <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(239,68,68,0.5)", display: "block", marginBottom: 4 }}>AI PROPOSED</span>
+                              <span style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.5, textDecoration: "line-through", textDecorationColor: "rgba(239,68,68,0.3)" }}>
+                                {d.aiProposal}
+                              </span>
+                            </div>
+                            <div style={{
+                              background: "rgba(16,185,129,0.04)", border: "1px solid rgba(16,185,129,0.1)",
+                              borderRadius: 8, padding: "8px 12px",
+                            }}>
+                              <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(16,185,129,0.5)", display: "block", marginBottom: 4 }}>HUMAN CONFIRMED</span>
+                              <span style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>
+                                {d.humanEdit}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Bottom bar */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: mobile ? "14px 0" : "16px 0", marginTop: 12,
+              borderTop: "1px solid rgba(255,255,255,0.05)",
+            }}>
+              <div style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.2)" }}>
+                {reviewed > 0 ? `${promoted} promoted · ${rejected} dismissed` : "Review each insight"}
+              </div>
+              <button onClick={() => {
+                setDecisions(prev => prev.map(d => d.status === "pending" ? { ...d, status: "correct" } : d));
+              }} style={{
+                fontFamily: BODY, fontSize: 14, fontWeight: 600,
+                color: reviewed > 0 ? "#08080C" : "rgba(255,255,255,0.5)",
+                background: reviewed > 0 ? "linear-gradient(135deg, #EAB308, #CA8A04)" : "rgba(255,255,255,0.06)",
+                border: reviewed > 0 ? "none" : "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 10, padding: "10px 28px", cursor: "pointer",
+                boxShadow: reviewed > 0 ? "0 4px 20px rgba(234,179,8,0.25)" : "none",
+                transition: "all 0.3s",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
+              >
+                {reviewed > 0 ? "Approve Remaining →" : "Approve All →"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ─── MAIN APP ───────────────────────────────────────────────
 
 export default function App() {
@@ -2330,7 +2868,8 @@ export default function App() {
   const handleLoadingComplete = useCallback(() => setView("curation"), []);
   const handleCurationComplete = useCallback(() => setView("topicCuration"), []);
   const handleTopicCurationComplete = useCallback(() => setView("connectionValidation"), []);
-  const handleConnectionValidationComplete = useCallback(() => setView("dashboard"), []);
+  const handleConnectionValidationComplete = useCallback(() => setView("insightReview"), []);
+  const handleInsightReviewComplete = useCallback(() => setView("dashboard"), []);
 
   // ─── ONBOARDING ──────────────────────────────────
   if (view === "onboarding") {
@@ -2355,6 +2894,11 @@ export default function App() {
   // ─── CONNECTION VALIDATION ─────────────────────
   if (view === "connectionValidation") {
     return <ConnectionValidation onComplete={handleConnectionValidationComplete} mobile={mobile} w={w} />;
+  }
+
+  // ─── INSIGHT & DECISION REVIEW ────────────────
+  if (view === "insightReview") {
+    return <InsightDecisionReview onComplete={handleInsightReviewComplete} mobile={mobile} w={w} />;
   }
 
   // ─── TIMELINE ────────────────────────────────────
