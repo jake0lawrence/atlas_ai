@@ -1381,3 +1381,32 @@ export const PAST_ANALOGIES = [
     ],
   },
 ];
+
+// ─── COMPANION SIDEBAR SUGGESTIONS ──────────────────────
+export const COMPANION_SIDEBAR_SUGGESTIONS = {
+  dashboard: [
+    { id: "dash-1", icon: "🧠", title: "Knowledge Mgmt is getting stale", description: "You haven't visited Knowledge Mgmt in 3 months — here's what's changed since your last deep dive.", accent: "#14B8A6", actions: ["Brief me", "Ask Atlas"] },
+    { id: "dash-2", icon: "💡", title: "New connection pattern", description: "Your conversations about AI Automation and n8n & Airtable are converging — you may be developing a unified workflow philosophy.", accent: "#EC4899", actions: ["View diff", "Ask Atlas"] },
+    { id: "dash-3", icon: "📊", title: "Thinking streak active", description: "You've had 12 conversations about CourtCollect this month — that's 3x your average.", accent: "#F59E0B", actions: ["View timeline", "Brief me"] },
+  ],
+  timeline: [
+    { id: "time-1", icon: "🔗", title: "Cross-topic connection", description: "This event connects to a similar architecture decision in Web Development from 6 months ago.", accent: "#06B6D4", actions: ["View connection", "Ask Atlas"] },
+    { id: "time-2", icon: "⚡", title: "Thinking velocity spike", description: "You had 5 conversations on this topic in one week — something was driving urgency.", accent: "#FBBF24", actions: ["Brief me", "Ask Atlas"] },
+  ],
+  connections: [
+    { id: "conn-1", icon: "🌐", title: "Potential new connection", description: "Atlas found a potential new connection between Dice or Die and Creative Writing — game narrative design overlaps.", accent: "#8B5CF6", actions: ["View diff", "Ask Atlas"] },
+    { id: "conn-2", icon: "💪", title: "Strongest bridge topic", description: "AI Automation connects to 5 other topics — it's your most interconnected area of thinking.", accent: "#EC4899", actions: ["Brief me", "Ask Atlas"] },
+  ],
+  evolution: [
+    { id: "evo-1", icon: "🔄", title: "Thinking shifted 3 times", description: "Your thinking on serverless architecture has shifted 3 times — see the diffs between each phase.", accent: "#3B82F6", actions: ["View diff", "Ask Atlas"] },
+    { id: "evo-2", icon: "📈", title: "Deepening pattern", description: "Your conversations are getting longer and more technical — expertise is compounding.", accent: "#10B981", actions: ["Brief me", "Ask Atlas"] },
+  ],
+  conversation: [
+    { id: "conv-1", icon: "⚠️", title: "Possible contradiction", description: "This contradicts a decision you made on Nov 14, 2024 about deployment strategy.", accent: "#EF4444", actions: ["View diff", "Ask Atlas"] },
+    { id: "conv-2", icon: "🔗", title: "Referenced elsewhere", description: "This conversation is referenced in 3 other topic threads — it was a pivotal moment.", accent: "#A855F7", actions: ["Brief me", "Ask Atlas"] },
+  ],
+  companion: [
+    { id: "comp-1", icon: "🎯", title: "Popular question pattern", description: "Most users ask about their decision history first — try 'What decisions have I revisited most?'", accent: "#FBBF24", actions: ["Ask this", "Brief me"] },
+    { id: "comp-2", icon: "🧩", title: "Knowledge gap detected", description: "You've discussed Personal Finance 28 times but never connected it to your automation workflows.", accent: "#84CC16", actions: ["View connection", "Ask Atlas"] },
+  ],
+};
