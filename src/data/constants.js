@@ -871,6 +871,70 @@ export const DIGEST_DATA = [
   },
 ];
 
+// ─── PIVOT ENTRIES (FULL-FORMAT DECISION JOURNAL) ───────────
+export const PIVOT_ENTRIES = [
+  {
+    id: "pivot-claude-shift",
+    date: "Dec 2025",
+    topicId: "webdev",
+    topicName: "Web Development",
+    topicIcon: "🌐",
+    topicColor: "#06B6D4",
+    title: "Shifted from ChatGPT-primary to Claude-primary workflow",
+    before: "ChatGPT for most development tasks, including architecture and debugging",
+    trigger: "A week-long architecture session with Claude on CourtCollect showed dramatically better context retention and code quality. Claude handled the multi-tenant RLS schema design in a single session that took three ChatGPT conversations to approximate.",
+    after: "Claude for architecture & long sessions, ChatGPT for quick research and one-off questions",
+    annotation: "Claude's long-context window changed everything. The ability to hold an entire codebase in context meant fewer repeated explanations. ChatGPT is still faster for quick lookups, but anything requiring sustained reasoning goes to Claude now.",
+    impact: ["CourtCollect", "AI Automation", "Knowledge Mgmt"],
+    annotated: true,
+  },
+  {
+    id: "pivot-automation-philosophy",
+    date: "Oct 2025",
+    topicId: "automation",
+    topicName: "AI Automation",
+    topicIcon: "🤖",
+    topicColor: "#EC4899",
+    title: "From 'automate everything' to strategic automation",
+    before: "If it can be automated, it should be — spent weeks building complex n8n workflows for edge cases",
+    trigger: "An n8n workflow for client reporting broke silently for 2 weeks. The maintenance burden of over-automated systems became clear when a simple manual process would have taken 5 minutes per week.",
+    after: "Automate the boring, hand-craft the critical. Only automate processes that are truly repetitive and where failure is detectable.",
+    annotation: null,
+    impact: ["n8n & Airtable", "HMPRG Campaigns"],
+    annotated: false,
+  },
+  {
+    id: "pivot-keymaster-shelved",
+    date: "Dec 2025",
+    topicId: "keymaster",
+    topicName: "Keymaster",
+    topicIcon: "🔐",
+    topicColor: "#10B981",
+    title: "Keymaster shelved to focus on CourtCollect + job search",
+    before: "Active development on browser extension with weekly progress milestones",
+    trigger: "Tyler departure accelerated job search timeline. CourtCollect became the primary portfolio piece. Available hours dropped by 60% and Keymaster wasn't generating revenue.",
+    after: "Project paused indefinitely — code archived, learnings documented for potential resume",
+    annotation: null,
+    impact: ["CourtCollect", "Job Search"],
+    annotated: false,
+  },
+  {
+    id: "pivot-hmprg-budget",
+    date: "Jan 2026",
+    topicId: "hmprg",
+    topicName: "HMPRG Campaigns",
+    topicIcon: "🏥",
+    topicColor: "#3B82F6",
+    title: "Shifted budget from Facebook to Instagram (3:1 outperformance)",
+    before: "Even split across Meta platforms — running similar campaigns on both Facebook and Instagram",
+    trigger: "Q4 2025 analytics showed Instagram Stories outperforming Facebook feed ads by 3:1 on CPE. The HMPRG target demographic (healthcare workers 25-45) was engaging far more on Instagram.",
+    after: "Instagram-heavy allocation with Facebook for retargeting only",
+    annotation: null,
+    impact: ["AI Automation"],
+    annotated: false,
+  },
+];
+
 // ─── PRE-FLIGHT BRIEFINGS DATA ──────────────────────────────
 export const BRIEFINGS = {
   courtcollect: {
