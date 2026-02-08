@@ -10,8 +10,8 @@ import {
   getInsightStaleness, RECURATION_COUNTS, SYNC_NEW_EVENTS,
   CURATED_PALETTE, TOPIC_SPARKLINES, SPLIT_SUGGESTIONS, MERGE_SUGGESTIONS,
   DEMO_PERSONAS, LOAD_PIPELINE, PHASE_META, VAULT_TREE, EXPORT_FORMATS,
-  TOUR_STEPS, TOUR_STORAGE_KEY, PAST_ANALOGIES,
-  COMPANION_SIDEBAR_SUGGESTIONS,
+  TOUR_STEPS, TOUR_STORAGE_KEY, V6_TOUR_STEPS, V6_TOUR_STORAGE_KEY,
+  PAST_ANALOGIES, COMPANION_SIDEBAR_SUGGESTIONS,
 } from './data/constants';
 import useWindowSize from './hooks/useWindowSize';
 import useSound from './hooks/useSound';
@@ -550,11 +550,11 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
 const Nav = ({ view, onNavigate, mobile, lastSyncTime, newCount, isSyncing, onSync, onCmdK }) => {
   const tabs = [
     { id: "dashboard", label: "Overview", icon: "◈" },
-    { id: "companion", label: "Companion", icon: "◆" },
+    { id: "companion", label: "Companion", icon: "◆", tour: "companion-tab" },
     { id: "connections", label: "Connections", icon: "◎" },
     { id: "evolution", label: "Evolution", icon: "◇" },
-    { id: "beliefDiffs", label: "Belief Diffs", icon: "⇄" },
-    { id: "digest", label: "Digest", icon: "📅" },
+    { id: "beliefDiffs", label: "Belief Diffs", icon: "⇄", tour: "belief-diffs-tab" },
+    { id: "digest", label: "Digest", icon: "📅", tour: "digest-tab" },
     { id: "search", label: "Search", icon: "⌕" },
     { id: "export", label: "Export", icon: "↗" },
   ];
@@ -573,6 +573,7 @@ const Nav = ({ view, onNavigate, mobile, lastSyncTime, newCount, isSyncing, onSy
       }}>
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => onNavigate(tab.id)}
+            {...(tab.tour ? { "data-tour": tab.tour } : {})}
             style={{
               fontFamily: BODY, fontSize: mobile ? 12 : 13, fontWeight: view === tab.id ? 600 : 400,
               color: view === tab.id ? "#08080C" : "rgba(255,255,255,0.4)",
@@ -4364,7 +4365,7 @@ tyler,Tyler Technologies,work,89,234500,Mar 2023,Dec 2025,3.4`}
 // GUIDED TOUR MODE (7A)
 // ═══════════════════════════════════════════════════════════════
 
-const GuidedTour = ({ active, onClose, mobile }) => {
+const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = TOUR_STORAGE_KEY }) => {
   const [step, setStep] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
 
@@ -4375,7 +4376,7 @@ const GuidedTour = ({ active, onClose, mobile }) => {
   // Track target element position and scroll it into view
   useEffect(() => {
     if (!active) return;
-    const current = TOUR_STEPS[step];
+    const current = steps[step];
     if (!current.target) { setTargetRect(null); return; }
 
     const el = document.querySelector(current.target);
@@ -4400,13 +4401,13 @@ const GuidedTour = ({ active, onClose, mobile }) => {
       window.removeEventListener("resize", updateRect);
       window.removeEventListener("scroll", updateRect, true);
     };
-  }, [active, step]);
+  }, [active, step, steps]);
 
   useEffect(() => {
     if (!active) return;
     const handleKey = (e) => {
       if (e.key === "Escape") { onClose(); return; }
-      if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); step < TOUR_STEPS.length - 1 ? setStep(s => s + 1) : handleFinish(); }
+      if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); step < steps.length - 1 ? setStep(s => s + 1) : handleFinish(); }
       if (e.key === "ArrowLeft" && step > 0) { e.preventDefault(); setStep(s => s - 1); }
     };
     window.addEventListener("keydown", handleKey);
@@ -4414,15 +4415,15 @@ const GuidedTour = ({ active, onClose, mobile }) => {
   });
 
   const handleFinish = () => {
-    try { localStorage.setItem(TOUR_STORAGE_KEY, "true"); } catch (e) { console.warn('Failed to save tour state:', e); }
+    try { localStorage.setItem(storageKey, "true"); } catch (e) { console.warn('Failed to save tour state:', e); }
     onClose();
   };
 
   if (!active) return null;
 
-  const current = TOUR_STEPS[step];
+  const current = steps[step];
   const isFirst = step === 0;
-  const isLast = step === TOUR_STEPS.length - 1;
+  const isLast = step === steps.length - 1;
   const hasTarget = !!current.target && !!targetRect;
   const spotPad = 10;
 
@@ -4450,7 +4451,7 @@ const GuidedTour = ({ active, onClose, mobile }) => {
       )}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", gap: 4 }}>
-          {TOUR_STEPS.map((_, i) => (
+          {steps.map((_, i) => (
             <div key={i} style={{
               width: i === step ? 18 : 6, height: 6, borderRadius: 3,
               background: i === step ? "#FBBF24" : i < step ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)",
@@ -4481,7 +4482,7 @@ const GuidedTour = ({ active, onClose, mobile }) => {
         </div>
       </div>
       <div style={{ textAlign: "center", marginTop: 12, fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
-        {step + 1} / {TOUR_STEPS.length} · Use arrow keys to navigate
+        {step + 1} / {steps.length} · Use arrow keys to navigate
       </div>
     </>
   );
@@ -5849,6 +5850,7 @@ const CompanionSidebar = ({ isOpen, onToggle, view, onNavigate, mobile }) => {
     <>
       {/* Minimized toggle button — always visible */}
       <div
+        data-tour="companion-sidebar"
         role="button"
         tabIndex={0}
         onClick={onToggle}
@@ -5979,6 +5981,8 @@ export default function App() {
   const setBriefingTopic = useStore(s => s.setBriefingTopic);
   const tourActive = useStore(s => s.tourActive);
   const setTourActive = useStore(s => s.setTourActive);
+  const v6TourActive = useStore(s => s.v6TourActive);
+  const setV6TourActive = useStore(s => s.setV6TourActive);
   const handleTopicClick = useStore(s => s.handleTopicClick);
   const storeHandleEventClick = useStore(s => s.handleEventClick);
   const navigateTo = useStore(s => s.navigateTo);
@@ -5996,7 +6000,11 @@ export default function App() {
       tourLaunched.current = true;
       try {
         if (!localStorage.getItem(TOUR_STORAGE_KEY)) {
+          // New user: show full tour
           appTimersRef.current.push(setTimeout(() => setTourActive(true), 600));
+        } else if (!localStorage.getItem(V6_TOUR_STORAGE_KEY)) {
+          // Returning v5 user: show "What's New in v6" mini-tour
+          appTimersRef.current.push(setTimeout(() => setV6TourActive(true), 600));
         }
       } catch (e) { console.warn('tour activation:', e); }
     }
@@ -6202,7 +6210,7 @@ export default function App() {
             <div data-tour="knowledge-map" style={{ marginBottom: mobile ? 28 : 40 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
                 <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: "#fff" }}>Knowledge Map</h3>
-                <button onClick={() => setShowRewind(true)} style={{
+                <button data-tour="rewind-btn" onClick={() => setShowRewind(true)} style={{
                   fontFamily: BODY, fontSize: mobile ? 10 : 11, fontWeight: 500,
                   color: "#EC4899", background: "rgba(236,72,153,0.08)",
                   border: "1px solid rgba(236,72,153,0.2)", borderRadius: 8,
@@ -6298,19 +6306,29 @@ export default function App() {
         </div>
       </div>
       {!mobile && (
-        <button onClick={() => setTourActive(true)} title="Take a guided tour" style={{
-          position: "fixed", bottom: 24, left: 24, zIndex: 1000,
-          fontFamily: BODY, fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.35)",
-          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: 8, padding: "7px 12px", cursor: "pointer", transition: "all 0.25s",
-          display: "flex", alignItems: "center", gap: 6,
-        }}>
-          <span style={{ fontSize: 13 }}>🗺️</span> Tour
-        </button>
+        <div style={{ position: "fixed", bottom: 24, left: 24, zIndex: 1000, display: "flex", gap: 6 }}>
+          <button onClick={() => setTourActive(true)} title="Take the full guided tour" style={{
+            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.35)",
+            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 8, padding: "7px 12px", cursor: "pointer", transition: "all 0.25s",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <span style={{ fontSize: 13 }}>🗺️</span> Tour
+          </button>
+          <button onClick={() => setV6TourActive(true)} title="See what's new in v6" style={{
+            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: "rgba(251,191,36,0.5)",
+            background: "rgba(251,191,36,0.04)", border: "1px solid rgba(251,191,36,0.12)",
+            borderRadius: 8, padding: "7px 12px", cursor: "pointer", transition: "all 0.25s",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <span style={{ fontSize: 13 }}>🆕</span> v6
+          </button>
+        </div>
       )}
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
       <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
+      <GuidedTour active={v6TourActive} onClose={() => setV6TourActive(false)} mobile={mobile} steps={V6_TOUR_STEPS} storageKey={V6_TOUR_STORAGE_KEY} />
       {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} mobile={mobile} />}
       {showRewind && <RewindMode onClose={() => setShowRewind(false)} mobile={mobile} />}
       <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view={view} onNavigate={handleNavigate} mobile={mobile} />
