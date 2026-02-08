@@ -17,6 +17,7 @@ import useWindowSize from './hooks/useWindowSize';
 import useSound from './hooks/useSound';
 import ErrorBoundary from './components/ErrorBoundary';
 import useStore from './store';
+import useRouterSync from './hooks/useRouterSync';
 
 // ─── STYLES ─────────────────────────────────────────────────
 const FONTS = `'Playfair Display', 'Georgia', serif`;
@@ -5982,6 +5983,7 @@ export default function App() {
   const storeHandleEventClick = useStore(s => s.handleEventClick);
   const navigateTo = useStore(s => s.navigateTo);
   const toggleCmdPalette = useStore(s => s.toggleCmdPalette);
+  useRouterSync();
   const tourLaunched = useRef(false);
   const appTimersRef = useRef([]);
 
