@@ -245,6 +245,61 @@ const REDISCOVERIES = [
   { icon: "🔄", ago: "2 years ago", text: "Your first conversation about AI automation — 'how do I connect APIs without coding.' Look how far that's come." },
 ];
 
+// ─── ASK ATLAS — COMPANION RESPONSE DATA ───────────────────
+const COMPANION_RESPONSES = {
+  "What's my current thinking on serverless architecture?": {
+    answer: "You've moved toward a pragmatic serverless-first approach, but with clear boundaries. Your CourtCollect work solidified the view that serverless (via Vercel + Supabase edge functions) is ideal for frontend-heavy SaaS products where you're the sole developer [1]. You explicitly chose against containerized deployment after a painful Docker + Railway debugging session that cost you three days [2]. However, you've noted that serverless has limits — for event-driven backend processing, you've been exploring pub/sub patterns that sit between pure serverless and traditional servers [3]. Your current position: serverless for the web layer, managed services for data, and evaluate case-by-case for background processing.",
+    confidence: 0.91,
+    freshness: "recent",
+    sources: [
+      { id: 1, topicId: "courtcollect", topicName: "CourtCollect", date: "2024-09-15", title: "Architecture decisions — Supabase + Next.js", excerpt: "Chose tech stack after evaluating options. Vercel + Supabase simplified the deployment story compared to self-managed infrastructure. For a solo developer, serverless is the obvious choice — I don't want to be on-call for my own side project.", highlight: "For a solo developer, serverless is the obvious choice" },
+      { id: 2, topicId: "courtcollect", topicName: "CourtCollect", date: "2024-11-14", title: "Deployment struggles — Docker + Railway", excerpt: "Three days lost to multi-stage Docker build conflicts. Railway's build system fought with our Next.js config at every turn. This is exactly the kind of infrastructure yak-shaving that kills solo projects.", highlight: "Three days lost to multi-stage Docker build conflicts" },
+      { id: 3, topicId: "courtcollect", topicName: "CourtCollect", date: "2024-11-16", title: "Pivoted to Vercel deployment", excerpt: "Switched strategy. Vercel + Supabase cloud simplified everything. The serverless model means I deploy and forget — no containers to manage, no scaling to configure. For background jobs, I'll evaluate pub/sub when the need is concrete.", highlight: "Vercel + Supabase cloud simplified everything" },
+    ],
+  },
+  "When did I decide to use TypeScript for CourtCollect?": {
+    answer: "You didn't start CourtCollect with TypeScript — the initial architecture decision in September 2024 was Next.js with JavaScript [1]. The shift to TypeScript happened gradually through your web development conversations, where you identified type safety as critical for multi-tenant systems with complex data models [2]. By the time you were designing the database schema with RLS policies and tenant isolation, the complexity of the type relationships (courts, cases, payments, agencies) made the case for TypeScript self-evident [3]. The formal decision crystallized during the CI/CD pipeline setup in October 2024, when you configured the build system with strict TypeScript checking from day one [4].",
+    confidence: 0.85,
+    freshness: "recent",
+    sources: [
+      { id: 1, topicId: "courtcollect", topicName: "CourtCollect", date: "2024-09-15", title: "Architecture decisions — Supabase + Next.js", excerpt: "Chose tech stack after evaluating options. Next.js 14 with App Router for the frontend, Supabase for the backend. Initial setup in JavaScript to move fast.", highlight: "Initial setup in JavaScript to move fast" },
+      { id: 2, topicId: "webdev", topicName: "Web Development", date: "2025-01-15", title: "Performance optimization", excerpt: "TypeScript catches entire categories of bugs at build time. For multi-tenant SaaS where a wrong tenant_id means a security breach, type safety isn't optional — it's a requirement.", highlight: "type safety isn't optional — it's a requirement" },
+      { id: 3, topicId: "courtcollect", topicName: "CourtCollect", date: "2024-09-22", title: "Database schema design", excerpt: "The schema has 6 interconnected tables with RLS policies on each. Keeping track of which agency can see which cases, which payments belong to which court — without types, this is a bug factory.", highlight: "without types, this is a bug factory" },
+      { id: 4, topicId: "courtcollect", topicName: "CourtCollect", date: "2024-10-05", title: "GitHub org setup & CI/CD pipeline", excerpt: "Configured strict TypeScript in tsconfig. Required CI to pass before merge. If the types don't check out, the code doesn't ship.", highlight: "Required CI to pass before merge" },
+    ],
+  },
+  "What are the tradeoffs I've identified with n8n vs. custom automation?": {
+    answer: "You've been living in both worlds and have a nuanced take. n8n wins for speed-to-value: your Bluesky analytics pipeline and HMPRG reporting automation were both stood up in hours, not days [1][2]. The visual workflow builder is genuinely powerful for connecting APIs without writing glue code. But you've hit real limits — complex conditional logic becomes a spaghetti of nodes, error handling is clunky, and debugging multi-step workflows is harder than reading equivalent code [3]. Your current philosophy is 'strategic automation': use n8n for the boring, repetitive data pipelines (API → transform → store), but hand-craft anything that involves complex business logic or needs to be maintained long-term [4]. The key tradeoff you keep coming back to: n8n's ceiling is lower but you hit it faster. Custom code's ceiling is unlimited but the ramp-up cost is real.",
+    confidence: 0.88,
+    freshness: "recent",
+    sources: [
+      { id: 1, topicId: "n8n", topicName: "n8n & Airtable", date: "2024-08-22", title: "Bluesky → Airtable pipeline", excerpt: "Built the full Bluesky analytics pipeline in n8n in about 3 hours. API calls, data transformation, Airtable write — all visual, no code. This would have been a full day in Node.js.", highlight: "Built the full Bluesky analytics pipeline in n8n in about 3 hours" },
+      { id: 2, topicId: "n8n", topicName: "n8n & Airtable", date: "2024-09-15", title: "HMPRG reporting automation", excerpt: "Meta Ads API → data cleanup → formatted report → email. n8n handled this beautifully. The scheduling and retry logic comes free.", highlight: "n8n handled this beautifully" },
+      { id: 3, topicId: "n8n", topicName: "n8n & Airtable", date: "2025-01-10", title: "Complex multi-step workflows", excerpt: "Hit the wall on a workflow with 8 conditional branches and error recovery. The visual canvas becomes unreadable. Debugging means clicking into each node individually. At this complexity level, I'd rather read 200 lines of code.", highlight: "The visual canvas becomes unreadable" },
+      { id: 4, topicId: "automation", topicName: "AI Automation", date: "2024-11-15", title: "AI-for-good nonprofit concept", excerpt: "My framework now: automate the boring stuff with no-code tools, hand-craft the critical stuff with real code. The 80/20 rule applies — 80% of automations are simple enough for n8n, 20% need proper engineering.", highlight: "automate the boring stuff with no-code tools, hand-craft the critical stuff with real code" },
+    ],
+  },
+  "Summarize my evolution on AI-assisted development": {
+    answer: "Your journey with AI-assisted development spans three distinct phases. In early 2023, you were a consumer — asking how-to questions, getting code snippets, treating AI as a smarter Stack Overflow [1]. By mid-2024, you'd become a collaborator: your conversations shifted from 'how do I do X' to 'help me think through the architecture of X.' The CourtCollect and Keymaster projects show this clearly — you're using AI to stress-test ideas, not just generate code [2]. The current phase, starting around late 2025, is what you'd call meta-cognitive: you're not just using AI to build things, you're building systems to extract knowledge from your AI usage itself. Atlas is the embodiment of this — the snake eating its tail [3]. The most telling metric: your average conversation length went from 8 messages in early 2023 to 35 messages by late 2024. You're not asking more questions — you're having deeper conversations [4].",
+    confidence: 0.94,
+    freshness: "mixed",
+    freshnessWarning: "Some sources are from early 2023. Your earliest thinking may have evolved further than captured here.",
+    sources: [
+      { id: 1, topicId: "webdev", topicName: "Web Development", date: "2023-01-20", title: "HTML/CSS fundamentals", excerpt: "Early web development learning. Asking basic questions about flexbox, CSS grid, responsive design. Each conversation was short and transactional — get the answer, move on.", highlight: "Each conversation was short and transactional" },
+      { id: 2, topicId: "courtcollect", topicName: "CourtCollect", date: "2024-09-22", title: "Database schema design", excerpt: "Can you help me think through the multi-tenant data model? I want to stress-test the approach before I commit to it. Here are the constraints I'm working with...", highlight: "I want to stress-test the approach before I commit" },
+      { id: 3, topicId: "obsidian", topicName: "Knowledge Mgmt", date: "2025-02-05", title: "LLM conversation extraction concept", excerpt: "What if I could turn all my AI conversations into a searchable, structured knowledge base? Not just the answers — the reasoning, the decisions, the evolution of my thinking. The system that extracts knowledge from the system I use to generate knowledge.", highlight: "The system that extracts knowledge from the system I use to generate knowledge" },
+      { id: 4, topicId: "automation", topicName: "AI Automation", date: "2024-08-20", title: "AI workflow patterns", excerpt: "LLM-in-the-loop automation is fundamentally different from traditional automation. You're not scripting deterministic steps — you're designing conversations with outcomes. Average session is now 35+ messages, multiple iterations.", highlight: "you're designing conversations with outcomes" },
+    ],
+  },
+};
+
+const COMPANION_SUGGESTION_CHIPS = [
+  "What's my current thinking on serverless architecture?",
+  "When did I decide to use TypeScript for CourtCollect?",
+  "What are the tradeoffs I've identified with n8n vs. custom automation?",
+  "Summarize my evolution on AI-assisted development",
+];
+
 // ─── CONVERSATION PREVIEW DATA ──────────────────────────────
 const CONVERSATION_PREVIEWS = {
   "courtcollect:4": {
@@ -562,6 +617,8 @@ const CSS = `
   @keyframes hapticBounce { 0% { transform: scale(1); } 40% { transform: scale(0.93); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
   @keyframes confettiBurst { 0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: translateY(-90px) rotate(180deg) scale(0.4); } }
   @keyframes viewFadeSlide { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes atlasTyping { 0%, 60%, 100% { opacity: 0.25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+  .atlas-typing-dot { animation: atlasTyping 1.2s ease-in-out infinite; }
   .fade-up { animation: fadeUp 0.6s ease both; }
   .slide-in { animation: slideIn 0.5s ease both; }
   .view-transition { animation: viewFadeSlide 0.45s cubic-bezier(0.16,1,0.3,1) both; }
@@ -1085,6 +1142,7 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
 const Nav = ({ view, onNavigate, mobile, lastSyncTime, newCount, isSyncing, onSync, onCmdK }) => {
   const tabs = [
     { id: "dashboard", label: "Overview", icon: "◈" },
+    { id: "companion", label: "Companion", icon: "◆" },
     { id: "connections", label: "Connections", icon: "◎" },
     { id: "evolution", label: "Evolution", icon: "◇" },
     { id: "search", label: "Search", icon: "⌕" },
@@ -1413,6 +1471,313 @@ const TimelineView = ({ topic, onBack, onEventClick, mobile, newEvents }) => {
 };
 
 // ─── CONVERSATION DRILLDOWN VIEW ─────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// ASK ATLAS — CONVERSATIONAL KNOWLEDGE QUERY
+// ═══════════════════════════════════════════════════════════════
+const AskAtlas = ({ onBack, onConversationClick, mobile }) => {
+  const [query, setQuery] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [expandedSources, setExpandedSources] = useState({});
+  const [chips, setChips] = useState(COMPANION_SUGGESTION_CHIPS);
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
+
+  const handleSubmit = (q) => {
+    const trimmed = (q || query).trim();
+    if (!trimmed || isTyping) return;
+
+    const userMsg = { role: "user", text: trimmed };
+    setMessages(prev => [...prev, userMsg]);
+    setQuery("");
+    setIsTyping(true);
+
+    const preBuilt = COMPANION_RESPONSES[trimmed];
+    const delay = preBuilt ? 1200 + Math.random() * 800 : 800;
+
+    setTimeout(() => {
+      if (preBuilt) {
+        setMessages(prev => [...prev, { role: "atlas", ...preBuilt }]);
+        setChips(COMPANION_SUGGESTION_CHIPS.filter(c => c !== trimmed));
+      } else {
+        setMessages(prev => [...prev, {
+          role: "atlas",
+          isDemo: true,
+          answer: "This is a demo — in production, Atlas would search your full knowledge base of 3,847 conversations to synthesize an answer from your own words. The query you asked would be matched against your curated topics, decisions, and insights to compose a response with full source citations.",
+          confidence: null,
+          freshness: null,
+          sources: [],
+        }]);
+      }
+      setIsTyping(false);
+    }, delay);
+  };
+
+  const toggleSource = (msgIdx) => {
+    setExpandedSources(prev => ({ ...prev, [msgIdx]: !prev[msgIdx] }));
+  };
+
+  const getConfidenceLabel = (c) => {
+    if (c >= 0.9) return { text: "High confidence", color: "#10B981" };
+    if (c >= 0.75) return { text: "Good confidence", color: "#FBBF24" };
+    if (c >= 0.5) return { text: "Moderate confidence", color: "#F97316" };
+    return { text: "Low confidence", color: "#EF4444" };
+  };
+
+  const renderAnswer = (text) => {
+    const parts = text.split(/(\[\d+\])/g);
+    return parts.map((part, i) => {
+      const match = part.match(/^\[(\d+)\]$/);
+      if (match) {
+        return (
+          <span key={i} style={{
+            fontFamily: MONO, fontSize: 10, color: "#FBBF24",
+            background: "rgba(251,191,36,0.12)", padding: "1px 5px",
+            borderRadius: 4, cursor: "default", fontWeight: 500,
+            verticalAlign: "super", lineHeight: 1,
+          }}>{part}</span>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#08080C" }}>
+      <style>{CSS}</style>
+
+      {/* Header */}
+      <div style={{ padding: mobile ? "20px 16px 0" : "28px 40px 0", maxWidth: 960, margin: "0 auto", width: "100%" }}>
+        <button onClick={onBack} style={{ fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "8px 16px", cursor: "pointer", marginBottom: 16 }}>← Back to dashboard</button>
+        <div style={{ textAlign: "center", marginBottom: mobile ? 16 : 24 }}>
+          <div style={{ fontSize: mobile ? 10 : 12, fontFamily: BODY, color: "rgba(251,191,36,0.35)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 6, fontWeight: 600 }}>Companion</div>
+          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 28 : 36, fontWeight: 800, color: "#fff", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+            Ask <span style={{ color: "#FBBF24" }}>Atlas</span>
+          </h1>
+          <p style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: "rgba(255,255,255,0.25)", marginTop: 6 }}>Query your knowledge base. Get answers in your own words.</p>
+        </div>
+      </div>
+
+      {/* Messages area */}
+      <div style={{ flex: 1, overflowY: "auto", padding: mobile ? "0 16px" : "0 40px" }}>
+        <div style={{ maxWidth: 720, margin: "0 auto" }}>
+          {messages.length === 0 && (
+            <div style={{ textAlign: "center", padding: mobile ? "40px 0" : "60px 0", animation: "fadeUp 0.6s ease both" }}>
+              <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.6 }}>◈</div>
+              <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: "rgba(255,255,255,0.3)", lineHeight: 1.6, maxWidth: 400, margin: "0 auto" }}>
+                Ask anything about your 3,847 conversations across 14 topics. Atlas synthesizes answers from your own words.
+              </p>
+            </div>
+          )}
+
+          {messages.map((msg, i) => {
+            if (msg.role === "user") {
+              return (
+                <div key={i} style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16, animation: "fadeUp 0.35s ease both" }}>
+                  <div style={{
+                    maxWidth: mobile ? "90%" : "75%",
+                    background: "linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.04))",
+                    border: "1px solid rgba(251,191,36,0.2)",
+                    borderRadius: "14px 14px 4px 14px",
+                    padding: mobile ? "10px 14px" : "12px 18px",
+                  }}>
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.45)", marginBottom: 5, fontWeight: 500 }}>You</div>
+                    <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.5 }}>{msg.text}</div>
+                  </div>
+                </div>
+              );
+            }
+
+            // Atlas response
+            const conf = msg.confidence ? getConfidenceLabel(msg.confidence) : null;
+            const isExpanded = expandedSources[i];
+            return (
+              <div key={i} style={{ marginBottom: 24, animation: "fadeUp 0.5s ease both" }}>
+                <div style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 14,
+                  padding: mobile ? "16px" : "20px 24px",
+                }}>
+                  {/* Atlas label + badges */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.5)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Atlas</div>
+                    {conf && (
+                      <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: `${conf.color}15`, color: conf.color, fontWeight: 500 }}>
+                        {conf.text} · {Math.round(msg.confidence * 100)}%
+                      </span>
+                    )}
+                    {msg.isDemo && (
+                      <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "rgba(139,92,246,0.1)", color: "#8B5CF6", fontWeight: 500 }}>
+                        Demo Mode
+                      </span>
+                    )}
+                    {msg.freshnessWarning && (
+                      <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "rgba(239,68,68,0.08)", color: "#EF4444", fontWeight: 500 }}>
+                        ⏳ Stale sources
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Synthesized answer */}
+                  <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, marginBottom: msg.sources && msg.sources.length > 0 ? 16 : 0 }}>
+                    {renderAnswer(msg.answer)}
+                  </div>
+
+                  {/* Freshness warning detail */}
+                  {msg.freshnessWarning && (
+                    <div style={{
+                      background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.1)",
+                      borderRadius: 8, padding: "8px 12px", marginBottom: 12,
+                      display: "flex", alignItems: "center", gap: 8,
+                    }}>
+                      <span style={{ fontSize: 12 }}>⏳</span>
+                      <span style={{ fontFamily: BODY, fontSize: 11, color: "rgba(239,68,68,0.7)", lineHeight: 1.4 }}>{msg.freshnessWarning}</span>
+                    </div>
+                  )}
+
+                  {/* Source toggle */}
+                  {msg.sources && msg.sources.length > 0 && (
+                    <button onClick={() => toggleSource(i)} style={{
+                      fontFamily: BODY, fontSize: 12, fontWeight: 500,
+                      color: "rgba(251,191,36,0.6)", background: "rgba(251,191,36,0.06)",
+                      border: "1px solid rgba(251,191,36,0.12)", borderRadius: 8,
+                      padding: "7px 14px", cursor: "pointer", transition: "all 0.25s",
+                      display: "flex", alignItems: "center", gap: 6,
+                    }}>
+                      <span style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>▸</span>
+                      {msg.sources.length} source{msg.sources.length > 1 ? "s" : ""} from your conversations
+                    </button>
+                  )}
+
+                  {/* Expanded source panel */}
+                  {isExpanded && msg.sources && (
+                    <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8, animation: "fadeUp 0.3s ease both" }}>
+                      {msg.sources.map((src) => {
+                        const topic = TOPICS.find(t => t.id === src.topicId);
+                        return (
+                          <div key={src.id} style={{
+                            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                            borderRadius: 10, padding: mobile ? "12px" : "14px 16px",
+                            cursor: "pointer", transition: "all 0.2s",
+                          }}
+                          onClick={() => onConversationClick && onConversationClick(src.topicId)}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(251,191,36,0.2)"; e.currentTarget.style.background = "rgba(251,191,36,0.03)"; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                              <span style={{
+                                fontFamily: MONO, fontSize: 10, fontWeight: 600,
+                                color: "#FBBF24", background: "rgba(251,191,36,0.12)",
+                                width: 20, height: 20, borderRadius: "50%",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                              }}>{src.id}</span>
+                              <span style={{ fontFamily: BODY, fontSize: 11, color: topic?.color || "#FBBF24", fontWeight: 600 }}>{topic?.icon} {src.topicName}</span>
+                              <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{src.date}</span>
+                            </div>
+                            <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.4)", fontWeight: 500, marginBottom: 6 }}>{src.title}</div>
+                            <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.35)", lineHeight: 1.55, fontStyle: "italic" }}>
+                              "{src.excerpt.split(src.highlight).map((part, pi, arr) => (
+                                <span key={pi}>
+                                  {part}
+                                  {pi < arr.length - 1 && (
+                                    <span style={{ background: "rgba(251,191,36,0.18)", color: "#FBBF24", padding: "1px 2px", borderRadius: 2, fontStyle: "normal", fontWeight: 500 }}>{src.highlight}</span>
+                                  )}
+                                </span>
+                              ))}"
+                            </div>
+                            <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(251,191,36,0.35)", marginTop: 8 }}>Click to view full conversation →</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Typing indicator */}
+          {isTyping && (
+            <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16, animation: "fadeUp 0.3s ease both" }}>
+              <div style={{
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: "14px 14px 14px 4px", padding: "14px 20px",
+                display: "flex", alignItems: "center", gap: 6,
+              }}>
+                <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.5)", fontWeight: 500, marginRight: 4 }}>Atlas</div>
+                <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(251,191,36,0.5)", animationDelay: "0s" }} />
+                <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(251,191,36,0.5)", animationDelay: "0.15s" }} />
+                <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(251,191,36,0.5)", animationDelay: "0.3s" }} />
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Suggestion chips + input */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(8,8,12,0.95)", padding: mobile ? "12px 16px 20px" : "16px 40px 24px" }}>
+        <div style={{ maxWidth: 720, margin: "0 auto" }}>
+          {/* Chips */}
+          {chips.length > 0 && messages.length < 3 && (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+              {chips.slice(0, mobile ? 2 : 4).map((chip, i) => (
+                <button key={i} onClick={() => handleSubmit(chip)} style={{
+                  fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.45)",
+                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 20, padding: mobile ? "6px 12px" : "7px 14px",
+                  cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap",
+                  overflow: "hidden", textOverflow: "ellipsis", maxWidth: mobile ? "100%" : 280,
+                }}>
+                  {chip.length > (mobile ? 40 : 50) ? chip.slice(0, mobile ? 37 : 47) + "…" : chip}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input */}
+          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} style={{ display: "flex", gap: 8 }}>
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Ask about your knowledge base…"
+              disabled={isTyping}
+              style={{
+                flex: 1, fontFamily: BODY, fontSize: mobile ? 14 : 15,
+                color: "#fff", background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12,
+                padding: mobile ? "12px 16px" : "14px 20px",
+                outline: "none", transition: "border-color 0.2s",
+              }}
+              onFocus={(e) => { e.target.style.borderColor = "rgba(251,191,36,0.3)"; }}
+              onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; }}
+            />
+            <button type="submit" disabled={isTyping || !query.trim()} style={{
+              fontFamily: BODY, fontSize: 14, fontWeight: 600,
+              color: isTyping || !query.trim() ? "rgba(255,255,255,0.2)" : "#08080C",
+              background: isTyping || !query.trim() ? "rgba(255,255,255,0.05)" : "#FBBF24",
+              border: "none", borderRadius: 12,
+              padding: mobile ? "12px 18px" : "14px 24px",
+              cursor: isTyping || !query.trim() ? "default" : "pointer",
+              transition: "all 0.25s", flexShrink: 0,
+            }}>
+              Ask
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ConversationDrilldown = ({ topicId, eventIndex, onBack, mobile }) => {
   const previewKey = `${topicId}:${eventIndex}`;
   const convo = CONVERSATION_PREVIEWS[previewKey];
@@ -4345,6 +4710,7 @@ export default function App() {
         if (cmdPaletteOpen) return; // handled by CommandPalette itself
         if (view === "conversation") { setView("timeline"); setSelectedEvent(null); return; }
         if (view === "timeline") { setView("dashboard"); setSelectedTopic(null); return; }
+        if (view === "companion") { setView("dashboard"); return; }
       }
     };
     window.addEventListener("keydown", handleGlobalKey);
@@ -4418,6 +4784,16 @@ export default function App() {
   // ─── CURATION SUMMARY ──────────────────────────
   if (view === "curationSummary") {
     return <div key="curationSummary" className="view-transition"><CurationSummary onComplete={handleCurationSummaryComplete} mobile={mobile} w={w} /></div>;
+  }
+
+  // ─── ASK ATLAS (COMPANION) ─────────────────────
+  if (view === "companion") {
+    return (
+      <>
+        <AskAtlas onBack={() => setView("dashboard")} onConversationClick={(topicId) => { const topic = TOPICS.find(t => t.id === topicId); if (topic) handleTopicClick(topic); }} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={setView} onTopicClick={handleTopicClick} mobile={mobile} />
+      </>
+    );
   }
 
   // ─── CONVERSATION DRILLDOWN ─────────────────────
