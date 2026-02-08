@@ -1096,7 +1096,7 @@ const Nav = ({ view, onNavigate, mobile, lastSyncTime, newCount, isSyncing, onSy
       margin: mobile ? "0 0 28px" : "0 auto 36px", gap: mobile ? 8 : 12,
       flexWrap: mobile ? "wrap" : "nowrap",
     }}>
-      <nav style={{
+      <nav data-tour="nav" style={{
         display: "flex", gap: 3, padding: 3,
         background: "rgba(255,255,255,0.03)", borderRadius: 10,
         border: "1px solid rgba(255,255,255,0.06)",
@@ -1118,7 +1118,7 @@ const Nav = ({ view, onNavigate, mobile, lastSyncTime, newCount, isSyncing, onSy
       </nav>
       <div style={{ display: "flex", alignItems: "center", gap: mobile ? 6 : 10, flexShrink: 0 }}>
         {!mobile && onCmdK && (
-          <button onClick={onCmdK} style={{
+          <button data-tour="cmd-k" onClick={onCmdK} style={{
             fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.25)",
             background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: 6, padding: "5px 10px", cursor: "pointer", transition: "all 0.2s",
@@ -1144,7 +1144,7 @@ const Nav = ({ view, onNavigate, mobile, lastSyncTime, newCount, isSyncing, onSy
             +{newCount} new
           </span>
         )}
-        <button onClick={onSync} disabled={isSyncing}
+        <button data-tour="sync" onClick={onSync} disabled={isSyncing}
           style={{
             fontFamily: BODY, fontSize: mobile ? 10 : 11, fontWeight: 500,
             color: isSyncing ? "rgba(255,255,255,0.3)" : "#FBBF24",
@@ -4082,24 +4082,55 @@ tyler,Tyler Technologies,work,89,234500,Mar 2023,Dec 2025,3.4`}
 // ═══════════════════════════════════════════════════════════════
 
 const TOUR_STEPS = [
-  { title: "Welcome to Atlas", description: "Let's take a quick tour of your AI Knowledge Atlas. We'll highlight the key features that make this platform unique.", icon: "🗺️", position: "center" },
-  { title: "Navigation", description: "Switch between views: Overview for your dashboard, Connections for your knowledge graph, Evolution for decisions & milestones, Search, and Export.", icon: "◈", position: "top" },
-  { title: "Knowledge Map", description: "Your topics are visualized as interactive bubbles — sized by conversation count. Click any topic to dive into its timeline.", icon: "🧠", position: "middle" },
-  { title: "AI Journey", description: "Track your activity over time and see the shift between AI platforms. The heatmap reveals your thinking patterns across months.", icon: "📊", position: "middle" },
-  { title: "Human-Curated Pipeline", description: "This is what makes Atlas different. Every insight passes through your curation — the AI proposes, you decide. Your knowledge base is human-verified, not just AI-generated.", icon: "⚖️", position: "middle", highlight: true },
-  { title: "Quick Navigation", description: "Press ⌘K (or Ctrl+K) anytime to open the command palette. Jump to any topic or view instantly.", icon: "⌕", position: "top" },
-  { title: "Incremental Sync", description: "Atlas isn't a one-time tool. Hit Sync to pull in new conversations and keep your knowledge base current.", icon: "⟳", position: "top" },
-  { title: "You're All Set!", description: "Explore your 3 years of AI conversations, mapped and curated. Your mind, your atlas.", icon: "✨", position: "center" },
+  { title: "Welcome to Atlas", description: "Let's take a quick tour of your AI Knowledge Atlas. We'll highlight the key features that make this platform unique.", icon: "🗺️" },
+  { title: "Navigation", description: "Switch between views: Overview for your dashboard, Connections for your knowledge graph, Evolution for decisions & milestones, Search, and Export.", icon: "◈", target: "[data-tour='nav']" },
+  { title: "Knowledge Map", description: "Your topics are visualized as interactive bubbles — sized by conversation count. Click any topic to dive into its timeline.", icon: "🧠", target: "[data-tour='knowledge-map']" },
+  { title: "AI Journey", description: "Track your activity over time and see the shift between AI platforms. The heatmap reveals your thinking patterns across months.", icon: "📊", target: "[data-tour='ai-journey']" },
+  { title: "Human-Curated Pipeline", description: "This is what makes Atlas different. Every insight passes through your curation — the AI proposes, you decide. Your knowledge base is human-verified, not just AI-generated.", icon: "⚖️", highlight: true },
+  { title: "Quick Navigation", description: "Press ⌘K (or Ctrl+K) anytime to open the command palette. Jump to any topic or view instantly.", icon: "⌕", target: "[data-tour='cmd-k']" },
+  { title: "Incremental Sync", description: "Atlas isn't a one-time tool. Hit Sync to pull in new conversations and keep your knowledge base current.", icon: "⟳", target: "[data-tour='sync']" },
+  { title: "You're All Set!", description: "Explore your 3 years of AI conversations, mapped and curated. Your mind, your atlas.", icon: "✨" },
 ];
 
 const TOUR_STORAGE_KEY = "atlas_tour_completed";
 
 const GuidedTour = ({ active, onClose, mobile }) => {
   const [step, setStep] = useState(0);
+  const [targetRect, setTargetRect] = useState(null);
 
   useEffect(() => {
-    if (!active) setStep(0);
+    if (!active) { setStep(0); setTargetRect(null); }
   }, [active]);
+
+  // Track target element position and scroll it into view
+  useEffect(() => {
+    if (!active) return;
+    const current = TOUR_STEPS[step];
+    if (!current.target) { setTargetRect(null); return; }
+
+    const el = document.querySelector(current.target);
+    if (!el) { setTargetRect(null); return; }
+
+    const updateRect = () => {
+      const r = el.getBoundingClientRect();
+      setTargetRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    };
+
+    // Measure immediately for instant positioning
+    updateRect();
+
+    // Scroll into view if needed, then re-measure after scroll settles
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const timer = setTimeout(updateRect, 400);
+
+    window.addEventListener("resize", updateRect);
+    window.addEventListener("scroll", updateRect, true);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateRect);
+      window.removeEventListener("scroll", updateRect, true);
+    };
+  }, [active, step]);
 
   useEffect(() => {
     if (!active) return;
@@ -4122,73 +4153,143 @@ const GuidedTour = ({ active, onClose, mobile }) => {
   const current = TOUR_STEPS[step];
   const isFirst = step === 0;
   const isLast = step === TOUR_STEPS.length - 1;
-  const topPos = current.position === "top" ? (mobile ? 80 : 100) : current.position === "middle" ? (mobile ? "35%" : "30%") : "50%";
+  const hasTarget = !!current.target && !!targetRect;
+  const spotPad = 10;
 
+  // Shared tooltip inner content
+  const tooltipInner = (
+    <>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: mobile ? 22 : 26 }}>{current.icon}</span>
+          <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 21, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>{current.title}</h3>
+        </div>
+        <button onClick={handleFinish} style={{
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 6, padding: "3px 8px", cursor: "pointer",
+          fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.25)",
+        }}>ESC</button>
+      </div>
+      <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.55)", lineHeight: 1.65, marginBottom: 24 }}>{current.description}</p>
+      {current.highlight && (
+        <div style={{
+          background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.15)",
+          borderRadius: 8, padding: "8px 12px", marginBottom: 20,
+          fontFamily: BODY, fontSize: 11, color: "#FBBF24", fontWeight: 500,
+        }}>The curation pipeline is Atlas's key differentiator — your judgment shapes the knowledge base.</div>
+      )}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: 4 }}>
+          {TOUR_STEPS.map((_, i) => (
+            <div key={i} style={{
+              width: i === step ? 18 : 6, height: 6, borderRadius: 3,
+              background: i === step ? "#FBBF24" : i < step ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)",
+              transition: "all 0.25s",
+            }} />
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {!isFirst && (
+            <button onClick={() => setStep(s => s - 1)} style={{
+              fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.4)",
+              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 8, padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
+            }}>Back</button>
+          )}
+          {isFirst && (
+            <button onClick={handleFinish} style={{
+              fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.3)",
+              background: "transparent", border: "none", padding: "7px 10px", cursor: "pointer",
+            }}>Skip tour</button>
+          )}
+          <button onClick={() => isLast ? handleFinish() : setStep(s => s + 1)} style={{
+            fontFamily: BODY, fontSize: 12, fontWeight: 600,
+            color: "#08080C", background: "#FBBF24",
+            border: "none", borderRadius: 8, padding: "7px 20px",
+            cursor: "pointer", transition: "all 0.2s",
+          }}>{isLast ? "Get Started" : "Next"}</button>
+        </div>
+      </div>
+      <div style={{ textAlign: "center", marginTop: 12, fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
+        {step + 1} / {TOUR_STEPS.length} · Use arrow keys to navigate
+      </div>
+    </>
+  );
+
+  // Card style (shared between both modes)
+  const cardStyle = {
+    background: current.highlight ? "linear-gradient(135deg, #131318 0%, rgba(251,191,36,0.06) 100%)" : "#131318",
+    border: `1px solid ${current.highlight ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)"}`,
+    borderRadius: 16, padding: mobile ? "24px 20px" : "28px 28px 24px",
+    boxShadow: current.highlight ? "0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(251,191,36,0.08)" : "0 24px 80px rgba(0,0,0,0.5)",
+    animation: "fadeUp 0.25s ease both",
+  };
+
+  // ── Spotlight mode: highlight the target element, position tooltip near it ──
+  if (hasTarget) {
+    const spaceBelow = window.innerHeight - (targetRect.top + targetRect.height + spotPad);
+    const placeBelow = spaceBelow > 280;
+    const tooltipWidth = mobile ? Math.min(window.innerWidth - 32, 360) : 420;
+    const tooltipLeft = Math.max(16, Math.min(
+      targetRect.left + targetRect.width / 2 - tooltipWidth / 2,
+      window.innerWidth - tooltipWidth - 16
+    ));
+
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 10000 }} onClick={handleFinish}>
+        {/* Spotlight cutout: box-shadow darkens everything except the target */}
+        <div style={{
+          position: "fixed",
+          top: targetRect.top - spotPad,
+          left: targetRect.left - spotPad,
+          width: targetRect.width + spotPad * 2,
+          height: targetRect.height + spotPad * 2,
+          borderRadius: 12,
+          boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)",
+          pointerEvents: "none",
+          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          zIndex: 10001,
+        }} />
+        {/* Gold border ring around the spotlight area */}
+        <div style={{
+          position: "fixed",
+          top: targetRect.top - spotPad,
+          left: targetRect.left - spotPad,
+          width: targetRect.width + spotPad * 2,
+          height: targetRect.height + spotPad * 2,
+          borderRadius: 12,
+          border: "1.5px solid rgba(251,191,36,0.4)",
+          pointerEvents: "none",
+          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          zIndex: 10002,
+        }} />
+        {/* Tooltip card positioned relative to spotlight */}
+        <div onClick={e => e.stopPropagation()} style={{
+          position: "fixed",
+          ...(placeBelow
+            ? { top: targetRect.top + targetRect.height + spotPad + 16 }
+            : { bottom: window.innerHeight - targetRect.top + spotPad + 16 }),
+          left: tooltipLeft,
+          width: tooltipWidth, maxWidth: "calc(100vw - 32px)",
+          zIndex: 10003,
+          ...cardStyle,
+        }}>
+          {tooltipInner}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Centered mode: for steps without a specific target element ──
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: current.position === "center" ? "center" : "flex-start", justifyContent: "center", paddingTop: current.position !== "center" ? topPos : 0 }} onClick={handleFinish}>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", transition: "opacity 0.3s" }} />
+    <div style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={handleFinish}>
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", transition: "opacity 0.3s" }} />
       <div onClick={e => e.stopPropagation()} style={{
         position: "relative", width: mobile ? "90%" : 420, maxWidth: "90vw",
-        background: current.highlight ? "linear-gradient(135deg, #131318 0%, rgba(251,191,36,0.06) 100%)" : "#131318",
-        border: `1px solid ${current.highlight ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)"}`,
-        borderRadius: 16, padding: mobile ? "24px 20px" : "28px 28px 24px",
-        boxShadow: current.highlight ? "0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(251,191,36,0.08)" : "0 24px 80px rgba(0,0,0,0.5)",
-        animation: "fadeUp 0.25s ease both",
+        zIndex: 1,
+        ...cardStyle,
       }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: mobile ? 22 : 26 }}>{current.icon}</span>
-            <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 21, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>{current.title}</h3>
-          </div>
-          <button onClick={handleFinish} style={{
-            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 6, padding: "3px 8px", cursor: "pointer",
-            fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.25)",
-          }}>ESC</button>
-        </div>
-        <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.55)", lineHeight: 1.65, marginBottom: 24 }}>{current.description}</p>
-        {current.highlight && (
-          <div style={{
-            background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.15)",
-            borderRadius: 8, padding: "8px 12px", marginBottom: 20,
-            fontFamily: BODY, fontSize: 11, color: "#FBBF24", fontWeight: 500,
-          }}>The curation pipeline is Atlas's key differentiator — your judgment shapes the knowledge base.</div>
-        )}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", gap: 4 }}>
-            {TOUR_STEPS.map((_, i) => (
-              <div key={i} style={{
-                width: i === step ? 18 : 6, height: 6, borderRadius: 3,
-                background: i === step ? "#FBBF24" : i < step ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)",
-                transition: "all 0.25s",
-              }} />
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            {!isFirst && (
-              <button onClick={() => setStep(s => s - 1)} style={{
-                fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.4)",
-                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 8, padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
-              }}>Back</button>
-            )}
-            {isFirst && (
-              <button onClick={handleFinish} style={{
-                fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.3)",
-                background: "transparent", border: "none", padding: "7px 10px", cursor: "pointer",
-              }}>Skip tour</button>
-            )}
-            <button onClick={() => isLast ? handleFinish() : setStep(s => s + 1)} style={{
-              fontFamily: BODY, fontSize: 12, fontWeight: 600,
-              color: "#08080C", background: "#FBBF24",
-              border: "none", borderRadius: 8, padding: "7px 20px",
-              cursor: "pointer", transition: "all 0.2s",
-            }}>{isLast ? "Get Started" : "Next"}</button>
-          </div>
-        </div>
-        <div style={{ textAlign: "center", marginTop: 12, fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
-          {step + 1} / {TOUR_STEPS.length} · Use arrow keys to navigate
-        </div>
+        {tooltipInner}
       </div>
     </div>
   );
@@ -4372,7 +4473,7 @@ export default function App() {
               <StatCard label="Longest Streak" value={34} sub="days · Nov 2024" delay={550} accent="#A855F7" mobile={mobile} />
             </div>
 
-            <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 14, padding: mobile ? "16px 14px 10px" : "20px 22px 14px", marginBottom: mobile ? 28 : 40 }}>
+            <div data-tour="ai-journey" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 14, padding: mobile ? "16px 14px 10px" : "20px 22px 14px", marginBottom: mobile ? 28 : 40 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: mobile ? 10 : 14 }}>
                 <div>
                   <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 15 : 17, color: "#fff" }}>Your AI Journey</h3>
@@ -4386,7 +4487,7 @@ export default function App() {
               <ActivityChart mobile={mobile} />
             </div>
 
-            <div style={{ marginBottom: mobile ? 28 : 40 }}>
+            <div data-tour="knowledge-map" style={{ marginBottom: mobile ? 28 : 40 }}>
               <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: "#fff", marginBottom: 3 }}>Knowledge Map</h3>
               <p style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: "rgba(255,255,255,0.2)", marginBottom: 14 }}>Sized by conversation count. {mobile ? "Tap" : "Click"} to explore.</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: mobile ? 8 : 12, justifyContent: "center", alignItems: "center", padding: mobile ? "20px 10px" : "28px 16px", background: "rgba(255,255,255,0.015)", borderRadius: 18, border: "1px solid rgba(255,255,255,0.04)" }}>
