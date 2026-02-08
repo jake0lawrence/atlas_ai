@@ -485,7 +485,7 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
   if (!open) return null;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: mobile ? 60 : 120 }} onClick={onClose}>
+    <div role="dialog" aria-modal="true" aria-label="Command palette" style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: mobile ? 60 : 120 }} onClick={onClose}>
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
       <div onClick={e => e.stopPropagation()} style={{
         position: "relative", width: mobile ? "92%" : 480, maxHeight: "60vh",
@@ -499,6 +499,7 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
             ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
+            aria-label="Search commands"
             placeholder="Jump to topic, view, or action..."
             style={{
               flex: 1, background: "transparent", border: "none", outline: "none",
@@ -720,6 +721,7 @@ const TopicBubble = ({ topic, maxCount, onClick, onBriefMe, index, mobile, recen
 
   return (
     <div onClick={() => onClick(topic)}
+      role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(topic); }}}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       onTouchStart={() => setHovered(true)} onTouchEnd={() => { setTimeout(() => setHovered(false), 1500); }}
       style={{
@@ -1763,7 +1765,7 @@ const SearchView = ({ mobile }) => {
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: mobile ? "10px 14px" : "12px 18px", marginBottom: 20 }}>
         <span style={{ fontSize: 18, opacity: 0.4 }}>🔍</span>
-        <input ref={inputRef} type="text" value={query} onChange={e => { setQuery(e.target.value); doSearch(e.target.value); }} placeholder="Search your conversations..."
+        <input ref={inputRef} type="text" value={query} onChange={e => { setQuery(e.target.value); doSearch(e.target.value); }} aria-label="Search topics and insights" placeholder="Search your conversations..."
           style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontFamily: BODY, fontSize: mobile ? 14 : 15, color: "#fff" }} />
         {query && <button onClick={() => { setQuery(""); setResults([]); }} style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Clear</button>}
       </div>
@@ -2042,6 +2044,7 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                         cursor: item.status === "pending" ? "pointer" : "default",
                       }}
                         onClick={() => { if (item.status === "pending") setActiveIdx(idx); }}
+                        role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (item.status === "pending") setActiveIdx(idx); }}}
                       >
                         {/* Status indicator */}
                         <div style={{
@@ -2793,6 +2796,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                         cursor: conn.status === "pending" ? "pointer" : "default",
                       }}
                         onClick={() => { if (conn.status === "pending") setActiveIdx(idx); }}
+                        role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (conn.status === "pending") setActiveIdx(idx); }}}
                       >
                         <div style={{
                           width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
@@ -3796,6 +3800,7 @@ const ExportPreview = ({ mobile, w }) => {
       return (
         <div key={node.name}>
           <div onClick={() => toggleFolder(node.name)}
+            role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFolder(node.name); }}}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: mobile ? "6px 8px" : "7px 10px", paddingLeft: indent + 10, cursor: "pointer", borderRadius: 6, background: isOpen ? "rgba(251,191,36,0.04)" : "transparent", transition: "background 0.2s" }}
             onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
             onMouseLeave={e => e.currentTarget.style.background = isOpen ? "rgba(251,191,36,0.04)" : "transparent"}>
@@ -4124,7 +4129,7 @@ const GuidedTour = ({ active, onClose, mobile }) => {
   });
 
   const handleFinish = () => {
-    try { localStorage.setItem(TOUR_STORAGE_KEY, "true"); } catch {}
+    try { localStorage.setItem(TOUR_STORAGE_KEY, "true"); } catch (e) { console.warn('Failed to save tour state:', e); }
     onClose();
   };
 
@@ -4216,7 +4221,7 @@ const GuidedTour = ({ active, onClose, mobile }) => {
     ));
 
     return (
-      <div style={{ position: "fixed", inset: 0, zIndex: 10000 }} onClick={handleFinish}>
+      <div role="dialog" aria-modal="true" aria-label="Guided tour" style={{ position: "fixed", inset: 0, zIndex: 10000 }} onClick={handleFinish}>
         {/* Spotlight cutout: box-shadow darkens everything except the target */}
         <div style={{
           position: "fixed",
@@ -4262,7 +4267,7 @@ const GuidedTour = ({ active, onClose, mobile }) => {
 
   // ── Centered mode: for steps without a specific target element ──
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={handleFinish}>
+    <div role="dialog" aria-modal="true" aria-label="Guided tour" style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={handleFinish}>
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", transition: "opacity 0.3s" }} />
       <div onClick={e => e.stopPropagation()} style={{
         position: "relative", width: mobile ? "90%" : 420, maxWidth: "90vw",
@@ -4644,7 +4649,7 @@ const DigestView = ({ mobile, onBack, onArchaeologyClick }) => {
               transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
             }}>
               {/* Card header — always visible */}
-              <div onClick={() => !isGenerating && toggleMonth(digest.id)} style={{
+              <div onClick={() => !isGenerating && toggleMonth(digest.id)} role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!isGenerating) toggleMonth(digest.id); }}} style={{
                 padding: mobile ? "16px 16px" : "20px 24px",
                 cursor: isGenerating ? "default" : "pointer",
                 display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -4898,11 +4903,11 @@ const BriefingCard = ({ topic, onClose, mobile }) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
-    });
+    }).catch(err => console.warn('Clipboard write failed:', err));
   };
 
   return (
-    <div onClick={onClose} style={{
+    <div role="dialog" aria-modal="true" aria-label="Topic briefing" onClick={onClose} style={{
       position: "fixed", inset: 0, zIndex: 9999,
       background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)",
       display: "flex", alignItems: "center", justifyContent: "center",
