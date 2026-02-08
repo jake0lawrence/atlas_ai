@@ -265,6 +265,11 @@ const LoadingView = ({ onComplete, mobile, w }) => {
   const [discoveries, setDiscoveries] = useState([]);
   const [showReveal, setShowReveal] = useState(false);
   const totalConvos = 3847;
+  const timersRef = useRef([]);
+
+  useEffect(() => {
+    return () => timersRef.current.forEach(clearTimeout);
+  }, []);
 
   useEffect(() => {
     const timings = [
@@ -272,15 +277,15 @@ const LoadingView = ({ onComplete, mobile, w }) => {
       6200, 6800, 7400, 8000, 8500, 9000, 9600, 10100, 10400,
     ];
     timings.forEach((t, i) => {
-      setTimeout(() => {
+      timersRef.current.push(setTimeout(() => {
         setStageIdx(i);
         if (LOAD_PIPELINE[i].discovery) {
           setDiscoveries(prev => [...prev, LOAD_PIPELINE[i].discovery]);
         }
-      }, t);
+      }, t));
     });
-    setTimeout(() => setShowReveal(true), 10800);
-    setTimeout(() => onComplete(), 12000);
+    timersRef.current.push(setTimeout(() => setShowReveal(true), 10800));
+    timersRef.current.push(setTimeout(() => onComplete(), 12000));
   }, [onComplete]);
 
   const stage = LOAD_PIPELINE[stageIdx] || LOAD_PIPELINE[LOAD_PIPELINE.length - 1];
@@ -896,6 +901,11 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
   const [showResolved, setShowResolved] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const askTimersRef = useRef([]);
+
+  useEffect(() => {
+    return () => askTimersRef.current.forEach(clearTimeout);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -913,7 +923,7 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
     const preBuilt = COMPANION_RESPONSES[trimmed];
     const delay = preBuilt ? 1200 + Math.random() * 800 : 800;
 
-    setTimeout(() => {
+    askTimersRef.current.push(setTimeout(() => {
       if (preBuilt) {
         setMessages(prev => [...prev, { role: "atlas", ...preBuilt }]);
         setChips(COMPANION_SUGGESTION_CHIPS.filter(c => c !== trimmed));
@@ -928,7 +938,7 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
         }]);
       }
       setIsTyping(false);
-    }, delay);
+    }, delay));
   };
 
   const toggleSource = (msgIdx) => {
@@ -937,11 +947,11 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
 
   const handleResolve = (contradictionId, resolutionType) => {
     setResolvingId(contradictionId);
-    setTimeout(() => {
+    askTimersRef.current.push(setTimeout(() => {
       onResolveContradiction && onResolveContradiction(contradictionId, resolutionType);
       setResolvingId(null);
       setExpandedContradiction(null);
-    }, 500);
+    }, 500));
   };
 
   const getConfidenceLabel = (c) => {
@@ -1818,6 +1828,11 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
   const [hapticId, setHapticId] = useState(null);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const sound = useSound();
+  const reviewTimersRef = useRef([]);
+
+  useEffect(() => {
+    return () => reviewTimersRef.current.forEach(clearTimeout);
+  }, []);
 
   const topicMap = {};
   TOPICS.forEach(t => { topicMap[t.id] = t; });
@@ -1836,29 +1851,29 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
 
     let delay = 800;
     highConfItems.forEach((item) => {
-      setTimeout(() => {
+      reviewTimersRef.current.push(setTimeout(() => {
         setAutoApproving(prev => new Set([...prev, item.id]));
-      }, delay);
-      setTimeout(() => {
+      }, delay));
+      reviewTimersRef.current.push(setTimeout(() => {
         setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: "approved" } : i));
         setAutoApproving(prev => { const next = new Set(prev); next.delete(item.id); return next; });
-      }, delay + 700);
+      }, delay + 700));
       delay += 900;
     });
     // Set active to first non-high-confidence item after auto-approves
-    setTimeout(() => {
+    reviewTimersRef.current.push(setTimeout(() => {
       setItems(prev => {
         const firstPending = prev.findIndex(i => i.status === "pending");
         if (firstPending >= 0) setActiveIdx(firstPending);
         return prev;
       });
-    }, delay + 100);
+    }, delay + 100));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Check if all done — play chime + trigger celebration
   useEffect(() => {
     if (reviewed === total && total > 0 && started) {
-      setTimeout(() => { setAllDone(true); sound.play("chime"); }, 400);
+      reviewTimersRef.current.push(setTimeout(() => { setAllDone(true); sound.play("chime"); }, 400));
     }
   }, [reviewed, total, started, sound]);
 
@@ -1888,17 +1903,17 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
     // Haptic-style bounce feedback on approve/edit actions
     if (action === "approved" || action === "edited") {
       setHapticId(id);
-      setTimeout(() => setHapticId(null), 350);
+      reviewTimersRef.current.push(setTimeout(() => setHapticId(null), 350));
     }
     setItems(prev => prev.map(i => i.id === id ? { ...i, status: action } : i));
     // Move to next pending item
-    setTimeout(() => {
+    reviewTimersRef.current.push(setTimeout(() => {
       setItems(prev => {
         const nextPending = prev.findIndex(i => i.status === "pending");
         setActiveIdx(nextPending >= 0 ? nextPending : null);
         return prev;
       });
-    }, 150);
+    }, 150));
   };
 
   const activeItem = activeIdx !== null ? items[activeIdx] : null;
@@ -2554,6 +2569,11 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
   const [newFrom, setNewFrom] = useState("");
   const [newTo, setNewTo] = useState("");
   const [newLabel, setNewLabel] = useState("");
+  const connTimersRef = useRef([]);
+
+  useEffect(() => {
+    return () => connTimersRef.current.forEach(clearTimeout);
+  }, []);
 
   const topicMap = {};
   TOPICS.forEach(t => { topicMap[t.id] = t; });
@@ -2577,7 +2597,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
       const s = action === "confirmed" ? Math.min(c.strength + 0.1, 1) : c.strength;
       return { ...c, status: action, strength: s };
     }));
-    setTimeout(() => moveNext(idx), 150);
+    connTimersRef.current.push(setTimeout(() => moveNext(idx), 150));
   };
 
   const startEdit = (idx) => { setEditingIdx(idx); setEditLabel(connections[idx].label); };
@@ -2586,7 +2606,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
       setConnections(prev => prev.map((c, i) =>
         i === editingIdx ? { ...c, label: editLabel.trim(), status: "edited" } : c
       ));
-      setTimeout(() => moveNext(editingIdx), 150);
+      connTimersRef.current.push(setTimeout(() => moveNext(editingIdx), 150));
     }
     setEditingIdx(null);
   };
@@ -2626,7 +2646,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (reviewed === total && total > 0 && !done) setTimeout(() => setDone(true), 400);
+    if (reviewed === total && total > 0 && !done) connTimersRef.current.push(setTimeout(() => setDone(true), 400));
   }, [reviewed, total, done]);
 
   const confirmed = connections.filter(c => c.status === "confirmed").length;
@@ -3023,6 +3043,11 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
   const [done, setDone] = useState(false);
   const [showTrail, setShowTrail] = useState(null);
   const [dismissAnim, setDismissAnim] = useState(null); // "correct" | "reject" | null
+  const insightTimersRef = useRef([]);
+
+  useEffect(() => {
+    return () => insightTimersRef.current.forEach(clearTimeout);
+  }, []);
 
   const topicMap = {};
   TOPICS.forEach(t => { topicMap[t.id] = t; });
@@ -3047,11 +3072,11 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
 
   const handleCorrect = (idx) => {
     setDismissAnim("correct");
-    setTimeout(() => {
+    insightTimersRef.current.push(setTimeout(() => {
       setDecisions(prev => prev.map((d, i) => i === idx ? { ...d, status: "correct" } : d));
       setDismissAnim(null);
       moveNext(idx);
-    }, 400);
+    }, 400));
   };
 
   const handleEdit = (idx) => {
@@ -3062,7 +3087,7 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
   const commitEdit = (idx) => {
     if (editText.trim() && editText.trim() !== decisions[idx].aiProposal) {
       setDismissAnim("correct");
-      setTimeout(() => {
+      insightTimersRef.current.push(setTimeout(() => {
         setDecisions(prev => prev.map((d, i) =>
           i === idx ? { ...d, status: "edited", humanEdit: editText.trim() } : d
         ));
@@ -3070,7 +3095,7 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
         setEditing(false);
         setEditText("");
         moveNext(idx);
-      }, 400);
+      }, 400));
     } else {
       setEditing(false);
       setEditText("");
@@ -3079,11 +3104,11 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
 
   const handleReject = (idx) => {
     setDismissAnim("reject");
-    setTimeout(() => {
+    insightTimersRef.current.push(setTimeout(() => {
       setDecisions(prev => prev.map((d, i) => i === idx ? { ...d, status: "rejected" } : d));
       setDismissAnim(null);
       moveNext(idx);
-    }, 400);
+    }, 400));
   };
 
   // Keyboard navigation
@@ -3100,7 +3125,7 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (reviewed === total && total > 0 && !done) setTimeout(() => setDone(true), 500);
+    if (reviewed === total && total > 0 && !done) insightTimersRef.current.push(setTimeout(() => setDone(true), 500));
   }, [reviewed, total, done]);
 
   const correct = decisions.filter(d => d.status === "correct").length;
@@ -3492,6 +3517,11 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
 const CurationSummary = ({ onComplete, mobile, w }) => {
   const [phase, setPhase] = useState(0); // 0: counting, 1: stats revealed, 2: before/after, 3: ready
   const [counters, setCounters] = useState({ reviewed: 0, approved: 0, edited: 0, rejected: 0, confidence: 0 });
+  const curationTimersRef = useRef([]);
+
+  useEffect(() => {
+    return () => curationTimersRef.current.forEach(clearTimeout);
+  }, []);
 
   const tablet = w >= 640 && w < 1024;
 
@@ -3534,9 +3564,9 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
     }, interval);
 
     // Phase transitions
-    setTimeout(() => setPhase(1), 1400);
-    setTimeout(() => setPhase(2), 2200);
-    setTimeout(() => setPhase(3), 3000);
+    curationTimersRef.current.push(setTimeout(() => setPhase(1), 1400));
+    curationTimersRef.current.push(setTimeout(() => setPhase(2), 2200));
+    curationTimersRef.current.push(setTimeout(() => setPhase(3), 3000));
 
     return () => clearInterval(timer);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -4827,6 +4857,11 @@ const DigestView = ({ mobile, onBack, onArchaeologyClick }) => {
 const BriefingCard = ({ topic, onClose, mobile }) => {
   const briefing = BRIEFINGS[topic.id];
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); };
+  }, []);
 
   if (!briefing) return null;
 
@@ -4861,7 +4896,7 @@ const BriefingCard = ({ topic, onClose, mobile }) => {
 
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     });
   };
 
@@ -5540,15 +5575,20 @@ export default function App() {
   // ─── GUIDED TOUR ────────────────────────────────
   const [tourActive, setTourActive] = useState(false);
   const tourLaunched = useRef(false);
+  const appTimersRef = useRef([]);
+
+  useEffect(() => {
+    return () => appTimersRef.current.forEach(clearTimeout);
+  }, []);
 
   useEffect(() => {
     if (view === "dashboard" && !tourLaunched.current) {
       tourLaunched.current = true;
       try {
         if (!localStorage.getItem(TOUR_STORAGE_KEY)) {
-          setTimeout(() => setTourActive(true), 600);
+          appTimersRef.current.push(setTimeout(() => setTourActive(true), 600));
         }
-      } catch {}
+      } catch (e) { console.warn('tour activation:', e); }
     }
   }, [view]);
 
@@ -5601,10 +5641,10 @@ export default function App() {
     setIsSyncing(true);
     setSyncPhase("connecting");
     setSyncProgress(10);
-    setTimeout(() => { setSyncPhase("downloading"); setSyncProgress(40); }, 800);
-    setTimeout(() => { setSyncPhase("processing"); setSyncProgress(75); }, 2000);
-    setTimeout(() => { setSyncPhase("complete"); setSyncProgress(100); }, 3200);
-    setTimeout(() => {
+    appTimersRef.current.push(setTimeout(() => { setSyncPhase("downloading"); setSyncProgress(40); }, 800));
+    appTimersRef.current.push(setTimeout(() => { setSyncPhase("processing"); setSyncProgress(75); }, 2000));
+    appTimersRef.current.push(setTimeout(() => { setSyncPhase("complete"); setSyncProgress(100); }, 3200));
+    appTimersRef.current.push(setTimeout(() => {
       setIsSyncing(false);
       setSyncPhase(null);
       setSyncProgress(0);
@@ -5612,7 +5652,7 @@ export default function App() {
       setNewSyncCount(0);
       setRecentlySynced(Object.keys(SYNC_NEW_EVENTS));
       setSyncedNewEvents(SYNC_NEW_EVENTS);
-    }, 4200);
+    }, 4200));
   }, [isSyncing]);
 
   // ─── ONBOARDING ──────────────────────────────────
