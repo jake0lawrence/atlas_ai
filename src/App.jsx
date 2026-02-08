@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // ─── RESPONSIVE HOOK ────────────────────────────────────────────────
 const useWindowSize = () => {
@@ -1194,6 +1194,9 @@ const CSS = `
   @keyframes viewFadeSlide { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes atlasTyping { 0%, 60%, 100% { opacity: 0.25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
   .atlas-typing-dot { animation: atlasTyping 1.2s ease-in-out infinite; }
+  @keyframes rewindFadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+  .rewind-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+  .rewind-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: none; cursor: pointer; }
   .fade-up { animation: fadeUp 0.6s ease both; }
   .slide-in { animation: slideIn 0.5s ease both; }
   .view-transition { animation: viewFadeSlide 0.45s cubic-bezier(0.16,1,0.3,1) both; }
@@ -1624,6 +1627,7 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
     { type: "view", id: "digest", label: "Thinking Digest", icon: "📅", sub: "Monthly knowledge evolution" },
     { type: "view", id: "search", label: "Search", icon: "⌕", sub: "Search conversations" },
     { type: "view", id: "export", label: "Export", icon: "↗", sub: "Export & share" },
+    { type: "view", id: "rewind", label: "Rewind Mode", icon: "⏪", sub: "Animated knowledge graph timeline" },
   ];
   const topics = TOPICS.map(t => ({ type: "topic", id: t.id, label: t.name, icon: t.icon, sub: `${t.count} conversations`, color: t.color, topic: t }));
   const all = [...views, ...topics];
@@ -2842,13 +2846,25 @@ const ConnectionsView = ({ onTopicClick, mobile }) => {
   );
 };
 
-const EvolutionView = ({ mobile }) => {
+const EvolutionView = ({ mobile, onRewind }) => {
   const [expanded, setExpanded] = useState(null);
   return (
     <div>
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 28, color: "#fff", marginBottom: 6, fontWeight: 700 }}>How You Evolved</h2>
         <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)" }}>From asking "how do I" to designing entire systems.</p>
+        {onRewind && (
+          <button onClick={onRewind} style={{
+            fontFamily: BODY, fontSize: mobile ? 11 : 12, fontWeight: 500,
+            color: "#EC4899", background: "rgba(236,72,153,0.08)",
+            border: "1px solid rgba(236,72,153,0.2)", borderRadius: 8,
+            padding: mobile ? "7px 14px" : "8px 18px", cursor: "pointer",
+            transition: "all 0.25s", marginTop: 12,
+            display: "inline-flex", alignItems: "center", gap: 6,
+          }}>
+            <span style={{ fontSize: 14 }}>⏪</span> Watch It Build
+          </button>
+        )}
       </div>
       <div style={{ position: "relative", paddingLeft: mobile ? 32 : 40 }}>
         <div style={{ position: "absolute", left: mobile ? 12 : 16, top: 0, bottom: 0, width: 3, background: "linear-gradient(180deg, #3B82F6, #10B981, #F59E0B, #EF4444, #A855F7, #EC4899)" }} />
@@ -6465,6 +6481,269 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
   );
 };
 
+// ═══════════════════════════════════════════════════════════════
+// REWIND MODE — Animated Knowledge Graph Timeline
+// ═══════════════════════════════════════════════════════════════
+const RewindMode = ({ onClose, mobile }) => {
+  const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  const [hovered, setHovered] = useState(null);
+  const timerRef = useRef(null);
+  const totalSteps = MONTHLY_ACTIVITY.length;
+
+  // Pre-compute topic positions in radial layout
+  const positions = useMemo(() => TOPICS.map((t, i) => {
+    const angle = (i / TOPICS.length) * Math.PI * 2 - Math.PI / 2;
+    const r = mobile ? 32 : 36;
+    return { id: t.id, x: 50 + r * Math.cos(angle), y: 50 + r * Math.sin(angle) };
+  }), [mobile]);
+
+  // Parse month string to end-of-month Date
+  const monthToDate = useCallback((monthStr) => {
+    const M = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+    const [mon, yr] = monthStr.split(" ");
+    return new Date(2000 + parseInt(yr), M[mon] + 1, 0);
+  }, []);
+
+  // Compute graph state at current step
+  const graphState = useMemo(() => {
+    const endDate = monthToDate(MONTHLY_ACTIVITY[step].month);
+    const counts = {};
+    let events = 0;
+    Object.entries(TIMELINE_DATA).forEach(([tid, evts]) => {
+      evts.forEach(e => {
+        if (new Date(e.date) <= endDate) { counts[tid] = (counts[tid] || 0) + 1; events++; }
+      });
+    });
+    const visible = new Set(Object.keys(counts));
+    const conns = CONNECTIONS.filter(c => visible.has(c.from) && visible.has(c.to));
+    let convos = 0;
+    for (let i = 0; i <= step; i++) convos += MONTHLY_ACTIVITY[i].gpt + MONTHLY_ACTIVITY[i].claude;
+    const phases = [
+      { max: 6, name: "Genesis", color: "#3B82F6", desc: "First explorations" },
+      { max: 12, name: "Exploration", color: "#10B981", desc: "Topics multiply" },
+      { max: 18, name: "Connection", color: "#F59E0B", desc: "Links forming" },
+      { max: 24, name: "Deepening", color: "#EF4444", desc: "Core topics grow" },
+      { max: 30, name: "Synthesis", color: "#A855F7", desc: "Dense network" },
+      { max: 39, name: "Mastery", color: "#EC4899", desc: "Expertise zones" },
+    ];
+    const phase = phases.find(p => step < p.max) || phases[phases.length - 1];
+    return { counts, visible, conns, convos, events, phase, month: MONTHLY_ACTIVITY[step].month };
+  }, [step, monthToDate]);
+
+  const maxEvts = useMemo(() => Math.max(...Object.values(TIMELINE_DATA).map(e => e.length)), []);
+
+  // Playback timer
+  useEffect(() => {
+    if (playing) {
+      timerRef.current = setInterval(() => {
+        setStep(prev => {
+          if (prev >= totalSteps - 1) { setPlaying(false); return prev; }
+          return prev + 1;
+        });
+      }, 2000 / speed);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [playing, speed, totalSteps]);
+
+  // Auto-play on mount
+  useEffect(() => { const t = setTimeout(() => setPlaying(true), 600); return () => clearTimeout(t); }, []);
+
+  const togglePlay = () => {
+    if (step >= totalSteps - 1) { setStep(0); setPlaying(true); }
+    else setPlaying(!playing);
+  };
+
+  const ht = hovered ? TOPICS.find(t => t.id === hovered) : null;
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9990,
+      background: "rgba(8,8,12,0.97)", backdropFilter: "blur(12px)",
+      display: "flex", flexDirection: "column",
+      animation: "rewindFadeIn 0.4s ease both",
+    }}>
+      {/* Header */}
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: mobile ? "16px 16px 8px" : "20px 32px 8px",
+      }}>
+        <div>
+          <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 26, color: "#fff", fontWeight: 700, margin: 0 }}>
+            Rewind Mode
+          </h2>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>
+            Watch your knowledge graph build itself
+          </div>
+        </div>
+        <button onClick={onClose} style={{
+          background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 8, padding: "8px 14px", cursor: "pointer",
+          fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.5)",
+        }}>
+          ✕ Close
+        </button>
+      </div>
+
+      {/* Phase indicator */}
+      <div style={{ textAlign: "center", padding: "8px 0" }}>
+        <span style={{
+          fontFamily: MONO, fontSize: mobile ? 10 : 12,
+          color: graphState.phase.color, fontWeight: 600,
+          padding: "4px 14px", borderRadius: 20,
+          background: `${graphState.phase.color}12`,
+          border: `1px solid ${graphState.phase.color}25`,
+        }}>
+          {graphState.phase.name} — {graphState.phase.desc}
+        </span>
+      </div>
+
+      {/* Graph canvas */}
+      <div style={{ flex: 1, position: "relative", margin: mobile ? "8px 8px" : "8px 32px", overflow: "hidden" }}>
+        {/* SVG connections */}
+        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+          {graphState.conns.map((conn, i) => {
+            const from = positions.find(p => p.id === conn.from);
+            const to = positions.find(p => p.id === conn.to);
+            if (!from || !to) return null;
+            return (
+              <line key={i}
+                x1={`${from.x}%`} y1={`${from.y}%`}
+                x2={`${to.x}%`} y2={`${to.y}%`}
+                stroke={graphState.phase.color}
+                strokeOpacity={0.12 + conn.strength * 0.22}
+                strokeWidth={1 + conn.strength * 1.5}
+                style={{ transition: "all 0.8s ease" }}
+              />
+            );
+          })}
+        </svg>
+
+        {/* Topic nodes */}
+        {TOPICS.map((topic, i) => {
+          const pos = positions[i];
+          const count = graphState.counts[topic.id] || 0;
+          const isVisible = graphState.visible.has(topic.id);
+          const size = isVisible ? (mobile ? 24 : 32) + (count / maxEvts) * (mobile ? 36 : 52) : 0;
+          const isHovered = hovered === topic.id;
+          return (
+            <div key={topic.id}
+              onMouseEnter={() => !playing && setHovered(topic.id)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => { if (!playing) setHovered(hovered === topic.id ? null : topic.id); }}
+              style={{
+                position: "absolute",
+                left: `${pos.x}%`, top: `${pos.y}%`,
+                transform: `translate(-50%, -50%) scale(${isHovered ? 1.15 : 1})`,
+                width: size, height: size, borderRadius: "50%",
+                background: `radial-gradient(circle at 35% 35%, ${topic.color}CC, ${topic.color}60)`,
+                border: `2px solid ${isHovered ? topic.color : `${topic.color}40`}`,
+                opacity: isVisible ? 1 : 0,
+                transition: "all 0.8s cubic-bezier(0.16,1,0.3,1)",
+                cursor: playing ? "default" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: isVisible ? `0 0 ${8 + count * 2}px ${topic.color}25` : "none",
+              }}
+            >
+              {isVisible && size > (mobile ? 30 : 40) && (
+                <span style={{ fontSize: mobile ? 12 : 16, pointerEvents: "none" }}>{topic.icon}</span>
+              )}
+              {isVisible && (isHovered || size > (mobile ? 50 : 60)) && (
+                <div style={{
+                  position: "absolute", top: "100%", marginTop: 4,
+                  fontFamily: BODY, fontSize: mobile ? 8 : 10, color: topic.color,
+                  whiteSpace: "nowrap", fontWeight: 600, pointerEvents: "none",
+                  textShadow: "0 1px 4px rgba(0,0,0,0.8)",
+                }}>
+                  {topic.name}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Hovered topic detail (during pause) */}
+        {ht && !playing && (
+          <div style={{
+            position: "absolute", bottom: mobile ? 8 : 16, left: "50%", transform: "translateX(-50%)",
+            background: "rgba(20,20,28,0.95)", border: `1px solid ${ht.color}30`,
+            borderRadius: 10, padding: mobile ? "10px 14px" : "12px 18px",
+            minWidth: mobile ? 200 : 240, textAlign: "center",
+            animation: "fadeUp 0.2s ease both",
+          }}>
+            <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "#fff", fontWeight: 600 }}>{ht.icon} {ht.name}</div>
+            <div style={{ fontFamily: MONO, fontSize: mobile ? 9 : 10, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>
+              {graphState.counts[ht.id] || 0} events by {graphState.month} · Depth: {ht.depth}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Running stats */}
+      <div style={{
+        display: "flex", justifyContent: "center", gap: mobile ? 16 : 32,
+        padding: mobile ? "8px 16px" : "10px 32px",
+      }}>
+        {[
+          { label: "Conversations", value: graphState.convos.toLocaleString() },
+          { label: "Active Topics", value: graphState.visible.size },
+          { label: "Connections", value: graphState.conns.length },
+          { label: "Date", value: graphState.month },
+        ].map((s, i) => (
+          <div key={i} style={{ textAlign: "center" }}>
+            <div style={{ fontFamily: MONO, fontSize: mobile ? 14 : 18, color: graphState.phase.color, fontWeight: 700 }}>{s.value}</div>
+            <div style={{ fontFamily: BODY, fontSize: mobile ? 8 : 10, color: "rgba(255,255,255,0.25)", marginTop: 1 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Controls */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: mobile ? 10 : 16,
+        padding: mobile ? "12px 16px 20px" : "12px 32px 24px",
+      }}>
+        <button onClick={togglePlay} style={{
+          width: mobile ? 36 : 40, height: mobile ? 36 : 40, borderRadius: "50%",
+          background: graphState.phase.color, border: "none",
+          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: mobile ? 14 : 16, color: "#fff", flexShrink: 0,
+          boxShadow: `0 0 16px ${graphState.phase.color}40`,
+        }}>
+          {playing ? "⏸" : step >= totalSteps - 1 ? "⟳" : "▶"}
+        </button>
+        <div style={{ flex: 1 }}>
+          <input
+            type="range" min={0} max={totalSteps - 1} value={step}
+            onChange={e => { setStep(parseInt(e.target.value)); setPlaying(false); }}
+            className="rewind-slider"
+            style={{
+              width: "100%", height: 6,
+              WebkitAppearance: "none", appearance: "none",
+              background: `linear-gradient(90deg, ${graphState.phase.color} ${(step / (totalSteps - 1)) * 100}%, rgba(255,255,255,0.08) ${(step / (totalSteps - 1)) * 100}%)`,
+              borderRadius: 3, outline: "none", cursor: "pointer",
+            }}
+          />
+        </div>
+        <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+          {[1, 2, 5].map(s => (
+            <button key={s} onClick={() => setSpeed(s)} style={{
+              fontFamily: MONO, fontSize: mobile ? 9 : 10, fontWeight: speed === s ? 700 : 400,
+              color: speed === s ? graphState.phase.color : "rgba(255,255,255,0.3)",
+              background: speed === s ? `${graphState.phase.color}15` : "transparent",
+              border: `1px solid ${speed === s ? `${graphState.phase.color}30` : "rgba(255,255,255,0.08)"}`,
+              borderRadius: 6, padding: mobile ? "4px 8px" : "5px 10px",
+              cursor: "pointer", transition: "all 0.2s",
+            }}>
+              {s}x
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── MAIN APP ───────────────────────────────────────────────
 
 export default function App() {
@@ -6475,6 +6754,7 @@ export default function App() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedChain, setSelectedChain] = useState(null);
+  const [showRewind, setShowRewind] = useState(false);
 
   // ─── CONTRADICTION DETECTION STATE ────────────────
   const [contradictions, setContradictions] = useState(CONTRADICTIONS_INITIAL);
@@ -6528,6 +6808,7 @@ export default function App() {
       }
       // Escape — back out of drilldowns, or close command palette
       if (e.key === "Escape") {
+        if (showRewind) { setShowRewind(false); return; }
         if (briefingTopic) { setBriefingTopic(null); return; }
         if (cmdPaletteOpen) return; // handled by CommandPalette itself
         if (view === "conversation") { setView("timeline"); setSelectedEvent(null); return; }
@@ -6539,7 +6820,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleGlobalKey);
     return () => window.removeEventListener("keydown", handleGlobalKey);
-  }, [view, cmdPaletteOpen, briefingTopic]);
+  }, [view, cmdPaletteOpen, briefingTopic, showRewind]);
 
   const maxCount = Math.max(...TOPICS.map(t => t.count));
   const totalWords = TOPICS.reduce((a, t) => a + t.words, 0) + 680000;
@@ -6555,6 +6836,10 @@ export default function App() {
   const handleInsightReviewComplete = useCallback(() => setView("curationSummary"), []);
   const handleCurationSummaryComplete = useCallback(() => setView("dashboard"), []);
   const handleArchaeologyClick = useCallback((chainId) => { setSelectedChain(chainId); setView("archaeology"); }, []);
+  const handleNavigate = useCallback((viewId) => {
+    if (viewId === "rewind") setShowRewind(true);
+    else setView(viewId);
+  }, []);
 
   // ─── SYNC HANDLER ────────────────────────────────
   const handleSync = useCallback(() => {
@@ -6627,7 +6912,7 @@ export default function App() {
             mobile={mobile}
           />
         </div>
-        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={setView} onTopicClick={handleTopicClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
       </>
     );
   }
@@ -6637,7 +6922,7 @@ export default function App() {
     return (
       <>
         <AskAtlas onBack={() => setView("dashboard")} onConversationClick={(topicId) => { const topic = TOPICS.find(t => t.id === topicId); if (topic) handleTopicClick(topic); }} mobile={mobile} contradictions={contradictions} resolvedContradictions={resolvedContradictions} onResolveContradiction={handleResolveContradiction} />
-        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={setView} onTopicClick={handleTopicClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
       </>
     );
   }
@@ -6650,7 +6935,7 @@ export default function App() {
           <style>{CSS}</style>
           <ConversationDrilldown topicId={selectedEvent.topicId} eventIndex={selectedEvent.eventIndex} onBack={() => { setView("timeline"); setSelectedEvent(null); }} mobile={mobile} />
         </div>
-        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={setView} onTopicClick={handleTopicClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
       </>
     );
   }
@@ -6663,7 +6948,7 @@ export default function App() {
           <style>{CSS}</style>
           <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} newEvents={syncedNewEvents} />
         </div>
-        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={setView} onTopicClick={handleTopicClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
       </>
     );
   }
@@ -6684,7 +6969,7 @@ export default function App() {
           <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.25)", marginTop: 6 }}>Jan 2023 — Feb 2026 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
         </div>
 
-        <Nav view={view === "timeline" ? "dashboard" : view} onNavigate={setView} mobile={mobile} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} />
+        <Nav view={view === "timeline" ? "dashboard" : view} onNavigate={handleNavigate} mobile={mobile} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} />
 
         {view === "dashboard" && (
           <>
@@ -6710,7 +6995,18 @@ export default function App() {
             </div>
 
             <div data-tour="knowledge-map" style={{ marginBottom: mobile ? 28 : 40 }}>
-              <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: "#fff", marginBottom: 3 }}>Knowledge Map</h3>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: "#fff" }}>Knowledge Map</h3>
+                <button onClick={() => setShowRewind(true)} style={{
+                  fontFamily: BODY, fontSize: mobile ? 10 : 11, fontWeight: 500,
+                  color: "#EC4899", background: "rgba(236,72,153,0.08)",
+                  border: "1px solid rgba(236,72,153,0.2)", borderRadius: 8,
+                  padding: mobile ? "5px 10px" : "6px 14px", cursor: "pointer",
+                  transition: "all 0.25s", display: "flex", alignItems: "center", gap: 5,
+                }}>
+                  <span style={{ fontSize: 12 }}>⏪</span> Rewind
+                </button>
+              </div>
               <p style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: "rgba(255,255,255,0.2)", marginBottom: 14 }}>Sized by conversation count. {mobile ? "Tap" : "Click"} to explore.</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: mobile ? 8 : 12, justifyContent: "center", alignItems: "center", padding: mobile ? "20px 10px" : "28px 16px", background: "rgba(255,255,255,0.015)", borderRadius: 18, border: "1px solid rgba(255,255,255,0.04)" }}>
                 {TOPICS.map((topic, i) => <TopicBubble key={topic.id} topic={topic} maxCount={maxCount} index={i} onClick={handleTopicClick} onBriefMe={setBriefingTopic} mobile={mobile} recentlySynced={recentlySynced} />)}
@@ -6785,7 +7081,7 @@ export default function App() {
         )}
 
         {view === "connections" && <ConnectionsView onTopicClick={handleTopicClick} mobile={mobile} />}
-        {view === "evolution" && <EvolutionView mobile={mobile} />}
+        {view === "evolution" && <EvolutionView mobile={mobile} onRewind={() => setShowRewind(true)} />}
         {view === "beliefDiffs" && <BeliefDiffsView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}
         {view === "digest" && <DigestView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}
         {view === "search" && <SearchView mobile={mobile} />}
@@ -6808,9 +7104,10 @@ export default function App() {
         </button>
       )}
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
-      <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={setView} onTopicClick={handleTopicClick} mobile={mobile} />
+      <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
       {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} mobile={mobile} />}
+      {showRewind && <RewindMode onClose={() => setShowRewind(false)} mobile={mobile} />}
     </div>
   );
 }
