@@ -12,17 +12,9 @@ import {
   DEMO_PERSONAS, LOAD_PIPELINE, PHASE_META, VAULT_TREE, EXPORT_FORMATS,
   TOUR_STEPS, TOUR_STORAGE_KEY,
 } from './data/constants';
-
-// ─── RESPONSIVE HOOK ────────────────────────────────────────────────
-const useWindowSize = () => {
-  const [size, setSize] = useState({ w: typeof window !== "undefined" ? window.innerWidth : 1024, h: typeof window !== "undefined" ? window.innerHeight : 768 });
-  useEffect(() => {
-    const handle = () => setSize({ w: window.innerWidth, h: window.innerHeight });
-    window.addEventListener("resize", handle);
-    return () => window.removeEventListener("resize", handle);
-  }, []);
-  return size;
-};
+import useWindowSize from './hooks/useWindowSize';
+import useSound from './hooks/useSound';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // ─── STYLES ─────────────────────────────────────────────────
 const FONTS = `'Playfair Display', 'Georgia', serif`;
@@ -1816,33 +1808,6 @@ const ConfidenceBadge = ({ confidence }) => {
   );
 };
 
-// ─── SOUND DESIGN HOOK (optional, off by default) ─────────────
-const useSound = () => {
-  const ctxRef = useRef(null);
-  const enabledRef = useRef(false);
-  const play = useCallback((type) => {
-    if (!enabledRef.current) return;
-    try {
-      if (!ctxRef.current) ctxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      const ctx = ctxRef.current;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      if (type === "chime") {
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.08, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.4);
-      }
-    } catch {}
-  }, []);
-  const toggle = useCallback(() => { enabledRef.current = !enabledRef.current; return enabledRef.current; }, []);
-  return { play, toggle, isEnabled: () => enabledRef.current };
-};
 
 const ReviewQueue = ({ onComplete, mobile, w }) => {
   const [items, setItems] = useState(() => REVIEW_QUEUE_DATA.map(item => ({ ...item, status: "pending" })));
@@ -5747,6 +5712,7 @@ export default function App() {
   const insightGrid = mobile ? "1fr" : "1fr 1fr";
 
   return (
+    <ErrorBoundary>
     <div style={{ minHeight: "100vh", background: "#08080C", padding: mobile ? "24px 16px 60px" : tablet ? "28px 24px 80px" : "32px 40px 80px" }}>
       <style>{CSS}</style>
       <div style={{ maxWidth: 960, margin: "0 auto" }}>
@@ -5898,5 +5864,6 @@ export default function App() {
       {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} mobile={mobile} />}
       {showRewind && <RewindMode onClose={() => setShowRewind(false)} mobile={mobile} />}
     </div>
+    </ErrorBoundary>
   );
 }
