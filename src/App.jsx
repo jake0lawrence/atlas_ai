@@ -559,8 +559,12 @@ const CSS = `
   @keyframes freshPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); } 50% { box-shadow: 0 0 12px 3px rgba(251,191,36,0.25); } }
   @keyframes syncSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes newGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); border-color: rgba(16,185,129,0.15); } 50% { box-shadow: 0 0 16px 4px rgba(16,185,129,0.25); border-color: rgba(16,185,129,0.4); } }
+  @keyframes hapticBounce { 0% { transform: scale(1); } 40% { transform: scale(0.93); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  @keyframes confettiBurst { 0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); } 50% { opacity: 0.8; } 100% { opacity: 0; transform: translateY(-90px) rotate(180deg) scale(0.4); } }
+  @keyframes viewFadeSlide { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp 0.6s ease both; }
   .slide-in { animation: slideIn 0.5s ease both; }
+  .view-transition { animation: viewFadeSlide 0.45s cubic-bezier(0.16,1,0.3,1) both; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(251,191,36,0.15); border-radius: 3px; }
@@ -1791,12 +1795,43 @@ const ConfidenceBadge = ({ confidence }) => {
   );
 };
 
+// ─── SOUND DESIGN HOOK (optional, off by default) ─────────────
+const useSound = () => {
+  const ctxRef = useRef(null);
+  const enabledRef = useRef(false);
+  const play = useCallback((type) => {
+    if (!enabledRef.current) return;
+    try {
+      if (!ctxRef.current) ctxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = ctxRef.current;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      if (type === "chime") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      }
+    } catch {}
+  }, []);
+  const toggle = useCallback(() => { enabledRef.current = !enabledRef.current; return enabledRef.current; }, []);
+  return { play, toggle, isEnabled: () => enabledRef.current };
+};
+
 const ReviewQueue = ({ onComplete, mobile, w }) => {
   const [items, setItems] = useState(() => REVIEW_QUEUE_DATA.map(item => ({ ...item, status: "pending" })));
   const [activeIdx, setActiveIdx] = useState(null);
   const [autoApproving, setAutoApproving] = useState(new Set());
   const [started, setStarted] = useState(false);
   const [allDone, setAllDone] = useState(false);
+  const [hapticId, setHapticId] = useState(null);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const sound = useSound();
 
   const topicMap = {};
   TOPICS.forEach(t => { topicMap[t.id] = t; });
@@ -1834,12 +1869,12 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
     }, delay + 100);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Check if all done
+  // Check if all done — play chime + trigger celebration
   useEffect(() => {
     if (reviewed === total && total > 0 && started) {
-      setTimeout(() => setAllDone(true), 400);
+      setTimeout(() => { setAllDone(true); sound.play("chime"); }, 400);
     }
-  }, [reviewed, total, started]);
+  }, [reviewed, total, started, sound]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -1864,6 +1899,11 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAction = (id, action) => {
+    // Haptic-style bounce feedback on approve/edit actions
+    if (action === "approved" || action === "edited") {
+      setHapticId(id);
+      setTimeout(() => setHapticId(null), 350);
+    }
     setItems(prev => prev.map(i => i.id === id ? { ...i, status: action } : i));
     // Move to next pending item
     setTimeout(() => {
@@ -1905,6 +1945,13 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
           <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
             AI classified your conversations. Verify, edit, or reject each one.
           </p>
+          <button onClick={() => { const on = sound.toggle(); setSoundEnabled(on); }} style={{
+            marginTop: 8, fontFamily: MONO, fontSize: 10, color: soundEnabled ? "#FBBF24" : "rgba(255,255,255,0.2)",
+            background: "transparent", border: `1px solid ${soundEnabled ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.08)"}`,
+            borderRadius: 12, padding: "3px 10px", cursor: "pointer", transition: "all 0.2s",
+          }}>
+            {soundEnabled ? "♪ Sound On" : "♪ Sound Off"}
+          </button>
         </div>
 
         {/* Progress bar */}
@@ -1929,7 +1976,24 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
 
         {/* All done state */}
         {allDone ? (
-          <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "48px 20px" : "64px 40px" }}>
+          <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "48px 20px" : "64px 40px", position: "relative", overflow: "hidden" }}>
+            {/* Confetti burst */}
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", overflow: "hidden" }}>
+              {Array.from({ length: 24 }, (_, i) => (
+                <div key={i} style={{
+                  position: "absolute",
+                  left: `${10 + Math.random() * 80}%`,
+                  top: "50%",
+                  width: Math.random() > 0.5 ? 6 : 4,
+                  height: Math.random() > 0.5 ? 6 : 10,
+                  borderRadius: Math.random() > 0.5 ? "50%" : 2,
+                  background: ["#FBBF24", "#10B981", "#3B82F6", "#EF4444", "#8B5CF6", "#EC4899"][i % 6],
+                  animation: `confettiBurst ${0.8 + Math.random() * 0.6}s ease-out ${i * 40}ms both`,
+                  transform: `rotate(${Math.random() * 360}deg)`,
+                  opacity: 0.9,
+                }} />
+              ))}
+            </div>
             <div style={{ fontSize: 56, marginBottom: 16 }}>✓</div>
             <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: "#10B981", marginBottom: 8 }}>
               Queue Complete
@@ -1962,6 +2026,7 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                 const isActive = idx === activeIdx;
                 const isAutoApproving = autoApproving.has(item.id);
                 const isDone = item.status !== "pending";
+                const isHaptic = hapticId === item.id;
 
                 return (
                   <div key={item.id} style={{
@@ -1970,8 +2035,8 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                     borderRadius: 14, overflow: "hidden",
                     opacity: isDone && !isAutoApproving ? 0.4 : 1,
                     transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
-                    animation: isAutoApproving ? "autoApprove 0.7s ease forwards" : "queueSlideUp 0.5s ease both",
-                    animationDelay: isAutoApproving ? "0s" : `${idx * 60}ms`,
+                    animation: isHaptic ? "hapticBounce 0.35s ease" : isAutoApproving ? "autoApprove 0.7s ease forwards" : "queueSlideUp 0.5s ease both",
+                    animationDelay: isAutoApproving ? "0s" : isHaptic ? "0s" : `${idx * 60}ms`,
                   }}>
                     {/* Compact row for non-active items */}
                     {!isActive ? (
@@ -4221,37 +4286,37 @@ export default function App() {
 
   // ─── ONBOARDING ──────────────────────────────────
   if (view === "onboarding") {
-    return <OnboardingView onStart={handleStartProcessing} mobile={mobile} w={w} />;
+    return <div key="onboarding" className="view-transition"><OnboardingView onStart={handleStartProcessing} mobile={mobile} w={w} /></div>;
   }
 
   // ─── LOADING ─────────────────────────────────────
   if (view === "loading") {
-    return <LoadingView onComplete={handleLoadingComplete} mobile={mobile} w={w} />;
+    return <div key="loading" className="view-transition"><LoadingView onComplete={handleLoadingComplete} mobile={mobile} w={w} /></div>;
   }
 
   // ─── CURATION (Review Queue) ────────────────────
   if (view === "curation") {
-    return <ReviewQueue onComplete={handleCurationComplete} mobile={mobile} w={w} />;
+    return <div key="curation" className="view-transition"><ReviewQueue onComplete={handleCurationComplete} mobile={mobile} w={w} /></div>;
   }
 
   // ─── TOPIC CURATION ────────────────────────────
   if (view === "topicCuration") {
-    return <TopicCurationPanel onComplete={handleTopicCurationComplete} mobile={mobile} w={w} />;
+    return <div key="topicCuration" className="view-transition"><TopicCurationPanel onComplete={handleTopicCurationComplete} mobile={mobile} w={w} /></div>;
   }
 
   // ─── CONNECTION VALIDATION ─────────────────────
   if (view === "connectionValidation") {
-    return <ConnectionValidation onComplete={handleConnectionValidationComplete} mobile={mobile} w={w} />;
+    return <div key="connectionValidation" className="view-transition"><ConnectionValidation onComplete={handleConnectionValidationComplete} mobile={mobile} w={w} /></div>;
   }
 
   // ─── INSIGHT & DECISION REVIEW ────────────────
   if (view === "insightReview") {
-    return <InsightDecisionReview onComplete={handleInsightReviewComplete} mobile={mobile} w={w} />;
+    return <div key="insightReview" className="view-transition"><InsightDecisionReview onComplete={handleInsightReviewComplete} mobile={mobile} w={w} /></div>;
   }
 
   // ─── CURATION SUMMARY ──────────────────────────
   if (view === "curationSummary") {
-    return <CurationSummary onComplete={handleCurationSummaryComplete} mobile={mobile} w={w} />;
+    return <div key="curationSummary" className="view-transition"><CurationSummary onComplete={handleCurationSummaryComplete} mobile={mobile} w={w} /></div>;
   }
 
   // ─── CONVERSATION DRILLDOWN ─────────────────────
