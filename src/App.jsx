@@ -572,6 +572,114 @@ const BELIEF_DIFFS = [
   },
 ];
 
+// ─── MONTHLY THINKING DIGEST DATA ──────────────────────────
+const DIGEST_DATA = [
+  {
+    id: "feb-2026",
+    month: "February 2026",
+    generating: true,
+    stats: { conversations: 18, newTopics: 0, pivots: 0, insights: 2 },
+    newTopics: [],
+    deepened: [
+      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: "#F59E0B", delta: "+6 conversations", detail: "Josephine TX integration and agency portal refinements" },
+      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: "#EF4444", delta: "+4 conversations", detail: "Interview pipeline strategy updates" },
+    ],
+    goneQuiet: [],
+    decisions: [
+      { text: "GovTech market positioning finalized for CourtCollect", topicId: "govtech", color: "#64748B" },
+    ],
+    pivots: [],
+    connections: [
+      { from: "CourtCollect", to: "Gov Tech & Policy", label: "GovTech narrative alignment", color: "#F59E0B" },
+    ],
+  },
+  {
+    id: "jan-2026",
+    month: "January 2026",
+    theme: "Heavy CourtCollect Sprint",
+    stats: { conversations: 47, newTopics: 0, pivots: 1, insights: 5 },
+    newTopics: [],
+    deepened: [
+      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: "#F59E0B", delta: "+12 conversations", detail: "Clearwater KS data conversion, collections agency portal MVP, Josephine TX integration" },
+      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: "#EF4444", delta: "+8 conversations", detail: "TransUnion 3rd round, Veritone prep, pipeline management" },
+      { topicId: "resumes", name: "Resumes & Cover Letters", icon: "📄", color: "#F97316", delta: "+5 conversations", detail: "Portfolio narrative refinement and helping others" },
+      { topicId: "automation", name: "AI Automation", icon: "🤖", color: "#EC4899", delta: "+3 conversations", detail: "Personal productivity system with integrated AI assistants" },
+    ],
+    goneQuiet: [
+      { topicId: "gamedev", name: "Dice or Die", icon: "🎲", color: "#8B5CF6", lastActive: "Jan 5", detail: "Monetization strategy was last touch — waiting for CourtCollect to stabilize" },
+      { topicId: "writing", name: "Creative Writing", icon: "✍️", color: "#FB923C", lastActive: "Jan 5", detail: "Professional bio iterations, but no creative work" },
+    ],
+    decisions: [
+      { text: "Portfolio narrative refined — leading with 100+ implementations story", topicId: "resumes", color: "#F97316" },
+      { text: "Consulting income cash flow projections completed", topicId: "finance", color: "#84CC16" },
+      { text: "Personal productivity system architecture selected", topicId: "automation", color: "#EC4899" },
+    ],
+    pivots: [
+      { text: "HMPRG: Shifted budget from Facebook to Instagram (3:1 outperformance)", topicId: "hmprg", color: "#3B82F6", before: "Even split across Meta platforms", after: "Instagram-heavy allocation" },
+    ],
+    connections: [
+      { from: "CourtCollect", to: "Tyler Technologies", label: "Clearwater KS data conversion leveraged Tyler expertise", color: "#F59E0B" },
+      { from: "Job Search", to: "CourtCollect", label: "Portfolio piece for interview narratives", color: "#EF4444" },
+    ],
+  },
+  {
+    id: "dec-2025",
+    month: "December 2025",
+    theme: "The Claude-Native Shift",
+    stats: { conversations: 58, newTopics: 0, pivots: 2, insights: 4 },
+    newTopics: [],
+    deepened: [
+      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: "#F59E0B", delta: "+9 conversations", detail: "Demo prep, pitch deck creation, investor-ready demo environment" },
+      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: "#EF4444", delta: "+7 conversations", detail: "Post-Tyler transition planning, master resume overhaul" },
+      { topicId: "obsidian", name: "Knowledge Mgmt", icon: "🧠", color: "#14B8A6", delta: "+4 conversations", detail: "Obsidian vault architecture decisions, AI + PKM integration ideas" },
+    ],
+    goneQuiet: [
+      { topicId: "keymaster", name: "Keymaster", icon: "🔐", color: "#10B981", lastActive: "Dec 5", detail: "Project paused — prioritizing CourtCollect and job search" },
+    ],
+    decisions: [
+      { text: "Tyler departure — knowledge capture and institutional docs completed", topicId: "tyler", color: "#6366F1" },
+      { text: "CourtCollect pitch: lead with 23% revenue loss statistic", topicId: "courtcollect", color: "#F59E0B" },
+      { text: "Obsidian vault folder structure and tagging system finalized", topicId: "obsidian", color: "#14B8A6" },
+    ],
+    pivots: [
+      { text: "Keymaster shelved to focus on CourtCollect + job search", topicId: "keymaster", color: "#10B981", before: "Active development on browser extension", after: "Project paused indefinitely" },
+      { text: "Shifted from ChatGPT-primary to Claude-primary workflow", topicId: "webdev", color: "#06B6D4", before: "ChatGPT for most development tasks", after: "Claude for architecture & long sessions, ChatGPT for quick research" },
+    ],
+    connections: [
+      { from: "Tyler Technologies", to: "CourtCollect", label: "Domain expertise transfer crystallized in pitch deck", color: "#6366F1" },
+      { from: "Knowledge Mgmt", to: "AI Automation", label: "PKM + AI integration concept emerged", color: "#14B8A6" },
+      { from: "Job Search", to: "Resumes & Cover Letters", label: "Application materials pipeline established", color: "#EF4444" },
+    ],
+  },
+  {
+    id: "oct-2025",
+    month: "October 2025",
+    theme: "Automation Deep-Dive",
+    stats: { conversations: 52, newTopics: 0, pivots: 1, insights: 3 },
+    newTopics: [],
+    deepened: [
+      { topicId: "automation", name: "AI Automation", icon: "🤖", color: "#EC4899", delta: "+8 conversations", detail: "AI-for-good nonprofit concept, client reporting automation" },
+      { topicId: "n8n", name: "n8n & Airtable", icon: "⚡", color: "#A855F7", delta: "+6 conversations", detail: "Complex multi-step workflows, error handling patterns" },
+      { topicId: "hmprg", name: "HMPRG Campaigns", icon: "🏥", color: "#3B82F6", delta: "+5 conversations", detail: "Campaign performance analysis and content calendar" },
+    ],
+    goneQuiet: [
+      { topicId: "finance", name: "Personal Finance", icon: "💰", color: "#84CC16", lastActive: "Aug 2025", detail: "Tax strategies settled, no active financial planning" },
+      { topicId: "tyler", name: "Tyler Technologies", icon: "🏢", color: "#6366F1", lastActive: "Sep 2025", detail: "Winding down, approaching departure" },
+    ],
+    decisions: [
+      { text: "Strategic automation philosophy: automate the boring, hand-craft the critical", topicId: "automation", color: "#EC4899" },
+      { text: "n8n for simple pipelines, custom code for complex logic", topicId: "n8n", color: "#A855F7" },
+    ],
+    pivots: [
+      { text: "From 'automate everything' to strategic automation", topicId: "automation", color: "#EC4899", before: "If it can be automated, it should be", after: "Automate the boring, hand-craft the critical" },
+    ],
+    connections: [
+      { from: "n8n & Airtable", to: "AI Automation", label: "Workflow tooling matured into automation philosophy", color: "#A855F7" },
+      { from: "HMPRG Campaigns", to: "n8n & Airtable", label: "Campaign reporting automated via n8n pipeline", color: "#3B82F6" },
+    ],
+  },
+];
+
 // ─── FRESHNESS & STALENESS ───────────────────────────────────
 const FRESHNESS_CONFIG = {
   active:   { label: "Active",   color: "#10B981", icon: "●" },
@@ -1109,6 +1217,7 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
     { type: "view", id: "connections", label: "Connections", icon: "◎", sub: "Knowledge graph" },
     { type: "view", id: "evolution", label: "Evolution", icon: "◇", sub: "Decisions & milestones" },
     { type: "view", id: "beliefDiffs", label: "Belief Diffs", icon: "⇄", sub: "How your thinking evolved" },
+    { type: "view", id: "digest", label: "Thinking Digest", icon: "📅", sub: "Monthly knowledge evolution" },
     { type: "view", id: "search", label: "Search", icon: "⌕", sub: "Search conversations" },
     { type: "view", id: "export", label: "Export", icon: "↗", sub: "Export & share" },
   ];
@@ -1210,6 +1319,7 @@ const Nav = ({ view, onNavigate, mobile, lastSyncTime, newCount, isSyncing, onSy
     { id: "connections", label: "Connections", icon: "◎" },
     { id: "evolution", label: "Evolution", icon: "◇" },
     { id: "beliefDiffs", label: "Belief Diffs", icon: "⇄" },
+    { id: "digest", label: "Digest", icon: "📅" },
     { id: "search", label: "Search", icon: "⌕" },
     { id: "export", label: "Export", icon: "↗" },
   ];
@@ -4988,6 +5098,269 @@ const BeliefDiffsView = ({ mobile, onBack }) => {
   );
 };
 
+// ─── MONTHLY THINKING DIGEST ────────────────────────────────
+
+const DigestView = ({ mobile, onBack }) => {
+  const [expandedMonth, setExpandedMonth] = useState(null);
+  const [expandedSection, setExpandedSection] = useState(null);
+
+  const toggleMonth = (id) => setExpandedMonth(expandedMonth === id ? null : id);
+  const toggleSection = (key) => setExpandedSection(expandedSection === key ? null : key);
+
+  const SectionHeader = ({ sectionKey, icon, title, count, color }) => (
+    <button onClick={() => toggleSection(sectionKey)} style={{
+      display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%",
+      background: "transparent", border: "none", cursor: "pointer", padding: "8px 0",
+      borderBottom: "1px solid rgba(255,255,255,0.04)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 14 }}>{icon}</span>
+        <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: color || "rgba(255,255,255,0.6)", fontWeight: 500 }}>{title}</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {count > 0 && <span style={{ fontFamily: MONO, fontSize: 10, color: color || "#FBBF24", background: `${color || "#FBBF24"}12`, padding: "2px 8px", borderRadius: 10 }}>{count}</span>}
+        <span style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.2)", transition: "transform 0.2s", transform: expandedSection === sectionKey ? "rotate(90deg)" : "rotate(0)" }}>▸</span>
+      </div>
+    </button>
+  );
+
+  return (
+    <div style={{ maxWidth: 960, margin: "0 auto" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+        <button onClick={onBack} style={{
+          fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.4)",
+          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 8, padding: "6px 12px", cursor: "pointer", transition: "all 0.2s",
+        }}>← Back</button>
+        <div>
+          <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 26, color: "#fff", letterSpacing: "-0.02em" }}>
+            Thinking Digest
+          </h2>
+          <p style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: "rgba(255,255,255,0.25)", marginTop: 2 }}>
+            Your monthly knowledge evolution — Spotify Wrapped for your thinking
+          </p>
+        </div>
+      </div>
+
+      {/* Monthly digest cards */}
+      <div style={{ display: "flex", flexDirection: "column", gap: mobile ? 14 : 18 }}>
+        {DIGEST_DATA.map((digest) => {
+          const isExpanded = expandedMonth === digest.id;
+          const isGenerating = digest.generating;
+
+          return (
+            <div key={digest.id} className="fade-up" style={{
+              background: isGenerating
+                ? "linear-gradient(135deg, rgba(251,191,36,0.04), rgba(251,191,36,0.01))"
+                : isExpanded
+                  ? "linear-gradient(135deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015))"
+                  : "rgba(255,255,255,0.025)",
+              border: `1px solid ${isGenerating ? "rgba(251,191,36,0.15)" : isExpanded ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)"}`,
+              borderRadius: 14, overflow: "hidden",
+              transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
+            }}>
+              {/* Card header — always visible */}
+              <div onClick={() => !isGenerating && toggleMonth(digest.id)} style={{
+                padding: mobile ? "16px 16px" : "20px 24px",
+                cursor: isGenerating ? "default" : "pointer",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: "#fff", fontWeight: 600 }}>
+                      {digest.month}
+                    </h3>
+                    {isGenerating && (
+                      <span style={{
+                        fontFamily: MONO, fontSize: 10, color: "#FBBF24",
+                        background: "rgba(251,191,36,0.1)", padding: "3px 10px",
+                        borderRadius: 20, animation: "pulse 2s ease-in-out infinite",
+                      }}>generating...</span>
+                    )}
+                  </div>
+                  {digest.theme && (
+                    <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(251,191,36,0.5)", fontWeight: 500, marginBottom: 6 }}>
+                      {digest.theme}
+                    </div>
+                  )}
+                  {/* Stat line */}
+                  <div style={{
+                    fontFamily: MONO, fontSize: mobile ? 9 : 10, color: "rgba(255,255,255,0.25)",
+                    display: "flex", flexWrap: "wrap", gap: mobile ? 8 : 14,
+                  }}>
+                    <span>{digest.stats.conversations} conversations</span>
+                    {digest.stats.newTopics > 0 && <span style={{ color: "#10B981" }}>+{digest.stats.newTopics} new topics</span>}
+                    {digest.stats.pivots > 0 && <span style={{ color: "#A855F7" }}>{digest.stats.pivots} pivot{digest.stats.pivots !== 1 ? "s" : ""}</span>}
+                    <span>{digest.stats.insights} insights curated</span>
+                  </div>
+                </div>
+                {!isGenerating && (
+                  <span style={{
+                    fontFamily: BODY, fontSize: 18, color: "rgba(255,255,255,0.15)",
+                    transition: "transform 0.25s", transform: isExpanded ? "rotate(90deg)" : "rotate(0)",
+                    flexShrink: 0, marginLeft: 12,
+                  }}>▸</span>
+                )}
+              </div>
+
+              {/* Expanded content */}
+              {isExpanded && !isGenerating && (
+                <div style={{
+                  padding: mobile ? "0 16px 16px" : "0 24px 24px",
+                  borderTop: "1px solid rgba(255,255,255,0.05)",
+                  paddingTop: mobile ? 12 : 16,
+                }} className="fade-up">
+                  {/* Topics Deepened */}
+                  {digest.deepened.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <SectionHeader sectionKey={`${digest.id}-deepened`} icon="📈" title="Topics Deepened" count={digest.deepened.length} color="#10B981" />
+                      {expandedSection === `${digest.id}-deepened` && (
+                        <div style={{ padding: "8px 0 4px", display: "flex", flexDirection: "column", gap: 6 }} className="fade-up">
+                          {digest.deepened.map((t, i) => (
+                            <div key={i} style={{
+                              display: "flex", alignItems: "center", gap: 10,
+                              padding: mobile ? "8px 10px" : "8px 14px",
+                              background: `${t.color}08`, borderRadius: 8,
+                              border: `1px solid ${t.color}15`,
+                            }}>
+                              <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                  <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: t.color, fontWeight: 600 }}>{t.name}</span>
+                                  <span style={{ fontFamily: MONO, fontSize: 10, color: "#10B981" }}>{t.delta}</span>
+                                </div>
+                                <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.35)", marginTop: 2, lineHeight: 1.4 }}>{t.detail}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Topics Gone Quiet */}
+                  {digest.goneQuiet.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <SectionHeader sectionKey={`${digest.id}-quiet`} icon="💤" title="Topics Gone Quiet" count={digest.goneQuiet.length} color="#64748B" />
+                      {expandedSection === `${digest.id}-quiet` && (
+                        <div style={{ padding: "8px 0 4px", display: "flex", flexDirection: "column", gap: 6 }} className="fade-up">
+                          {digest.goneQuiet.map((t, i) => (
+                            <div key={i} style={{
+                              display: "flex", alignItems: "center", gap: 10,
+                              padding: mobile ? "8px 10px" : "8px 14px",
+                              background: "rgba(100,116,139,0.06)", borderRadius: 8,
+                              border: "1px solid rgba(100,116,139,0.12)",
+                            }}>
+                              <span style={{ fontSize: 16, flexShrink: 0, opacity: 0.5 }}>{t.icon}</span>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                  <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.4)", fontWeight: 500 }}>{t.name}</span>
+                                  <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(100,116,139,0.6)" }}>last: {t.lastActive}</span>
+                                </div>
+                                <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.25)", marginTop: 2, lineHeight: 1.4 }}>{t.detail}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Key Decisions */}
+                  {digest.decisions.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <SectionHeader sectionKey={`${digest.id}-decisions`} icon="🎯" title="Key Decisions Made" count={digest.decisions.length} color="#EF4444" />
+                      {expandedSection === `${digest.id}-decisions` && (
+                        <div style={{ padding: "8px 0 4px", display: "flex", flexDirection: "column", gap: 6 }} className="fade-up">
+                          {digest.decisions.map((d, i) => (
+                            <div key={i} style={{
+                              padding: mobile ? "8px 10px" : "8px 14px",
+                              background: `${d.color}06`, borderRadius: 8,
+                              border: `1px solid ${d.color}12`,
+                              display: "flex", alignItems: "center", gap: 8,
+                            }}>
+                              <span style={{ fontFamily: BODY, fontSize: 12, color: d.color, fontWeight: 600 }}>●</span>
+                              <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{d.text}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Pivots Detected */}
+                  {digest.pivots.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <SectionHeader sectionKey={`${digest.id}-pivots`} icon="↩️" title="Pivots Detected" count={digest.pivots.length} color="#A855F7" />
+                      {expandedSection === `${digest.id}-pivots` && (
+                        <div style={{ padding: "8px 0 4px", display: "flex", flexDirection: "column", gap: 6 }} className="fade-up">
+                          {digest.pivots.map((p, i) => (
+                            <div key={i} style={{
+                              padding: mobile ? "10px 10px" : "10px 14px",
+                              background: "rgba(168,85,247,0.04)", borderRadius: 8,
+                              border: "1px solid rgba(168,85,247,0.12)",
+                            }}>
+                              <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.55)", fontWeight: 500, marginBottom: 8 }}>{p.text}</div>
+                              <div style={{ display: "flex", alignItems: "center", gap: mobile ? 8 : 14 }}>
+                                <div style={{ flex: 1, padding: "6px 10px", background: "rgba(239,68,68,0.06)", borderRadius: 6, border: "1px solid rgba(239,68,68,0.1)" }}>
+                                  <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(239,68,68,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>Before</div>
+                                  <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.4 }}>{p.before}</div>
+                                </div>
+                                <span style={{ fontFamily: BODY, fontSize: 14, color: "rgba(168,85,247,0.4)", flexShrink: 0 }}>→</span>
+                                <div style={{ flex: 1, padding: "6px 10px", background: "rgba(16,185,129,0.06)", borderRadius: 6, border: "1px solid rgba(16,185,129,0.1)" }}>
+                                  <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(16,185,129,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>After</div>
+                                  <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.4 }}>{p.after}</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Connections Formed */}
+                  {digest.connections.length > 0 && (
+                    <div style={{ marginBottom: 4 }}>
+                      <SectionHeader sectionKey={`${digest.id}-connections`} icon="🔗" title="Connections Formed" count={digest.connections.length} color="#3B82F6" />
+                      {expandedSection === `${digest.id}-connections` && (
+                        <div style={{ padding: "8px 0 4px", display: "flex", flexDirection: "column", gap: 6 }} className="fade-up">
+                          {digest.connections.map((c, i) => (
+                            <div key={i} style={{
+                              padding: mobile ? "8px 10px" : "8px 14px",
+                              background: "rgba(59,130,246,0.04)", borderRadius: 8,
+                              border: "1px solid rgba(59,130,246,0.1)",
+                              display: "flex", alignItems: "center", gap: 8,
+                            }}>
+                              <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: c.color, fontWeight: 600, flexShrink: 0 }}>{c.from}</span>
+                              <span style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>↔</span>
+                              <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.5)", fontWeight: 500, flexShrink: 0 }}>{c.to}</span>
+                              {!mobile && <span style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.2)", marginLeft: 4 }}>— {c.label}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer stat */}
+      <div style={{
+        textAlign: "center", marginTop: mobile ? 24 : 32,
+        fontFamily: MONO, fontSize: mobile ? 9 : 10, color: "rgba(255,255,255,0.15)",
+      }}>
+        {DIGEST_DATA.length} months of thinking · {DIGEST_DATA.reduce((a, d) => a + d.stats.conversations, 0)} conversations · {DIGEST_DATA.reduce((a, d) => a + d.stats.pivots, 0)} pivots detected
+      </div>
+    </div>
+  );
+};
+
 // ─── MAIN APP ───────────────────────────────────────────────
 
 export default function App() {
@@ -5039,6 +5412,7 @@ export default function App() {
         if (view === "conversation") { setView("timeline"); setSelectedEvent(null); return; }
         if (view === "timeline") { setView("dashboard"); setSelectedTopic(null); return; }
         if (view === "companion") { setView("dashboard"); return; }
+        if (view === "digest") { setView("dashboard"); return; }
       }
     };
     window.addEventListener("keydown", handleGlobalKey);
@@ -5269,6 +5643,7 @@ export default function App() {
         {view === "connections" && <ConnectionsView onTopicClick={handleTopicClick} mobile={mobile} />}
         {view === "evolution" && <EvolutionView mobile={mobile} />}
         {view === "beliefDiffs" && <BeliefDiffsView mobile={mobile} onBack={() => setView("dashboard")} />}
+        {view === "digest" && <DigestView mobile={mobile} onBack={() => setView("dashboard")} />}
         {view === "search" && <SearchView mobile={mobile} />}
         {view === "export" && <ExportPreview mobile={mobile} w={w} />}
 
