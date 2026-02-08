@@ -1606,8 +1606,11 @@ const ConversationDrilldown = ({ topicId, eventIndex, onBack, mobile }) => {
 
 const ConnectionsView = ({ onTopicClick, mobile }) => {
   const [selected, setSelected] = useState(null);
-  const topicMap = {};
-  TOPICS.forEach(t => { topicMap[t.id] = t; });
+  const topicMap = useMemo(() => {
+    const map = {};
+    TOPICS.forEach(t => { map[t.id] = t; });
+    return map;
+  }, []);
   const adjacency = {};
   CONNECTIONS.forEach(c => {
     if (!adjacency[c.from]) adjacency[c.from] = [];
@@ -1834,8 +1837,17 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
     return () => reviewTimersRef.current.forEach(clearTimeout);
   }, []);
 
-  const topicMap = {};
-  TOPICS.forEach(t => { topicMap[t.id] = t; });
+  // Derive activeIdx from items — moves to first pending whenever items change
+  useEffect(() => {
+    const firstPending = items.findIndex(i => i.status === "pending");
+    if (firstPending >= 0) setActiveIdx(firstPending);
+  }, [items]);
+
+  const topicMap = useMemo(() => {
+    const map = {};
+    TOPICS.forEach(t => { map[t.id] = t; });
+    return map;
+  }, []);
 
   const reviewed = items.filter(i => i.status !== "pending").length;
   const total = items.length;
@@ -1860,15 +1872,8 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
       }, delay + 700));
       delay += 900;
     });
-    // Set active to first non-high-confidence item after auto-approves
-    reviewTimersRef.current.push(setTimeout(() => {
-      setItems(prev => {
-        const firstPending = prev.findIndex(i => i.status === "pending");
-        if (firstPending >= 0) setActiveIdx(firstPending);
-        return prev;
-      });
-    }, delay + 100));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // Active index is now derived via useEffect on items
+  }, []);
 
   // Check if all done — play chime + trigger celebration
   useEffect(() => {
@@ -1887,17 +1892,14 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
       else if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); handleAction(activeItem.id, "skipped"); }
       else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
-        setItems(prev => {
-          const pendingBefore = [];
-          prev.forEach((item, i) => { if (i < activeIdx && item.status === "pending") pendingBefore.push(i); });
-          if (pendingBefore.length > 0) setActiveIdx(pendingBefore[pendingBefore.length - 1]);
-          return prev;
-        });
+        const pendingBefore = [];
+        items.forEach((item, i) => { if (i < activeIdx && item.status === "pending") pendingBefore.push(i); });
+        if (pendingBefore.length > 0) setActiveIdx(pendingBefore[pendingBefore.length - 1]);
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // keyboard navigation
 
   const handleAction = (id, action) => {
     // Haptic-style bounce feedback on approve/edit actions
@@ -1906,14 +1908,7 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
       reviewTimersRef.current.push(setTimeout(() => setHapticId(null), 350));
     }
     setItems(prev => prev.map(i => i.id === id ? { ...i, status: action } : i));
-    // Move to next pending item
-    reviewTimersRef.current.push(setTimeout(() => {
-      setItems(prev => {
-        const nextPending = prev.findIndex(i => i.status === "pending");
-        setActiveIdx(nextPending >= 0 ? nextPending : null);
-        return prev;
-      });
-    }, 150));
+    // activeIdx is derived via useEffect on items
   };
 
   const activeItem = activeIdx !== null ? items[activeIdx] : null;
@@ -2575,8 +2570,11 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
     return () => connTimersRef.current.forEach(clearTimeout);
   }, []);
 
-  const topicMap = {};
-  TOPICS.forEach(t => { topicMap[t.id] = t; });
+  const topicMap = useMemo(() => {
+    const map = {};
+    TOPICS.forEach(t => { map[t.id] = t; });
+    return map;
+  }, []);
 
   const reviewed = connections.filter(c => c.status !== "pending").length;
   const total = connections.length;
@@ -2643,7 +2641,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (reviewed === total && total > 0 && !done) connTimersRef.current.push(setTimeout(() => setDone(true), 400));
@@ -3049,8 +3047,11 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
     return () => insightTimersRef.current.forEach(clearTimeout);
   }, []);
 
-  const topicMap = {};
-  TOPICS.forEach(t => { topicMap[t.id] = t; });
+  const topicMap = useMemo(() => {
+    const map = {};
+    TOPICS.forEach(t => { map[t.id] = t; });
+    return map;
+  }, []);
 
   const reviewed = decisions.filter(d => d.status !== "pending").length;
   const total = decisions.length;
@@ -3122,7 +3123,7 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (reviewed === total && total > 0 && !done) insightTimersRef.current.push(setTimeout(() => setDone(true), 500));
@@ -3569,7 +3570,7 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
     curationTimersRef.current.push(setTimeout(() => setPhase(3), 3000));
 
     return () => clearInterval(timer);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const statCards = [
     { label: "Items Reviewed", value: counters.reviewed, color: "#FBBF24", icon: "📋" },
