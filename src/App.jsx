@@ -572,6 +572,105 @@ const BELIEF_DIFFS = [
   },
 ];
 
+// ─── PRE-FLIGHT BRIEFINGS DATA ──────────────────────────────
+const BRIEFINGS = {
+  courtcollect: {
+    summary: "CourtCollect is your municipal court collections SaaS platform, built on Supabase + Next.js with a serverless Vercel deployment. You've completed the agency portal MVP with multi-tenant RLS, onboarded two pilot courts (Clearwater KS and Josephine TX), and pivoted away from Docker after a painful Railway experience. The architecture is now event-driven with API-first design enabling third-party integrations. You're the sole developer, leveraging your 100+ Tyler Technologies implementations as domain expertise.",
+    decisions: [
+      "Chose Supabase + Next.js over Firebase and AWS Amplify (Sep 2024)",
+      "Pivoted from Docker + Railway to Vercel + Supabase Cloud after 3 days of issues (Nov 2024)",
+      "Multi-tenant architecture with row-level security and tenant_id on every table",
+      "Assignments junction table instead of direct agency-case link for audit history",
+      "Gated deployments on test passage — CI must pass before merge",
+      "TypeScript with strict checking for type safety in multi-tenant data models",
+    ],
+    openQuestions: [
+      "Payment processing edge cases for partial payments across reassigned agencies",
+      "When to introduce pub/sub for background event processing vs. keeping serverless",
+      "Pricing model for courts — per-case vs. flat monthly vs. percentage of collections",
+      "How to handle data migration from legacy systems at scale beyond pilot courts",
+    ],
+    connections: [
+      { topicId: "tyler", summary: "Domain expertise from 100+ municipal implementations directly informs product design" },
+      { topicId: "govtech", summary: "Policy requirements and procurement processes shape go-to-market strategy" },
+      { topicId: "webdev", summary: "Tech stack decisions flow from your React/Next.js/Supabase experience" },
+      { topicId: "jobsearch", summary: "CourtCollect serves as a key portfolio piece in applications" },
+    ],
+    lastActivity: { date: "Feb 3, 2026", title: "Josephine TX integration", summary: "API design and data mapping for City of Josephine." },
+    suggestedPrompt: "Continue from where we left off on CourtCollect — last time we were designing the API integration for Josephine TX. I want to discuss how to generalize the data mapping layer so onboarding new courts is faster. Also, I'm hitting edge cases with partial payment calculations when cases get reassigned between agencies.",
+  },
+  jobsearch: {
+    summary: "You're in an active job search after leaving Tyler Technologies in December 2024, targeting Customer Success Manager and Implementation Manager roles in GovTech and adjacent SaaS. You've built a strong application pipeline with tailored materials, completed multiple rounds at TransUnion and Veritone, and refined your narrative around 100+ municipal software implementations. Your strategy balances traditional job search with consulting and CourtCollect as a startup path.",
+    decisions: [
+      "Focus on CSM/Implementation Manager roles leveraging GovTech domain expertise",
+      "Rebuilt resume from scratch emphasizing 100+ Tyler implementations (Dec 2024)",
+      "Created modular cover letter framework for rapid tailoring per role",
+      "Positioned CourtCollect as entrepreneurial initiative, not just side project",
+      "Shifted LinkedIn profile toward GovTech + AI narrative",
+    ],
+    openQuestions: [
+      "Whether to pursue full-time employment or go all-in on CourtCollect consulting",
+      "How to handle the gap narrative — framing the transition positively",
+      "Which offer criteria matter most: salary, equity, remote flexibility, or mission alignment",
+      "Should you expand search beyond GovTech into broader B2B SaaS?",
+    ],
+    connections: [
+      { topicId: "resumes", summary: "Application materials are continuously refined based on interview feedback" },
+      { topicId: "tyler", summary: "100+ implementations provide the core experience narrative" },
+      { topicId: "courtcollect", summary: "Demonstrates entrepreneurial initiative and technical ability" },
+    ],
+    lastActivity: { date: "Feb 2, 2026", title: "Interview debrief & strategy update", summary: "Assessed pipeline status across active applications." },
+    suggestedPrompt: "Let's do a job search pipeline review. I want to assess where each active application stands, identify which roles I should prioritize follow-ups on, and discuss whether my current positioning is working or if I need to adjust my narrative for the next round of applications.",
+  },
+  automation: {
+    summary: "Your automation philosophy has evolved from 'automate everything with no-code' to 'strategic automation — automate the boring, hand-craft the critical.' You use n8n for data pipelines and repetitive workflows (Bluesky analytics, HMPRG reporting) but write custom code for complex business logic. You've built a personal productivity system integrating calendar, tasks, and AI assistants, and you're exploring LLM-in-the-loop automation patterns for document classification and content processing.",
+    decisions: [
+      "Strategic automation philosophy: no-code for simple pipelines, code for complex logic",
+      "n8n as primary workflow automation tool over Zapier and Make (Jun 2024)",
+      "Automated HMPRG campaign reporting via Meta Ads API → n8n → formatted reports",
+      "Build monitoring before building automation",
+      "AI-in-the-loop workflows via n8n rather than pure chat interfaces",
+    ],
+    openQuestions: [
+      "How to productize automation consulting for nonprofits (AI-for-good concept)",
+      "Best patterns for error handling in multi-step n8n workflows at scale",
+      "Whether to build a unified personal automation dashboard or keep tools separate",
+      "How Claude API integration with n8n changes the automation possibilities",
+    ],
+    connections: [
+      { topicId: "n8n", summary: "Primary tool for implementing workflow automations" },
+      { topicId: "hmprg", summary: "Client reporting automation is the most production-tested use case" },
+      { topicId: "obsidian", summary: "PKM + AI integration explores automated knowledge extraction" },
+      { topicId: "courtcollect", summary: "Event-driven architecture decisions informed by automation experience" },
+    ],
+    lastActivity: { date: "Jan 20, 2025", title: "Personal productivity system", summary: "Integrated calendar, tasks, and AI assistants." },
+    suggestedPrompt: "I want to revisit my automation stack. I've been using the Claude API with n8n for document classification — let's discuss patterns for building reliable LLM-in-the-loop workflows. Specifically, how to handle model failures gracefully and when to fall back to deterministic processing.",
+  },
+  hmprg: {
+    summary: "HMPRG (Health and Medicine Policy Research Group) is your digital marketing client focused on the RAPID-IL campaign for Illinois youth health career pathways. You've run Meta ad campaigns, built a YouTube content series, and managed a multi-platform social media presence. Instagram significantly outperforms Facebook (3:1), leading to a budget reallocation. Recent focus has been on landing page conversion optimization with measurable results.",
+    decisions: [
+      "Shifted ad budget to 70/30 Instagram-heavy after 3:1 performance ratio (Jan 2025)",
+      "YouTube video series format for health career spotlight content",
+      "$800 Meta advertising budget targeting Illinois youth demographics",
+      "3-month rolling content calendar across Instagram, Facebook, LinkedIn",
+      "Redesigned conversion funnel, improving CTR by 40%",
+    ],
+    openQuestions: [
+      "Whether to expand beyond Meta to TikTok for reaching younger demographics",
+      "How to measure long-term impact beyond click-through rates",
+      "Sustainability of current content production pace with available resources",
+      "Whether AI-generated content could supplement the video production pipeline",
+    ],
+    connections: [
+      { topicId: "automation", summary: "Campaign reporting automated via n8n + Meta Ads API" },
+      { topicId: "webdev", summary: "Landing page optimization draws on web development skills" },
+      { topicId: "n8n", summary: "Analytics pipeline built on n8n → Airtable for reporting" },
+    ],
+    lastActivity: { date: "Feb 1, 2026", title: "Landing page optimization", summary: "Redesigned conversion funnel. Improved CTR by 40%." },
+    suggestedPrompt: "Let's review the HMPRG campaign performance for Q1 2026. I want to analyze whether the Instagram-heavy budget allocation is still optimal, discuss the landing page changes and their impact on conversion rates, and plan the next content calendar cycle.",
+  },
+};
+
 // ─── FRESHNESS & STALENESS ───────────────────────────────────
 const FRESHNESS_CONFIG = {
   active:   { label: "Active",   color: "#10B981", icon: "●" },
@@ -1364,7 +1463,7 @@ const FreshnessBadge = ({ topic, style }) => {
   );
 };
 
-const TopicBubble = ({ topic, maxCount, onClick, index, mobile, recentlySynced }) => {
+const TopicBubble = ({ topic, maxCount, onClick, onBriefMe, index, mobile, recentlySynced }) => {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
   const baseSize = mobile ? 44 : 52;
@@ -1421,7 +1520,17 @@ const TopicBubble = ({ topic, maxCount, onClick, index, mobile, recentlySynced }
               {RECURATION_COUNTS[topic.id]} new conversations since last review
             </div>
           )}
-          <div style={{ fontFamily: BODY, fontSize: 10, color: topic.color, marginTop: 5, fontWeight: 500 }}>Click to explore →</div>
+          <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
+            {BRIEFINGS[topic.id] && (
+              <button onClick={e => { e.stopPropagation(); onBriefMe && onBriefMe(topic); }} style={{
+                fontFamily: BODY, fontSize: 10, fontWeight: 600, color: topic.color,
+                background: `${topic.color}15`, border: `1px solid ${topic.color}30`,
+                borderRadius: 6, padding: "3px 10px", cursor: "pointer",
+                transition: "all 0.2s", whiteSpace: "nowrap",
+              }}>Brief me</button>
+            )}
+            <span style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.25)", fontWeight: 500 }}>Click to explore →</span>
+          </div>
         </div>
       )}
     </div>
@@ -4988,6 +5097,187 @@ const BeliefDiffsView = ({ mobile, onBack }) => {
   );
 };
 
+// ─── PRE-FLIGHT BRIEFING CARD ──────────────────────────────
+const BriefingCard = ({ topic, onClose, mobile }) => {
+  const briefing = BRIEFINGS[topic.id];
+  const [copied, setCopied] = useState(false);
+
+  if (!briefing) return null;
+
+  const handleCopy = () => {
+    const connTopics = briefing.connections.map(c => {
+      const t = TOPICS.find(tp => tp.id === c.topicId);
+      return `  - ${t?.name || c.topicId}: ${c.summary}`;
+    }).join("\n");
+
+    const text = [
+      `PRE-FLIGHT BRIEFING: ${topic.name}`,
+      `${"=".repeat(40)}`,
+      ``,
+      `SUMMARY`,
+      briefing.summary,
+      ``,
+      `KEY DECISIONS`,
+      ...briefing.decisions.map(d => `  - ${d}`),
+      ``,
+      `OPEN QUESTIONS`,
+      ...briefing.openQuestions.map(q => `  - ${q}`),
+      ``,
+      `RELEVANT CONNECTIONS`,
+      connTopics,
+      ``,
+      `LAST ACTIVITY (${briefing.lastActivity.date})`,
+      `${briefing.lastActivity.title}: ${briefing.lastActivity.summary}`,
+      ``,
+      `SUGGESTED STARTING PROMPT`,
+      briefing.suggestedPrompt,
+    ].join("\n");
+
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div onClick={onClose} style={{
+      position: "fixed", inset: 0, zIndex: 9999,
+      background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: mobile ? 16 : 40,
+      animation: "fadeUp 0.3s ease both",
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: "#0D0D12", border: `1px solid ${topic.color}30`,
+        borderRadius: 18, width: "100%", maxWidth: 640,
+        maxHeight: "90vh", overflow: "auto",
+        boxShadow: `0 24px 80px rgba(0,0,0,0.6), 0 0 40px ${topic.color}10`,
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: mobile ? "20px 18px 16px" : "24px 28px 18px",
+          borderBottom: `1px solid ${topic.color}15`,
+          display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+        }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 22 }}>{topic.icon}</span>
+              <span style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 24, fontWeight: 700, color: "#fff" }}>{topic.name}</span>
+              <FreshnessBadge topic={topic} />
+            </div>
+            <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 500 }}>
+              Pre-flight Briefing · {topic.count} conversations · {(topic.words / 1000).toFixed(0)}k words
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 8, width: 32, height: 32, cursor: "pointer",
+            color: "rgba(255,255,255,0.4)", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center",
+          }}>x</button>
+        </div>
+
+        <div style={{ padding: mobile ? "18px 18px 20px" : "22px 28px 28px" }}>
+          {/* Summary */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ fontFamily: BODY, fontSize: 11, color: topic.color, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Summary</div>
+            <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.6)", lineHeight: 1.65 }}>
+              {briefing.summary}
+            </div>
+          </div>
+
+          {/* Key Decisions */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ fontFamily: BODY, fontSize: 11, color: "#10B981", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Key Decisions</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              {briefing.decisions.map((d, i) => (
+                <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <span style={{ fontFamily: MONO, fontSize: 10, color: "#10B981", marginTop: 3, flexShrink: 0 }}>+</span>
+                  <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{d}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Open Questions */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ fontFamily: BODY, fontSize: 11, color: "#FBBF24", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Open Questions</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              {briefing.openQuestions.map((q, i) => (
+                <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <span style={{ fontFamily: MONO, fontSize: 10, color: "#FBBF24", marginTop: 3, flexShrink: 0 }}>?</span>
+                  <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{q}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Relevant Connections */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ fontFamily: BODY, fontSize: 11, color: "#3B82F6", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Relevant Connections</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {briefing.connections.map((conn, i) => {
+                const connTopic = TOPICS.find(t => t.id === conn.topicId);
+                return (
+                  <div key={i} style={{
+                    display: "flex", gap: 10, alignItems: "center",
+                    background: "rgba(255,255,255,0.02)", borderRadius: 8,
+                    padding: "8px 12px", border: "1px solid rgba(255,255,255,0.04)",
+                  }}>
+                    <span style={{ fontSize: 14, flexShrink: 0 }}>{connTopic?.icon}</span>
+                    <div>
+                      <span style={{ fontFamily: BODY, fontSize: 12, color: connTopic?.color || "#fff", fontWeight: 600 }}>{connTopic?.name}</span>
+                      <span style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.3)", marginLeft: 6 }}>— {conn.summary}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Last Activity */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.25)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Last Activity</div>
+            <div style={{
+              background: "rgba(255,255,255,0.02)", borderRadius: 8,
+              padding: "10px 14px", border: "1px solid rgba(255,255,255,0.04)",
+            }}>
+              <div style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 4 }}>{briefing.lastActivity.date}</div>
+              <div style={{ fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.55)", fontWeight: 500 }}>{briefing.lastActivity.title}</div>
+              <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>{briefing.lastActivity.summary}</div>
+            </div>
+          </div>
+
+          {/* Suggested Prompt */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ fontFamily: BODY, fontSize: 11, color: "#A855F7", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Suggested Starting Prompt</div>
+            <div style={{
+              background: "rgba(168,85,247,0.05)", borderRadius: 10,
+              padding: mobile ? "12px 14px" : "14px 18px",
+              border: "1px solid rgba(168,85,247,0.15)",
+              fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.55)",
+              lineHeight: 1.6, fontStyle: "italic",
+            }}>
+              "{briefing.suggestedPrompt}"
+            </div>
+          </div>
+
+          {/* Copy Button */}
+          <button onClick={handleCopy} style={{
+            width: "100%", padding: "12px 0", borderRadius: 10,
+            background: copied ? "rgba(16,185,129,0.12)" : `${topic.color}12`,
+            border: `1px solid ${copied ? "rgba(16,185,129,0.3)" : `${topic.color}25`}`,
+            fontFamily: BODY, fontSize: 13, fontWeight: 600,
+            color: copied ? "#10B981" : topic.color,
+            cursor: "pointer", transition: "all 0.25s",
+          }}>
+            {copied ? "Copied to clipboard!" : "Copy briefing to clipboard"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── MAIN APP ───────────────────────────────────────────────
 
 export default function App() {
@@ -5009,6 +5299,9 @@ export default function App() {
 
   // ─── COMMAND PALETTE & KEYBOARD NAV ──────────────
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
+
+  // ─── PRE-FLIGHT BRIEFING ────────────────────────
+  const [briefingTopic, setBriefingTopic] = useState(null);
 
   // ─── GUIDED TOUR ────────────────────────────────
   const [tourActive, setTourActive] = useState(false);
@@ -5035,6 +5328,7 @@ export default function App() {
       }
       // Escape — back out of drilldowns, or close command palette
       if (e.key === "Escape") {
+        if (briefingTopic) { setBriefingTopic(null); return; }
         if (cmdPaletteOpen) return; // handled by CommandPalette itself
         if (view === "conversation") { setView("timeline"); setSelectedEvent(null); return; }
         if (view === "timeline") { setView("dashboard"); setSelectedTopic(null); return; }
@@ -5043,7 +5337,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleGlobalKey);
     return () => window.removeEventListener("keydown", handleGlobalKey);
-  }, [view, cmdPaletteOpen]);
+  }, [view, cmdPaletteOpen, briefingTopic]);
 
   const maxCount = Math.max(...TOPICS.map(t => t.count));
   const totalWords = TOPICS.reduce((a, t) => a + t.words, 0) + 680000;
@@ -5195,7 +5489,7 @@ export default function App() {
               <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: "#fff", marginBottom: 3 }}>Knowledge Map</h3>
               <p style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: "rgba(255,255,255,0.2)", marginBottom: 14 }}>Sized by conversation count. {mobile ? "Tap" : "Click"} to explore.</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: mobile ? 8 : 12, justifyContent: "center", alignItems: "center", padding: mobile ? "20px 10px" : "28px 16px", background: "rgba(255,255,255,0.015)", borderRadius: 18, border: "1px solid rgba(255,255,255,0.04)" }}>
-                {TOPICS.map((topic, i) => <TopicBubble key={topic.id} topic={topic} maxCount={maxCount} index={i} onClick={handleTopicClick} mobile={mobile} recentlySynced={recentlySynced} />)}
+                {TOPICS.map((topic, i) => <TopicBubble key={topic.id} topic={topic} maxCount={maxCount} index={i} onClick={handleTopicClick} onBriefMe={setBriefingTopic} mobile={mobile} recentlySynced={recentlySynced} />)}
               </div>
             </div>
 
@@ -5291,6 +5585,7 @@ export default function App() {
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
       <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={setView} onTopicClick={handleTopicClick} mobile={mobile} />
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
+      {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} mobile={mobile} />}
     </div>
   );
 }
