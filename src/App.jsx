@@ -16,6 +16,7 @@ import {
 import useWindowSize from './hooks/useWindowSize';
 import useSound from './hooks/useSound';
 import ErrorBoundary from './components/ErrorBoundary';
+import useStore from './store';
 
 // ─── STYLES ─────────────────────────────────────────────────
 const FONTS = `'Playfair Display', 'Georgia', serif`;
@@ -5943,44 +5944,44 @@ export default function App() {
   const { w } = useWindowSize();
   const mobile = w < 640;
   const tablet = w >= 640 && w < 1024;
-  const [view, setView] = useState("onboarding");
-  const [selectedTopic, setSelectedTopic] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [selectedChain, setSelectedChain] = useState(null);
-  const [showRewind, setShowRewind] = useState(false);
 
-  // ─── CONTRADICTION DETECTION STATE ────────────────
-  const [contradictions, setContradictions] = useState(CONTRADICTIONS_INITIAL);
-  const [resolvedContradictions, setResolvedContradictions] = useState([]);
-
-  const handleResolveContradiction = useCallback((contradictionId, resolutionType) => {
-    const contradiction = contradictions.find(c => c.id === contradictionId);
-    if (!contradiction) return;
-    const resolved = { ...contradiction, resolution: resolutionType, resolvedAt: new Date().toISOString() };
-    setResolvedContradictions(prev => [...prev, resolved]);
-    setContradictions(prev => prev.filter(c => c.id !== contradictionId));
-  }, [contradictions]);
-
-  // ─── SYNC STATE ──────────────────────────────────
-  const [lastSyncTime, setLastSyncTime] = useState("2:34 PM");
-  const [newSyncCount, setNewSyncCount] = useState(47);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncPhase, setSyncPhase] = useState(null);
-  const [syncProgress, setSyncProgress] = useState(0);
-  const [recentlySynced, setRecentlySynced] = useState([]);
-  const [syncedNewEvents, setSyncedNewEvents] = useState({});
-
-  // ─── COMMAND PALETTE & KEYBOARD NAV ──────────────
-  const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
-
-  // ─── COMPANION SIDEBAR ────────────────────────────
-  const [companionSidebarOpen, setCompanionSidebarOpen] = useState(false);
-
-  // ─── PRE-FLIGHT BRIEFING ────────────────────────
-  const [briefingTopic, setBriefingTopic] = useState(null);
-
-  // ─── GUIDED TOUR ────────────────────────────────
-  const [tourActive, setTourActive] = useState(false);
+  // ─── CENTRALIZED STATE (Zustand) ──────────────────
+  const view = useStore(s => s.view);
+  const setView = useStore(s => s.setView);
+  const selectedTopic = useStore(s => s.selectedTopic);
+  const setSelectedTopic = useStore(s => s.setSelectedTopic);
+  const selectedEvent = useStore(s => s.selectedEvent);
+  const setSelectedEvent = useStore(s => s.setSelectedEvent);
+  const selectedChain = useStore(s => s.selectedChain);
+  const setSelectedChain = useStore(s => s.setSelectedChain);
+  const showRewind = useStore(s => s.showRewind);
+  const setShowRewind = useStore(s => s.setShowRewind);
+  const contradictions = useStore(s => s.contradictions);
+  const resolvedContradictions = useStore(s => s.resolvedContradictions);
+  const resolveContradiction = useStore(s => s.resolveContradiction);
+  const lastSyncTime = useStore(s => s.lastSyncTime);
+  const newSyncCount = useStore(s => s.newSyncCount);
+  const isSyncing = useStore(s => s.isSyncing);
+  const syncPhase = useStore(s => s.syncPhase);
+  const syncProgress = useStore(s => s.syncProgress);
+  const recentlySynced = useStore(s => s.recentlySynced);
+  const syncedNewEvents = useStore(s => s.syncedNewEvents);
+  const setIsSyncing = useStore(s => s.setIsSyncing);
+  const setSyncPhase = useStore(s => s.setSyncPhase);
+  const setSyncProgress = useStore(s => s.setSyncProgress);
+  const completeSyncCycle = useStore(s => s.completeSyncCycle);
+  const cmdPaletteOpen = useStore(s => s.cmdPaletteOpen);
+  const setCmdPaletteOpen = useStore(s => s.setCmdPaletteOpen);
+  const companionSidebarOpen = useStore(s => s.companionSidebarOpen);
+  const toggleCompanionSidebar = useStore(s => s.toggleCompanionSidebar);
+  const briefingTopic = useStore(s => s.briefingTopic);
+  const setBriefingTopic = useStore(s => s.setBriefingTopic);
+  const tourActive = useStore(s => s.tourActive);
+  const setTourActive = useStore(s => s.setTourActive);
+  const handleTopicClick = useStore(s => s.handleTopicClick);
+  const storeHandleEventClick = useStore(s => s.handleEventClick);
+  const navigateTo = useStore(s => s.navigateTo);
+  const toggleCmdPalette = useStore(s => s.toggleCmdPalette);
   const tourLaunched = useRef(false);
   const appTimersRef = useRef([]);
 
@@ -6004,13 +6005,13 @@ export default function App() {
       // Cmd+K / Ctrl+K — open command palette
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setCmdPaletteOpen(prev => !prev);
+        toggleCmdPalette();
         return;
       }
       // Cmd+/ / Ctrl+/ — toggle companion sidebar
       if ((e.metaKey || e.ctrlKey) && e.key === "/") {
         e.preventDefault();
-        setCompanionSidebarOpen(prev => !prev);
+        toggleCompanionSidebar();
         return;
       }
       // Escape — back out of drilldowns, or close command palette
@@ -6027,27 +6028,22 @@ export default function App() {
     };
     window.addEventListener("keydown", handleGlobalKey);
     return () => window.removeEventListener("keydown", handleGlobalKey);
-  }, [view, cmdPaletteOpen, briefingTopic, showRewind]);
+  }, [view, cmdPaletteOpen, briefingTopic, showRewind, toggleCmdPalette, toggleCompanionSidebar, setShowRewind, setBriefingTopic, setView, setSelectedEvent, setSelectedTopic, setSelectedChain]);
 
   const maxCount = Math.max(...TOPICS.map(t => t.count));
   const totalWords = TOPICS.reduce((a, t) => a + t.words, 0) + 680000;
   const totalConvos = 3847;
 
-  const handleTopicClick = (topic) => { setSelectedTopic(topic); setView("timeline"); };
-  const handleEventClick = useCallback((topicId, eventIndex) => { setSelectedEvent({ topicId, eventIndex }); setView("conversation"); }, []);
-  const handleStartProcessing = useCallback(() => setView("loading"), []);
-  const handleLoadingComplete = useCallback(() => setView("curation"), []);
-  const handleCurationComplete = useCallback(() => setView("topicCuration"), []);
-  const handleTopicCurationComplete = useCallback(() => setView("connectionValidation"), []);
-  const handleConnectionValidationComplete = useCallback(() => setView("insightReview"), []);
-  const handleInsightReviewComplete = useCallback(() => setView("curationSummary"), []);
-  const handleCurationSummaryComplete = useCallback(() => setView("dashboard"), []);
-  const handleArchaeologyClick = useCallback((chainId) => { setSelectedChain(chainId); setView("archaeology"); }, []);
-  const handleNavigate = useCallback((viewId) => {
-    if (viewId === "rewind") setShowRewind(true);
-    else setView(viewId);
-  }, []);
-  const toggleCompanionSidebar = useCallback(() => setCompanionSidebarOpen(prev => !prev), []);
+  const handleEventClick = useCallback((topicId, eventIndex) => { storeHandleEventClick(topicId, eventIndex); }, [storeHandleEventClick]);
+  const handleStartProcessing = useCallback(() => setView("loading"), [setView]);
+  const handleLoadingComplete = useCallback(() => setView("curation"), [setView]);
+  const handleCurationComplete = useCallback(() => setView("topicCuration"), [setView]);
+  const handleTopicCurationComplete = useCallback(() => setView("connectionValidation"), [setView]);
+  const handleConnectionValidationComplete = useCallback(() => setView("insightReview"), [setView]);
+  const handleInsightReviewComplete = useCallback(() => setView("curationSummary"), [setView]);
+  const handleCurationSummaryComplete = useCallback(() => setView("dashboard"), [setView]);
+  const handleArchaeologyClick = useCallback((chainId) => { setSelectedChain(chainId); setView("archaeology"); }, [setSelectedChain, setView]);
+  const handleNavigate = navigateTo;
 
   // ─── SYNC HANDLER ────────────────────────────────
   const handleSync = useCallback(() => {
@@ -6059,15 +6055,9 @@ export default function App() {
     appTimersRef.current.push(setTimeout(() => { setSyncPhase("processing"); setSyncProgress(75); }, 2000));
     appTimersRef.current.push(setTimeout(() => { setSyncPhase("complete"); setSyncProgress(100); }, 3200));
     appTimersRef.current.push(setTimeout(() => {
-      setIsSyncing(false);
-      setSyncPhase(null);
-      setSyncProgress(0);
-      setLastSyncTime("Just now");
-      setNewSyncCount(0);
-      setRecentlySynced(Object.keys(SYNC_NEW_EVENTS));
-      setSyncedNewEvents(SYNC_NEW_EVENTS);
+      completeSyncCycle();
     }, 4200));
-  }, [isSyncing]);
+  }, [isSyncing, setIsSyncing, setSyncPhase, setSyncProgress, completeSyncCycle]);
 
   // ─── ONBOARDING ──────────────────────────────────
   if (view === "onboarding") {
@@ -6130,7 +6120,7 @@ export default function App() {
   if (view === "companion") {
     return (
       <>
-        <AskAtlas onBack={() => setView("dashboard")} onConversationClick={(topicId) => { const topic = TOPICS.find(t => t.id === topicId); if (topic) handleTopicClick(topic); }} mobile={mobile} contradictions={contradictions} resolvedContradictions={resolvedContradictions} onResolveContradiction={handleResolveContradiction} />
+        <AskAtlas onBack={() => setView("dashboard")} onConversationClick={(topicId) => { const topic = TOPICS.find(t => t.id === topicId); if (topic) handleTopicClick(topic); }} mobile={mobile} contradictions={contradictions} resolvedContradictions={resolvedContradictions} onResolveContradiction={resolveContradiction} />
         <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
         <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="companion" onNavigate={handleNavigate} mobile={mobile} />
       </>
