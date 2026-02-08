@@ -1284,3 +1284,100 @@ export const TOUR_STEPS = [
 ];
 
 export const TOUR_STORAGE_KEY = "atlas_tour_completed";
+
+// ─── PAST ANALOGIES DATA (for "What Would Past-Me Say?") ──
+export const PAST_ANALOGIES = [
+  {
+    id: "pa-1",
+    triggerDecisionId: 1,
+    currentQuestion: "Should I use a managed database for the new project?",
+    analogies: [
+      {
+        relevance: 95,
+        pastDecision: "6 months ago you evaluated managed vs. self-hosted for CourtCollect — chose managed because operational overhead wasn't worth it as a solo developer.",
+        pastDate: "Sep 2024",
+        pastReasoning: "Chose Supabase (managed) because: solo developer = no time for DB admin, Supabase handles auth + storage + realtime out of the box, and the $25/mo cost was worth the time saved on DevOps. 'I don't want to be on-call for my own side project.'",
+        pastSnippet: { user: "Should I self-host PostgreSQL or use Supabase for CourtCollect?", ai: "For a solo developer building a SaaS product, managed is almost always the right call. Supabase gives you Postgres + auth + storage + realtime subscriptions. The operational overhead of self-hosting isn't worth it at your scale." },
+        thenContext: "Building CourtCollect MVP as sole developer. Needed auth, realtime updates, and file storage. Budget-conscious but time-constrained.",
+        nowContext: "More experience with managed services. Have seen both the benefits (speed) and limitations (vendor lock-in) firsthand.",
+        outcome: "Shipped MVP 3 weeks faster than estimated. Zero database incidents in 6 months. Monthly cost: $25.",
+        outcomeType: "positive",
+        topicId: "courtcollect",
+        sourceRef: "CourtCollect · Sep 15, 2024",
+      },
+    ],
+  },
+  {
+    id: "pa-2",
+    triggerDecisionId: 4,
+    currentQuestion: "Is this automation worth building?",
+    analogies: [
+      {
+        relevance: 88,
+        pastDecision: "Last year you built a similar automation for HMPRG campaign management — saved time but maintenance was higher than expected.",
+        pastDate: "Jan 2025",
+        pastReasoning: "Built an n8n workflow to auto-shift ad budgets based on performance metrics. Reasoning: 'Manual budget adjustments take 2 hours/week and I always forget to check on weekends.' Prioritized time savings over simplicity.",
+        pastSnippet: { user: "The Instagram campaigns are outperforming Facebook 3:1. Should I automate the budget reallocation?", ai: "With a 3:1 performance ratio, automating the reallocation makes sense. But build in guardrails — max 20% shift per day, alerts on anomalies." },
+        thenContext: "Managing $800/mo ad budget across two platforms. Manual adjustments were error-prone and time-consuming.",
+        nowContext: "Considering similar automation for a new workflow. More experience with n8n and automation maintenance costs.",
+        outcome: "Saved ~3 hours/week on budget management. But maintenance was higher than expected — spent 4 hours/month fixing edge cases in the automation.",
+        outcomeType: "mixed",
+        topicId: "hmprg",
+        sourceRef: "HMPRG · Jan 15, 2025",
+      },
+      {
+        relevance: 72,
+        pastDecision: "You automated Keymaster's credential rotation — that one was non-negotiable for security.",
+        pastDate: "Jul 2024",
+        pastReasoning: "Built automated credential rotation because 'if I forget to rotate a key, the security model breaks.' Prioritized reliability over complexity. This wasn't a nice-to-have — it was core to the product's security promise.",
+        pastSnippet: { user: "Should I automate the credential rotation for Keymaster?", ai: "For a security product, automated rotation isn't optional — it's essential. Manual rotation introduces human error into your security chain." },
+        thenContext: "Building a password manager where security automation was a core requirement, not a nice-to-have.",
+        nowContext: "The current automation is less security-critical. ROI calculation is different when failure mode is 'inconvenience' vs 'security breach.'",
+        outcome: "Rotation automation has run flawlessly for 8 months. Zero manual interventions needed.",
+        outcomeType: "positive",
+        topicId: "keymaster",
+        sourceRef: "Keymaster · Jul 28, 2024",
+      },
+    ],
+  },
+  {
+    id: "pa-3",
+    triggerDecisionId: 2,
+    currentQuestion: "Should I switch deployment platforms mid-project?",
+    analogies: [
+      {
+        relevance: 91,
+        pastDecision: "You pivoted CourtCollect from Docker + Railway to Vercel after 3 days of friction — and it paid off immediately.",
+        pastDate: "Nov 2024",
+        pastReasoning: "After 3 days of containerization issues, decided the sunk cost wasn't worth continuing. 'The goal is shipping the product, not mastering Docker.' Switched to Vercel + Supabase Cloud which eliminated the containerization layer entirely.",
+        pastSnippet: { user: "Docker keeps failing on Railway. Should I keep debugging or switch platforms?", ai: "Three days of deployment friction is a clear signal. Vercel + Supabase Cloud eliminates the containerization layer entirely and fits your serverless architecture." },
+        thenContext: "3 days deep into Docker debugging. Prisma client generation conflicted with multi-stage builds. Railway support was slow to respond.",
+        nowContext: "Facing a similar platform friction point. The question is the same: when does debugging stop being productive?",
+        outcome: "Switched to Vercel in 2 hours. Deployed successfully on first try. Never looked back.",
+        outcomeType: "positive",
+        topicId: "courtcollect",
+        sourceRef: "CourtCollect · Nov 16, 2024",
+      },
+    ],
+  },
+  {
+    id: "pa-4",
+    triggerDecisionId: 7,
+    currentQuestion: "What's the best way to organize my knowledge system?",
+    analogies: [
+      {
+        relevance: 85,
+        pastDecision: "You chose Zettelkasten for your Obsidian vault after evaluating PARA and simple folder structures.",
+        pastDate: "Dec 2024",
+        pastReasoning: "PARA felt too corporate for personal knowledge. Simple folders wouldn't scale past 50 notes. Zettelkasten's atomic notes matched how you actually think — in connections, not categories. 'I want my notes to surprise me with connections I didn't plan.'",
+        pastSnippet: { user: "I want to set up my Obsidian vault properly. What structure should I use?", ai: "For your use case, a Zettelkasten-inspired structure works best: atomic notes for ideas, Maps of Content for navigation, and daily journals for capture." },
+        thenContext: "Starting fresh with a knowledge management system. Had tried Notion and Google Docs before but outgrew both.",
+        nowContext: "The vault has grown to 200+ notes. Some structural patterns are proving more useful than others.",
+        outcome: "Zettelkasten structure held up well. MOCs became the most-used navigation tool. Daily journals are the best capture mechanism.",
+        outcomeType: "positive",
+        topicId: "obsidian",
+        sourceRef: "Knowledge Mgmt · Dec 1, 2024",
+      },
+    ],
+  },
+];
