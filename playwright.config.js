@@ -18,12 +18,16 @@ export default defineConfig({
     viewport: { width: 1280, height: 900 },
   },
   expect: {
-    toHaveScreenshot: { maxDiffPixelRatio: 0.002, animations: 'disabled', caret: 'hide' },
+    // An absolute budget, not a ratio: 0.002 of a 1280x900 page is ~2,300 px,
+    // enough for a whole word to change unseen (it did: "Parse" vs "Pars").
+    toHaveScreenshot: { maxDiffPixels: 40, animations: 'disabled', caret: 'hide' },
   },
   webServer: {
     command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
     url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
+    // Always build fresh: reusing a server that outlived a previous run once
+    // captured a baseline from a stale bundle.
+    reuseExistingServer: false,
     timeout: 120_000,
   },
   projects: [

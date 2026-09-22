@@ -56,6 +56,8 @@ Adding a view: create `src/views/<Name>.jsx`, add its route to `PATH_TO_VIEW` in
 - **Error handling:** Never use empty `catch {}` blocks. At minimum: `catch (e) { console.warn('context:', e); }`
 - **Accessibility:** Interactive divs need `role="button"`, `tabIndex={0}`, and keyboard event handlers.
 - **Shadowed imports:** `no-shadow` is an error. A local `const meta = ...` next to `import { meta } from '../styles/shared'` compiled fine and silently dropped a font from a timeline stamp; the sweep caught it, the lint now catches it first.
+- **Screenshot tolerance is an absolute pixel budget** (`maxDiffPixels` in `playwright.config.js`), never a ratio: a ratio of a full page hides a changed word, and `--update-snapshots` then leaves the stale PNG in place because the actual is "within tolerance". If a recapture prints no "re-generated" line, the baseline did not change.
+- **Never `pkill`/kill-by-name from the agent shell** (`pkill -f "vite preview"` matches the shell's own command line and kills the session, exit 144). Playwright owns its web server; let it start and stop it (`reuseExistingServer: false`).
 - **Verifying a refactor:** build `main` and the branch, sweep both, compare. Identical markup on every route is the standard for a no-behavior-change PR (`/curation/topics` is the known exception: its confidence values are `Math.random()`).
 
 ## Self-Update Policy

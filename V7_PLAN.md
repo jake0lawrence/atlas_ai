@@ -80,8 +80,8 @@ its route's baseline PNGs; no PR touches two views.
 | # | PR | Route | File | What changes | Done when |
 |---|---|---|---|---|---|
 | 1 | Shell + Nav **(merged, #68)** | all | `App.jsx`, `components/Nav.jsx` | The three-station nav (Atlas / Curate / Companion) with page tabs under the active station, wordmark, actions row (⌘K, sync, Export, Tour), hero only on the dashboard, footer fixed, one tour button. Adds the `SPACE` and `TYPE` scales to `tokens.js`, the `mobile` screenshot project, and removes the last `exhaustive-deps` suppressions. | Render + route tests green; baseline updated for every route (the shell is in all of them); PR text records each principle as accepted or amended. |
-| 2 | Onboarding **(PR open)** | `/` | `views/OnboardingView.jsx` | One card, one CTA: the demo persona is the default path (first persona pre-selected, CTA live on load), own exports sit behind a disclosure and take over the CTA when a file lands, the disabled persona becomes a footnote instead of a dead card, and a four-fact strip (read from the fixtures) replaces the steps row. | Baseline for `/` at 1280 and 390. |
-| 3 | Loading | `/loading` | `views/LoadingView.jsx` | The five-phase pipeline as the story of what Atlas does, on the motion budget. | Same. |
+| 2 | Onboarding **(merged, #69)** | `/` | `views/OnboardingView.jsx` | One card, one CTA: the demo persona is the default path (first persona pre-selected, CTA live on load), own exports sit behind a disclosure and take over the CTA when a file lands, the disabled persona becomes a footnote instead of a dead card, and a four-fact strip (read from the fixtures) replaces the steps row. | Baseline for `/` at 1280 and 390. |
+| 3 | Loading **(PR open)** | `/loading` | `views/LoadingView.jsx` | The five stages (Parse / Normalize / Enrich / Connect / Build) are the page: each shows done / running / waiting, a finished stage keeps its last finding as a one-line summary, the running stage carries the step log, discovered topics land as chips under Enrich. Overall progress bar with a real `progressbar` role, a "Skip to the atlas" link after 1.5 s, and the two infinite animations (brain glow, shimmer) removed; class animations gated behind `prefers-reduced-motion` in `base.js`. | Same. |
 | 4 | Dashboard | `/dashboard` | `views/DashboardView.jsx` | Stat band, journey chart, knowledge map, staleness alerts on the type and spacing scales; empty state for a fresh atlas. | Same, plus palette/sidebar baselines. |
 | 5 | Companion (Ask Atlas) | `/companion` | `views/AskAtlas.jsx` | The demo closer: response cards with citations, the contradiction panel, the source drawer. | Same. |
 | 6 | Timeline + Drilldown | `/topic/:id`, `/topic/:id/conversation/:n` | `views/TimelineView.jsx`, `views/ConversationDrilldown.jsx` | Two views, one PR, because the drilldown is the timeline's detail state. Designed empty state for events without a preview. | Same. |
@@ -135,6 +135,9 @@ Every view PR carries the same body, so review is the same every time:
 - ~~`useRouterSync` still carries two `exhaustive-deps` suppressions~~ → fixed in PR 1
   (router values read through a ref that a layout effect keeps current).
 - ~~The footer says "Atlas · v5."~~ → fixed in PR 1.
+- The screenshot tolerance was a ratio (`maxDiffPixelRatio: 0.002`), which let a
+  changed word pass and left a stale baseline in place. → fixed in PR 3
+  (`maxDiffPixels: 40`, and local runs never reuse a server).
 
 ## What v7 does NOT include
 

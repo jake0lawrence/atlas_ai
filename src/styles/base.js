@@ -36,6 +36,9 @@ export const CSS = `
   .fade-up { animation: fadeUp 0.6s ease both; }
   .slide-in { animation: slideIn 0.5s ease both; }
   .view-transition { animation: viewFadeSlide 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up, .slide-in, .view-transition, .atlas-typing-dot { animation: none !important; }
+  }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: ${alpha(C.gold, 0.15)}; border-radius: 3px; }
