@@ -35,9 +35,12 @@ export const DEEP_LINKS = [
 
 // Everything the sweep and the screenshot baseline visit. `setup` runs in the
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
+// `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
+// flags its own route (V7_PLAN.md, principle 7).
+const MOBILE_ROUTES = new Set(['/', '/dashboard', '/connections', '/companion/diff', '/topic/courtcollect']);
 export const SWEEP_ROUTES = [
-  ...Object.keys(PATH_TO_VIEW).map(path => ({ path })),
-  ...DEEP_LINKS.map(({ path }) => ({ path })),
+  ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
+  ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
 ];

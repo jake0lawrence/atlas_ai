@@ -11,8 +11,8 @@ and there is no backend. `src/main.jsx` is the Vite entry point.
 |---|---|
 | `src/App.jsx` | The shell: reads the Zustand store, owns keyboard shortcuts + the sync cascade, and switches between views. Nothing else. |
 | `src/views/` | One file per full-screen view (`OnboardingView`, `LoadingView`, the five curation screens, `DashboardView`, `AskAtlas`, `RewindMode`, ...). Each exports a default component. |
-| `src/components/` | Shared pieces used by more than one view (`Nav`, `CommandPalette`, `CompanionSidebar`, `GuidedTour`, `StatCard`, badges, sparklines, `ErrorBoundary`). |
-| `src/styles/tokens.js` | **The only file allowed to spell a color.** `C.gold`, `alpha(C.red, 0.1)`, `white(0.3)`, `black(0.5)`, plus the `FONTS` / `BODY` / `MONO` stacks. ESLint (`no-restricted-syntax`) fails on a hex or `rgba(` literal anywhere else. |
+| `src/components/` | Shared pieces used by more than one view (`Nav`, `CommandPalette`, `CompanionSidebar`, `GuidedTour`, `StatCard`, badges, sparklines, `ErrorBoundary`). `Nav` is the shell's top bar: three stations (Atlas / Curate / Companion, `STATIONS`), page tabs under the active one, actions on the right. Every routed view maps to a station (`stationFor`, tested). |
+| `src/styles/tokens.js` | **The only file allowed to spell a color.** `C.gold`, `alpha(C.red, 0.1)`, `white(0.3)`, `black(0.5)`, the `FONTS` / `BODY` / `MONO` stacks, and the `SPACE` / `TYPE` scales (px). ESLint (`no-restricted-syntax`) fails on a hex or `rgba(` literal anywhere else. |
 | `src/styles/shared.js` | Inline-style objects shared across views (`row`, `stack`, `grow`, `screen(mobile)`, `eyebrow`, `display(mobile)`, `title`, `lede`, `body`, `mono`, `track`). Extend with a spread: `{ ...lede(mobile), marginTop: 6 }`. |
 | `src/styles/base.js` | The global `CSS` string (keyframes, scrollbar, font import) every view injects via `<style>`; re-exports the font stacks. |
 | `src/routes.js` | The route table (`PATH_TO_VIEW`, `DEEP_LINKS`, `SWEEP_ROUTES`), shared by the router hook, the render tests, the sweep and the screenshot baseline. |
@@ -32,7 +32,7 @@ Adding a view: create `src/views/<Name>.jsx`, add its route to `PATH_TO_VIEW` in
 - **Production build:** `npm run build` (Vite)
 - **Lint:** `npm run lint` (ESLint 9 flat config, `eslint.config.js`). Zero errors is the bar; React Compiler lints are warnings.
 - **Tests:** `npm run test` (Vitest + jsdom). `src/views/__tests__/views.test.jsx` mounts every view and every route; a view without a case there fails the suite.
-- **Screenshots:** `npm run test:e2e` (Playwright, Chromium, 1280x900, web fonts blocked) diffs every route in `src/routes.js` against `tests/e2e/__screenshots__/`. Change a view on purpose → `npm run test:e2e:update` and commit the PNGs.
+- **Screenshots:** `npm run test:e2e` (Playwright, Chromium, web fonts blocked, paused fake clock) diffs every route in `src/routes.js` against `tests/e2e/__screenshots__/desktop/` (1280x900) and, for routes flagged in `MOBILE_ROUTES`, `__screenshots__/mobile/` (390x844). Change a view on purpose → `npm run test:e2e:update` and commit the PNGs.
 - **Sweep:** `npm run sweep -- --dist dist --out after.json`, then `npm run sweep -- --compare before.json after.json`: renders every route from a built `dist/` and diffs text + markup between two builds. Use it to prove a refactor changed nothing.
 - **All of it:** `npm run check` (lint, test, build). CI runs check + screenshots on every PR (`.github/workflows/ci.yml`).
 - **No TypeScript** — plain JSX
