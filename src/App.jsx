@@ -221,17 +221,6 @@ export default function App() {
     );
   }
 
-  // ─── ASK ATLAS (COMPANION) ─────────────────────
-  if (view === "companion") {
-    return (
-      <>
-        <AskAtlas onBack={() => setView("dashboard")} onConversationClick={(topicId) => { const topic = TOPICS.find(t => t.id === topicId); if (topic) handleTopicClick(topic); }} mobile={mobile} contradictions={contradictions} resolvedContradictions={resolvedContradictions} onResolveContradiction={resolveContradiction} />
-        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
-        <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="companion" onNavigate={handleNavigate} mobile={mobile} />
-      </>
-    );
-  }
-
   // ─── CONVERSATION DRILLDOWN ─────────────────────
   if (view === "conversation" && selectedEvent) {
     return (
@@ -280,6 +269,7 @@ export default function App() {
           />
         )}
 
+        {view === "companion" && <AskAtlas onConversationClick={(topicId) => { const topic = TOPICS.find(t => t.id === topicId); if (topic) handleTopicClick(topic); }} mobile={mobile} contradictions={contradictions} resolvedContradictions={resolvedContradictions} onResolveContradiction={resolveContradiction} />}
         {view === "connections" && <ConnectionsView onTopicClick={handleTopicClick} mobile={mobile} />}
         {view === "evolution" && <EvolutionView mobile={mobile} onRewind={() => setShowRewind(true)} />}
         {view === "beliefDiffs" && <BeliefDiffsView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}

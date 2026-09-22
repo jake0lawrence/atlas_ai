@@ -37,13 +37,26 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/dashboard', '/connections', '/companion/diff', '/topic/courtcollect']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/dashboard', '/companion', '/connections', '/companion/diff', '/topic/courtcollect']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   // The first-visit guided tour covers the dashboard, so the baseline seeds the
   // "tour seen" flags for every route except this one, which captures the tour.
   { path: '/dashboard', id: 'dashboard-tour', tour: true },
+  // Ask Atlas with an answer on screen and its second citation opened.
+  // `mask` hides elements that are not the subject of the shot and move with
+  // the scroll offset (the fixed companion tab rounds differently after a
+  // scroll). Every other route still captures that tab.
+  { path: '/companion', id: 'companion-answer', mask: ['[title^="Open companion"]'], setup: async (page) => {
+    await page.getByRole('button', { name: /current thinking on serverless/ }).click();
+    await page.clock.runFor(1600).catch(() => page.waitForTimeout(1600)); // fake clock in the baseline, real in the sweep
+    await page.getByRole('button', { name: 'Source 2' }).click();
+    await page.clock.runFor(100).catch(() => page.waitForTimeout(100));
+    // The citation scrolls its source into view; reset so fixed elements
+    // (the companion tab) sit in the same place in every full-page capture.
+    await page.evaluate(() => window.scrollTo(0, 0));
+  } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
 ];
