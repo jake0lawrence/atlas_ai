@@ -33,7 +33,7 @@ import DigestView from './views/DigestView';
 import DecisionArchaeology from './views/DecisionArchaeology';
 import RewindMode from './views/RewindMode';
 import DashboardView from './views/DashboardView';
-import { C, alpha, white, SPACE, TYPE } from './styles/tokens';
+import { C, white } from './styles/tokens';
 
 // ─── MAIN APP ───────────────────────────────────────────────
 
@@ -270,16 +270,6 @@ export default function App() {
       <style>{CSS}</style>
       <div style={container}>
         <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
-
-        {view === "dashboard" && (
-          <div style={{ textAlign: "center", marginBottom: mobile ? SPACE.xl : SPACE.xxl }}>
-            <div style={{ fontSize: TYPE.xs, fontFamily: BODY, color: alpha(C.gold, 0.35), textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: SPACE.md, fontWeight: 600 }}>Your AI Knowledge Atlas</div>
-            <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xxl : TYPE.display, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-              3 Years of Thinking,{mobile ? <br /> : " "}<span style={{ color: C.gold }}>Mapped</span>
-            </h1>
-            <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.sm : TYPE.base, color: white(0.3), marginTop: SPACE.sm }}>Jan 2023 — Feb 2026 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
-          </div>
-        )}
 
         {view === "dashboard" && (
           <DashboardView

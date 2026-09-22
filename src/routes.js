@@ -41,6 +41,9 @@ const MOBILE_ROUTES = new Set(['/', '/loading', '/dashboard', '/connections', '/
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
+  // The first-visit guided tour covers the dashboard, so the baseline seeds the
+  // "tour seen" flags for every route except this one, which captures the tour.
+  { path: '/dashboard', id: 'dashboard-tour', tour: true },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
 ];

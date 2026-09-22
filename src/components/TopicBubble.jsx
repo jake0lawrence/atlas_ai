@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   BRIEFINGS, getTopicFreshness, RECURATION_COUNTS,
 } from '../data/constants';
@@ -10,6 +10,8 @@ import { C, alpha, white, black } from '../styles/tokens';
 const TopicBubble = ({ topic, maxCount, onClick, onBriefMe, index, mobile, recentlySynced }) => {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
+  const touchTimer = useRef(null);
+  useEffect(() => () => clearTimeout(touchTimer.current), []);
   const baseSize = mobile ? 44 : 52;
   const scaleRange = mobile ? 56 : 80;
   const size = baseSize + (topic.count / maxCount) * scaleRange;
@@ -22,9 +24,9 @@ const TopicBubble = ({ topic, maxCount, onClick, onBriefMe, index, mobile, recen
 
   return (
     <div onClick={() => onClick(topic)}
-      role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(topic); }}}
+      role="button" tabIndex={0} aria-label={`${topic.name}: ${topic.count} conversations${hasUncurated ? `, ${RECURATION_COUNTS[topic.id]} new since last review` : ""}`} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(topic); }}}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      onTouchStart={() => setHovered(true)} onTouchEnd={() => { setTimeout(() => setHovered(false), 1500); }}
+      onTouchStart={() => setHovered(true)} onTouchEnd={() => { clearTimeout(touchTimer.current); touchTimer.current = setTimeout(() => setHovered(false), 1500); }}
       style={{
         width: size, height: size, borderRadius: "50%",
         background: `radial-gradient(circle at 30% 30%, ${topic.color}35, ${topic.color}10)`,
@@ -35,7 +37,7 @@ const TopicBubble = ({ topic, maxCount, onClick, onBriefMe, index, mobile, recen
         cursor: "pointer", position: "relative", flexShrink: 0,
         filter: isDormant ? "saturate(0.35)" : "none",
         boxShadow: hovered ? `0 0 30px ${topic.color}20, inset 0 0 15px ${topic.color}08` : "none",
-        animation: isNewlySynced && visible ? "newGlow 2s ease-in-out 3" : hasUncurated && visible ? "freshPulse 3s ease-in-out infinite" : "none",
+        animation: isNewlySynced && visible ? "newGlow 2s ease-in-out 3" : hasUncurated && visible ? "freshPulse 3s ease-in-out 3" : "none",
       }}>
       <span style={{ fontSize: size > 80 ? 22 : size > 60 ? 16 : 13 }}>{topic.icon}</span>
       {size > (mobile ? 65 : 75) && (
