@@ -3,11 +3,13 @@ import {
   LOAD_PIPELINE, PHASE_META,
 } from '../data/constants';
 import { FONTS, BODY, MONO, CSS } from '../styles/base';
+import { C, alpha, white } from '../styles/tokens';
+import { row, stackTight } from '../styles/shared';
 
 // ═══════════════════════════════════════════════════════════════
 // ENHANCED LOADING VIEW
 // ═══════════════════════════════════════════════════════════════
-const LoadingView = ({ onComplete, mobile, w }) => {
+const LoadingView = ({ onComplete, mobile }) => {
   const [stageIdx, setStageIdx] = useState(0);
   const [discoveries, setDiscoveries] = useState([]);
   const [showReveal, setShowReveal] = useState(false);
@@ -40,7 +42,7 @@ const LoadingView = ({ onComplete, mobile, w }) => {
   const convoCount = Math.floor((stage.pct / 100) * totalConvos);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#08080C", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: mobile ? "24px 16px" : "32px", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: C.bg0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: mobile ? "24px 16px" : "32px", position: "relative", overflow: "hidden" }}>
       <style>{CSS}</style>
 
       {/* Ambient glow that shifts with phase */}
@@ -63,11 +65,11 @@ const LoadingView = ({ onComplete, mobile, w }) => {
 
         {/* Status message */}
         <div style={{ textAlign: "center", minHeight: 56, marginBottom: 24 }}>
-          <div style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 22, color: "#fff", marginBottom: 6, transition: "all 0.3s" }}>
+          <div style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 22, color: C.white, marginBottom: 6, transition: "all 0.3s" }}>
             {stage.msg}
           </div>
           {stage.detail && (
-            <div key={stageIdx} className="fade-up" style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
+            <div key={stageIdx} className="fade-up" style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: white(0.3), lineHeight: 1.5 }}>
               {stage.detail}
             </div>
           )}
@@ -75,7 +77,7 @@ const LoadingView = ({ onComplete, mobile, w }) => {
 
         {/* Progress bar */}
         <div style={{ marginBottom: 10 }}>
-          <div style={{ width: "100%", height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+          <div style={{ width: "100%", height: 5, background: white(0.04), borderRadius: 3, overflow: "hidden" }}>
             <div style={{
               width: `${stage.pct}%`, height: "100%",
               background: `linear-gradient(90deg, ${phaseMeta.color}CC, ${phaseMeta.color})`,
@@ -84,7 +86,7 @@ const LoadingView = ({ onComplete, mobile, w }) => {
             }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-            <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
+            <span style={{ fontFamily: MONO, fontSize: 10, color: white(0.15) }}>
               {convoCount.toLocaleString()} / {totalConvos.toLocaleString()} conversations
             </span>
             <span style={{ fontFamily: MONO, fontSize: 10, color: phaseMeta.color + "80" }}>
@@ -95,7 +97,7 @@ const LoadingView = ({ onComplete, mobile, w }) => {
 
         {/* Phase progress dots */}
         <div style={{ display: "flex", justifyContent: "center", gap: 4, margin: "20px 0 28px" }}>
-          {Object.entries(PHASE_META).map(([key, meta], i) => {
+          {Object.entries(PHASE_META).map(([key, meta]) => {
             const phaseOrder = ["parse", "normalize", "enrich", "connect", "build"];
             const currentPhaseIdx = phaseOrder.indexOf(stage.phase);
             const thisIdx = phaseOrder.indexOf(key);
@@ -105,7 +107,7 @@ const LoadingView = ({ onComplete, mobile, w }) => {
               <div key={key} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <div style={{
                   width: isActive ? 24 : 8, height: 8, borderRadius: 4,
-                  background: isDone ? meta.color : isActive ? meta.color : "rgba(255,255,255,0.06)",
+                  background: isDone ? meta.color : isActive ? meta.color : white(0.06),
                   opacity: isDone ? 0.5 : 1,
                   transition: "all 0.4s cubic-bezier(0.16,1,0.3,1)",
                   boxShadow: isActive ? `0 0 8px ${meta.color}40` : "none",
@@ -118,25 +120,25 @@ const LoadingView = ({ onComplete, mobile, w }) => {
         {/* Discovery feed */}
         {discoveries.length > 0 && (
           <div style={{
-            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)",
+            background: white(0.02), border: `1px solid ${white(0.05)}`,
             borderRadius: 12, padding: mobile ? "14px 16px" : "16px 20px",
           }}>
-            <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
+            <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.2), textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
               Discovered Topics
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={stackTight}>
               {discoveries.map((d, i) => (
                 <div key={i} className="slide-in" style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: "8px 12px", borderRadius: 8,
-                  background: "rgba(255,255,255,0.02)",
+                  background: white(0.02),
                   animationDelay: `${i * 50}ms`,
                 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={row}>
                     <span style={{ fontSize: 16 }}>{d.icon}</span>
-                    <span style={{ fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>{d.name}</span>
+                    <span style={{ fontFamily: BODY, fontSize: 13, color: white(0.6), fontWeight: 500 }}>{d.name}</span>
                   </div>
-                  <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(251,191,36,0.4)" }}>{d.count} convos</span>
+                  <span style={{ fontFamily: MONO, fontSize: 11, color: alpha(C.gold, 0.4) }}>{d.count} convos</span>
                 </div>
               ))}
             </div>
@@ -146,12 +148,12 @@ const LoadingView = ({ onComplete, mobile, w }) => {
         {/* Reveal animation */}
         {showReveal && (
           <div className="fade-up" style={{ textAlign: "center", marginTop: 28 }}>
-            <div style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 24, color: "#FBBF24", fontWeight: 700 }}>
+            <div style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 24, color: C.gold, fontWeight: 700 }}>
               Your atlas is ready.
             </div>
             <div style={{
-              fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.25)", marginTop: 6,
-              background: "linear-gradient(90deg, rgba(251,191,36,0) 0%, rgba(251,191,36,0.08) 50%, rgba(251,191,36,0) 100%)",
+              fontFamily: BODY, fontSize: 12, color: white(0.25), marginTop: 6,
+              background: `linear-gradient(90deg, ${alpha(C.gold, 0)} 0%, ${alpha(C.gold, 0.08)} 50%, ${alpha(C.gold, 0)} 100%)`,
               backgroundSize: "200% 100%", animation: "shimmer 2s infinite linear",
               padding: "6px 0", borderRadius: 4,
             }}>

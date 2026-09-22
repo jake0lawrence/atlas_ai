@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { BODY, MONO } from '../styles/base';
+import { C, white } from '../styles/tokens';
 
-const DropZone = ({ platform, icon, color, subtitle, accepted, onDrop, onFile, mobile }) => {
+const DropZone = ({ platform, icon, color, subtitle, accepted, onFile, mobile }) => {
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef(null);
 
@@ -25,7 +26,7 @@ const DropZone = ({ platform, icon, color, subtitle, accepted, onDrop, onFile, m
         flex: 1, minWidth: mobile ? "100%" : 280,
         border: `2px dashed ${accepted ? color : dragOver ? color : `${color}30`}`,
         borderRadius: 16, padding: mobile ? "28px 20px" : "36px 28px",
-        background: accepted ? `${color}08` : dragOver ? `${color}06` : "rgba(255,255,255,0.015)",
+        background: accepted ? `${color}08` : dragOver ? `${color}06` : white(0.015),
         cursor: accepted ? "default" : "pointer",
         transition: "all 0.35s cubic-bezier(0.16,1,0.3,1)",
         animation: dragOver ? "borderGlow 1.5s infinite" : "none",
@@ -38,13 +39,13 @@ const DropZone = ({ platform, icon, color, subtitle, accepted, onDrop, onFile, m
         <div className="fade-up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${color}20`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>✓</div>
           <div style={{ fontFamily: BODY, fontSize: 14, color, fontWeight: 600 }}>{platform} ready</div>
-          <div style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.3)", wordBreak: "break-all" }}>{accepted}</div>
+          <div style={{ fontFamily: MONO, fontSize: 11, color: white(0.3), wordBreak: "break-all" }}>{accepted}</div>
         </div>
       ) : (
         <>
           <div style={{ fontSize: mobile ? 36 : 44, marginBottom: 12, animation: dragOver ? "float 1.5s infinite ease-in-out" : "none" }}>{icon}</div>
-          <div style={{ fontFamily: BODY, fontSize: mobile ? 15 : 17, color: "#fff", fontWeight: 600, marginBottom: 4 }}>{platform}</div>
-          <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.3)", marginBottom: 14, lineHeight: 1.5 }}>{subtitle}</div>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 15 : 17, color: C.white, fontWeight: 600, marginBottom: 4 }}>{platform}</div>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.3), marginBottom: 14, lineHeight: 1.5 }}>{subtitle}</div>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "8px 16px", borderRadius: 8,

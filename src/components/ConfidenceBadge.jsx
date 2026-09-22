@@ -1,4 +1,5 @@
 import { MONO } from '../styles/base';
+import { C } from '../styles/tokens';
 
 // ═══════════════════════════════════════════════════════════════
 // REVIEW QUEUE (v5 Curation Pipeline — Section 1A)
@@ -7,7 +8,7 @@ import { MONO } from '../styles/base';
 const ConfidenceBadge = ({ confidence }) => {
   const isHigh = confidence >= 90;
   const isMed = confidence >= 70 && confidence < 90;
-  const color = isHigh ? "#10B981" : isMed ? "#F59E0B" : "#EF4444";
+  const color = isHigh ? C.green : isMed ? C.amber : C.red;
   const label = isHigh ? "High" : isMed ? "Medium" : "Low";
   return (
     <div style={{

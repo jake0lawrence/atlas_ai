@@ -3,6 +3,7 @@ import {
   TOUR_STEPS, TOUR_STORAGE_KEY,
 } from '../data/constants';
 import { FONTS, BODY, MONO } from '../styles/base';
+import { C, alpha, white, black } from '../styles/tokens';
 
 // ═══════════════════════════════════════════════════════════════
 // GUIDED TOUR MODE (7A)
@@ -76,20 +77,20 @@ const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: mobile ? 22 : 26 }}>{current.icon}</span>
-          <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 21, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>{current.title}</h3>
+          <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 21, fontWeight: 700, color: C.white, lineHeight: 1.2 }}>{current.title}</h3>
         </div>
         <button onClick={handleFinish} style={{
-          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+          background: white(0.05), border: `1px solid ${white(0.08)}`,
           borderRadius: 6, padding: "3px 8px", cursor: "pointer",
-          fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.25)",
+          fontFamily: MONO, fontSize: 10, color: white(0.25),
         }}>ESC</button>
       </div>
-      <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.55)", lineHeight: 1.65, marginBottom: 24 }}>{current.description}</p>
+      <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: white(0.55), lineHeight: 1.65, marginBottom: 24 }}>{current.description}</p>
       {current.highlight && (
         <div style={{
-          background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.15)",
+          background: alpha(C.gold, 0.06), border: `1px solid ${alpha(C.gold, 0.15)}`,
           borderRadius: 8, padding: "8px 12px", marginBottom: 20,
-          fontFamily: BODY, fontSize: 11, color: "#FBBF24", fontWeight: 500,
+          fontFamily: BODY, fontSize: 11, color: C.gold, fontWeight: 500,
         }}>The curation pipeline is Atlas's key differentiator — your judgment shapes the knowledge base.</div>
       )}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -97,7 +98,7 @@ const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = 
           {steps.map((_, i) => (
             <div key={i} style={{
               width: i === step ? 18 : 6, height: 6, borderRadius: 3,
-              background: i === step ? "#FBBF24" : i < step ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)",
+              background: i === step ? C.gold : i < step ? alpha(C.gold, 0.3) : white(0.1),
               transition: "all 0.25s",
             }} />
           ))}
@@ -105,26 +106,26 @@ const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = 
         <div style={{ display: "flex", gap: 8 }}>
           {!isFirst && (
             <button onClick={() => setStep(s => s - 1)} style={{
-              fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.4)",
-              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+              fontFamily: BODY, fontSize: 12, fontWeight: 500, color: white(0.4),
+              background: white(0.04), border: `1px solid ${white(0.08)}`,
               borderRadius: 8, padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
             }}>Back</button>
           )}
           {isFirst && (
             <button onClick={handleFinish} style={{
-              fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.3)",
+              fontFamily: BODY, fontSize: 12, fontWeight: 500, color: white(0.3),
               background: "transparent", border: "none", padding: "7px 10px", cursor: "pointer",
             }}>Skip tour</button>
           )}
           <button onClick={() => isLast ? handleFinish() : setStep(s => s + 1)} style={{
             fontFamily: BODY, fontSize: 12, fontWeight: 600,
-            color: "#08080C", background: "#FBBF24",
+            color: C.bg0, background: C.gold,
             border: "none", borderRadius: 8, padding: "7px 20px",
             cursor: "pointer", transition: "all 0.2s",
           }}>{isLast ? "Get Started" : "Next"}</button>
         </div>
       </div>
-      <div style={{ textAlign: "center", marginTop: 12, fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
+      <div style={{ textAlign: "center", marginTop: 12, fontFamily: MONO, fontSize: 10, color: white(0.15) }}>
         {step + 1} / {steps.length} · Use arrow keys to navigate
       </div>
     </>
@@ -132,10 +133,10 @@ const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = 
 
   // Card style (shared between both modes)
   const cardStyle = {
-    background: current.highlight ? "linear-gradient(135deg, #131318 0%, rgba(251,191,36,0.06) 100%)" : "#131318",
-    border: `1px solid ${current.highlight ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)"}`,
+    background: current.highlight ? `linear-gradient(135deg, ${C.bg2} 0%, ${alpha(C.gold, 0.06)} 100%)` : C.bg2,
+    border: `1px solid ${current.highlight ? alpha(C.gold, 0.3) : white(0.1)}`,
     borderRadius: 16, padding: mobile ? "24px 20px" : "28px 28px 24px",
-    boxShadow: current.highlight ? "0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(251,191,36,0.08)" : "0 24px 80px rgba(0,0,0,0.5)",
+    boxShadow: current.highlight ? `0 24px 80px ${black(0.6)}, 0 0 40px ${alpha(C.gold, 0.08)}` : `0 24px 80px ${black(0.5)}`,
     animation: "fadeUp 0.25s ease both",
   };
 
@@ -159,7 +160,7 @@ const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = 
           width: targetRect.width + spotPad * 2,
           height: targetRect.height + spotPad * 2,
           borderRadius: 12,
-          boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)",
+          boxShadow: `0 0 0 9999px ${black(0.6)}`,
           pointerEvents: "none",
           transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
           zIndex: 10001,
@@ -172,7 +173,7 @@ const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = 
           width: targetRect.width + spotPad * 2,
           height: targetRect.height + spotPad * 2,
           borderRadius: 12,
-          border: "1.5px solid rgba(251,191,36,0.4)",
+          border: `1.5px solid ${alpha(C.gold, 0.4)}`,
           pointerEvents: "none",
           transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
           zIndex: 10002,
@@ -197,7 +198,7 @@ const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = 
   // ── Centered mode: for steps without a specific target element ──
   return (
     <div role="dialog" aria-modal="true" aria-label="Guided tour" style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={handleFinish}>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", transition: "opacity 0.3s" }} />
+      <div style={{ position: "fixed", inset: 0, background: black(0.65), transition: "opacity 0.3s" }} />
       <div onClick={e => e.stopPropagation()} style={{
         position: "relative", width: mobile ? "90%" : 420, maxWidth: "90vw",
         zIndex: 1,

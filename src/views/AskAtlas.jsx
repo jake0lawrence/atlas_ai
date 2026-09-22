@@ -4,6 +4,8 @@ import {
   CONTRADICTION_TYPE_CONFIG, RESOLUTION_OPTIONS,
 } from '../data/constants';
 import { FONTS, BODY, MONO, CSS } from '../styles/base';
+import { C, alpha, white } from '../styles/tokens';
+import { mono, monoSmall } from '../styles/shared';
 
 // ─── CONVERSATION DRILLDOWN VIEW ─────────────────────────────
 // ═══════════════════════════════════════════════════════════════
@@ -74,10 +76,10 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
   };
 
   const getConfidenceLabel = (c) => {
-    if (c >= 0.9) return { text: "High confidence", color: "#10B981" };
-    if (c >= 0.75) return { text: "Good confidence", color: "#FBBF24" };
-    if (c >= 0.5) return { text: "Moderate confidence", color: "#F97316" };
-    return { text: "Low confidence", color: "#EF4444" };
+    if (c >= 0.9) return { text: "High confidence", color: C.green };
+    if (c >= 0.75) return { text: "Good confidence", color: C.gold };
+    if (c >= 0.5) return { text: "Moderate confidence", color: C.orange };
+    return { text: "Low confidence", color: C.red };
   };
 
   const renderAnswer = (text) => {
@@ -87,8 +89,8 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
       if (match) {
         return (
           <span key={i} style={{
-            fontFamily: MONO, fontSize: 10, color: "#FBBF24",
-            background: "rgba(251,191,36,0.12)", padding: "1px 5px",
+            fontFamily: MONO, fontSize: 10, color: C.gold,
+            background: alpha(C.gold, 0.12), padding: "1px 5px",
             borderRadius: 4, cursor: "default", fontWeight: 500,
             verticalAlign: "super", lineHeight: 1,
           }}>{part}</span>
@@ -102,7 +104,6 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
   const renderContradictionSidebar = () => {
     const activeContradictions = contradictions || [];
     const resolved = resolvedContradictions || [];
-    const totalCount = activeContradictions.length + resolved.length;
 
     return (
       <div style={{
@@ -110,25 +111,25 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
         flexShrink: 0,
         overflowY: "auto",
         padding: mobile ? "16px" : "0 0 0 20px",
-        borderLeft: mobile ? "none" : "1px solid rgba(255,255,255,0.06)",
+        borderLeft: mobile ? "none" : `1px solid ${white(0.06)}`,
       }}>
         {/* Sidebar header */}
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-            <div style={{ fontFamily: MONO, fontSize: 10, color: "rgba(251,191,36,0.5)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <div style={{ fontFamily: MONO, fontSize: 10, color: alpha(C.gold, 0.5), fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Thinking Drift
             </div>
             {activeContradictions.length > 0 && (
               <span style={{
                 fontFamily: MONO, fontSize: 10, fontWeight: 600,
-                color: "#EF4444", background: "rgba(239,68,68,0.12)",
+                color: C.red, background: alpha(C.red, 0.12),
                 padding: "2px 7px", borderRadius: 10,
               }}>
                 {activeContradictions.length}
               </span>
             )}
           </div>
-          <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.2)", lineHeight: 1.4 }}>
+          <div style={{ fontFamily: BODY, fontSize: 11, color: white(0.2), lineHeight: 1.4 }}>
             Positions that may have shifted since earlier decisions.
           </div>
         </div>
@@ -137,7 +138,7 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
         {activeContradictions.length === 0 && resolved.length === 0 && (
           <div style={{ textAlign: "center", padding: "24px 0" }}>
             <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.3 }}>✓</div>
-            <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.2)" }}>No contradictions detected</div>
+            <div style={{ fontFamily: BODY, fontSize: 12, color: white(0.2) }}>No contradictions detected</div>
           </div>
         )}
 
@@ -150,8 +151,8 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
             <div
               key={c.id}
               style={{
-                background: `rgba(${c.type === "hard" ? "239,68,68" : c.type === "soft" ? "249,115,22" : "168,85,247"},${typeConfig.bgAlpha})`,
-                border: `1px solid rgba(${c.type === "hard" ? "239,68,68" : c.type === "soft" ? "249,115,22" : "168,85,247"},0.15)`,
+                background: alpha(c.type === "hard" ? C.red : c.type === "soft" ? C.orange : C.purple, typeConfig.bgAlpha),
+                border: `1px solid ${alpha(c.type === "hard" ? C.red : c.type === "soft" ? C.orange : C.purple, 0.15)}`,
                 borderRadius: 10,
                 padding: "12px 14px",
                 marginBottom: 10,
@@ -169,13 +170,13 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
                 <span style={{ fontFamily: BODY, fontSize: 10, fontWeight: 600, color: typeConfig.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   {typeConfig.label}
                 </span>
-                <span style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.15)", marginLeft: "auto" }}>
+                <span style={{ fontFamily: BODY, fontSize: 10, color: white(0.15), marginLeft: "auto" }}>
                   {c.icon} {c.topic}
                 </span>
               </div>
 
               {/* Summary */}
-              <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5, marginBottom: isExpanded ? 12 : 0 }}>
+              <div style={{ fontFamily: BODY, fontSize: 12, color: white(0.5), lineHeight: 1.5, marginBottom: isExpanded ? 12 : 0 }}>
                 {c.summary}
               </div>
 
@@ -184,15 +185,15 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
                 <div style={{ animation: "fadeUp 0.3s ease both" }} onClick={(e) => e.stopPropagation()}>
                   {/* Earlier position */}
                   <div style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: white(0.03),
+                    border: `1px solid ${white(0.06)}`,
                     borderRadius: 8, padding: "10px 12px", marginBottom: 8,
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", fontWeight: 600 }}>EARLIER</span>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.15)" }}>{c.earlier.source.conversationDate}</span>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: white(0.25), fontWeight: 600 }}>EARLIER</span>
+                      <span style={monoSmall}>{c.earlier.source.conversationDate}</span>
                     </div>
-                    <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>
+                    <div style={{ fontFamily: BODY, fontSize: 11, color: white(0.4), lineHeight: 1.5 }}>
                       {c.earlier.position}
                     </div>
                     <div
@@ -205,15 +206,15 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
 
                   {/* Current position */}
                   <div style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: white(0.03),
+                    border: `1px solid ${white(0.06)}`,
                     borderRadius: 8, padding: "10px 12px", marginBottom: 10,
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", fontWeight: 600 }}>CURRENT</span>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.15)" }}>{c.current.source.conversationDate}</span>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: white(0.25), fontWeight: 600 }}>CURRENT</span>
+                      <span style={monoSmall}>{c.current.source.conversationDate}</span>
                     </div>
-                    <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>
+                    <div style={{ fontFamily: BODY, fontSize: 11, color: white(0.4), lineHeight: 1.5 }}>
                       {c.current.position}
                     </div>
                     <div
@@ -226,28 +227,28 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
 
                   {/* Resolve buttons */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                    <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.2)", marginBottom: 2, fontWeight: 500 }}>RESOLVE</div>
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: white(0.2), marginBottom: 2, fontWeight: 500 }}>RESOLVE</div>
                     {RESOLUTION_OPTIONS.map((opt) => (
                       <button
                         key={opt.id}
                         onClick={() => handleResolve(c.id, opt.id)}
                         style={{
                           fontFamily: BODY, fontSize: 11, fontWeight: 500,
-                          color: "rgba(255,255,255,0.55)",
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.08)",
+                          color: white(0.55),
+                          background: white(0.03),
+                          border: `1px solid ${white(0.08)}`,
                           borderRadius: 6, padding: "7px 10px",
                           cursor: "pointer", transition: "all 0.2s",
                           display: "flex", alignItems: "center", gap: 7,
                           textAlign: "left", width: "100%",
                         }}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${typeConfig.color}40`; e.currentTarget.style.background = `${typeConfig.color}08`; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = white(0.08); e.currentTarget.style.background = white(0.03); }}
                       >
                         <span style={{ fontSize: 12, flexShrink: 0, opacity: 0.7 }}>{opt.icon}</span>
                         <div>
                           <div style={{ fontWeight: 600, fontSize: 11 }}>{opt.label}</div>
-                          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 1 }}>{opt.desc}</div>
+                          <div style={{ fontSize: 10, color: white(0.25), marginTop: 1 }}>{opt.desc}</div>
                         </div>
                       </button>
                     ))}
@@ -265,7 +266,7 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
               onClick={() => setShowResolved(!showResolved)}
               style={{
                 fontFamily: BODY, fontSize: 11, fontWeight: 500,
-                color: "rgba(255,255,255,0.25)", background: "none",
+                color: white(0.25), background: "none",
                 border: "none", cursor: "pointer", padding: "4px 0",
                 display: "flex", alignItems: "center", gap: 6,
               }}
@@ -280,15 +281,15 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
                   const resolution = RESOLUTION_OPTIONS.find(r => r.id === c.resolution);
                   return (
                     <div key={c.id} style={{
-                      background: "rgba(255,255,255,0.015)",
-                      border: "1px solid rgba(255,255,255,0.04)",
+                      background: white(0.015),
+                      border: `1px solid ${white(0.04)}`,
                       borderRadius: 8, padding: "8px 10px", opacity: 0.6,
                     }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontSize: 10, color: "#10B981" }}>✓</span>
-                        <span style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.3)", fontWeight: 500 }}>{c.topic}</span>
+                        <span style={{ fontSize: 10, color: C.green }}>✓</span>
+                        <span style={{ fontFamily: BODY, fontSize: 10, color: white(0.3), fontWeight: 500 }}>{c.topic}</span>
                       </div>
-                      <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.2)", lineHeight: 1.4 }}>
+                      <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.2), lineHeight: 1.4 }}>
                         Resolved: {resolution?.label || c.resolution}
                       </div>
                     </div>
@@ -303,18 +304,18 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#08080C" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: C.bg0 }}>
       <style>{CSS}</style>
 
       {/* Header */}
       <div style={{ padding: mobile ? "20px 16px 0" : "28px 40px 0", maxWidth: 1200, margin: "0 auto", width: "100%" }}>
-        <button onClick={onBack} style={{ fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "8px 16px", cursor: "pointer", marginBottom: 16 }}>← Back to dashboard</button>
+        <button onClick={onBack} style={{ fontFamily: BODY, fontSize: 13, color: white(0.4), background: white(0.04), border: `1px solid ${white(0.08)}`, borderRadius: 8, padding: "8px 16px", cursor: "pointer", marginBottom: 16 }}>← Back to dashboard</button>
         <div style={{ textAlign: "center", marginBottom: mobile ? 16 : 24 }}>
-          <div style={{ fontSize: mobile ? 10 : 12, fontFamily: BODY, color: "rgba(251,191,36,0.35)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 6, fontWeight: 600 }}>Companion</div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 28 : 36, fontWeight: 800, color: "#fff", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            Ask <span style={{ color: "#FBBF24" }}>Atlas</span>
+          <div style={{ fontSize: mobile ? 10 : 12, fontFamily: BODY, color: alpha(C.gold, 0.35), textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 6, fontWeight: 600 }}>Companion</div>
+          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 28 : 36, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+            Ask <span style={{ color: C.gold }}>Atlas</span>
           </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: "rgba(255,255,255,0.25)", marginTop: 6 }}>Query your knowledge base. Get answers in your own words.</p>
+          <p style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: white(0.25), marginTop: 6 }}>Query your knowledge base. Get answers in your own words.</p>
         </div>
       </div>
 
@@ -328,7 +329,7 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
               {messages.length === 0 && (
                 <div style={{ textAlign: "center", padding: mobile ? "40px 0" : "60px 0", animation: "fadeUp 0.6s ease both" }}>
                   <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.6 }}>◈</div>
-                  <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: "rgba(255,255,255,0.3)", lineHeight: 1.6, maxWidth: 400, margin: "0 auto" }}>
+                  <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: white(0.3), lineHeight: 1.6, maxWidth: 400, margin: "0 auto" }}>
                     Ask anything about your 3,847 conversations across 14 topics. Atlas synthesizes answers from your own words.
                   </p>
                 </div>
@@ -340,13 +341,13 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
                     <div key={i} style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16, animation: "fadeUp 0.35s ease both" }}>
                       <div style={{
                         maxWidth: mobile ? "90%" : "75%",
-                        background: "linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.04))",
-                        border: "1px solid rgba(251,191,36,0.2)",
+                        background: `linear-gradient(135deg, ${alpha(C.gold, 0.1)}, ${alpha(C.gold, 0.04)})`,
+                        border: `1px solid ${alpha(C.gold, 0.2)}`,
                         borderRadius: "14px 14px 4px 14px",
                         padding: mobile ? "10px 14px" : "12px 18px",
                       }}>
-                        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.45)", marginBottom: 5, fontWeight: 500 }}>You</div>
-                        <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.5 }}>{msg.text}</div>
+                        <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.gold, 0.45), marginBottom: 5, fontWeight: 500 }}>You</div>
+                        <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: white(0.75), lineHeight: 1.5 }}>{msg.text}</div>
                       </div>
                     </div>
                   );
@@ -358,45 +359,45 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
                 return (
                   <div key={i} style={{ marginBottom: 24, animation: "fadeUp 0.5s ease both" }}>
                     <div style={{
-                      background: "rgba(255,255,255,0.02)",
-                      border: "1px solid rgba(255,255,255,0.06)",
+                      background: white(0.02),
+                      border: `1px solid ${white(0.06)}`,
                       borderRadius: 14,
                       padding: mobile ? "16px" : "20px 24px",
                     }}>
                       {/* Atlas label + badges */}
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-                        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.5)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Atlas</div>
+                        <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.gold, 0.5), fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Atlas</div>
                         {conf && (
                           <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: `${conf.color}15`, color: conf.color, fontWeight: 500 }}>
                             {conf.text} · {Math.round(msg.confidence * 100)}%
                           </span>
                         )}
                         {msg.isDemo && (
-                          <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "rgba(139,92,246,0.1)", color: "#8B5CF6", fontWeight: 500 }}>
+                          <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: alpha(C.violet, 0.1), color: C.violet, fontWeight: 500 }}>
                             Demo Mode
                           </span>
                         )}
                         {msg.freshnessWarning && (
-                          <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "rgba(239,68,68,0.08)", color: "#EF4444", fontWeight: 500 }}>
+                          <span style={{ fontFamily: BODY, fontSize: 10, padding: "2px 8px", borderRadius: 20, background: alpha(C.red, 0.08), color: C.red, fontWeight: 500 }}>
                             ⏳ Stale sources
                           </span>
                         )}
                       </div>
 
                       {/* Synthesized answer */}
-                      <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, marginBottom: msg.sources && msg.sources.length > 0 ? 16 : 0 }}>
+                      <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: white(0.65), lineHeight: 1.7, marginBottom: msg.sources && msg.sources.length > 0 ? 16 : 0 }}>
                         {renderAnswer(msg.answer)}
                       </div>
 
                       {/* Freshness warning detail */}
                       {msg.freshnessWarning && (
                         <div style={{
-                          background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.1)",
+                          background: alpha(C.red, 0.04), border: `1px solid ${alpha(C.red, 0.1)}`,
                           borderRadius: 8, padding: "8px 12px", marginBottom: 12,
                           display: "flex", alignItems: "center", gap: 8,
                         }}>
                           <span style={{ fontSize: 12 }}>⏳</span>
-                          <span style={{ fontFamily: BODY, fontSize: 11, color: "rgba(239,68,68,0.7)", lineHeight: 1.4 }}>{msg.freshnessWarning}</span>
+                          <span style={{ fontFamily: BODY, fontSize: 11, color: alpha(C.red, 0.7), lineHeight: 1.4 }}>{msg.freshnessWarning}</span>
                         </div>
                       )}
 
@@ -404,8 +405,8 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
                       {msg.sources && msg.sources.length > 0 && (
                         <button onClick={() => toggleSource(i)} style={{
                           fontFamily: BODY, fontSize: 12, fontWeight: 500,
-                          color: "rgba(251,191,36,0.6)", background: "rgba(251,191,36,0.06)",
-                          border: "1px solid rgba(251,191,36,0.12)", borderRadius: 8,
+                          color: alpha(C.gold, 0.6), background: alpha(C.gold, 0.06),
+                          border: `1px solid ${alpha(C.gold, 0.12)}`, borderRadius: 8,
                           padding: "7px 14px", cursor: "pointer", transition: "all 0.25s",
                           display: "flex", alignItems: "center", gap: 6,
                         }}>
@@ -421,36 +422,36 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
                             const topic = TOPICS.find(t => t.id === src.topicId);
                             return (
                               <div key={src.id} style={{
-                                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                                background: white(0.02), border: `1px solid ${white(0.06)}`,
                                 borderRadius: 10, padding: mobile ? "12px" : "14px 16px",
                                 cursor: "pointer", transition: "all 0.2s",
                               }}
                               onClick={() => onConversationClick && onConversationClick(src.topicId)}
-                              onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(251,191,36,0.2)"; e.currentTarget.style.background = "rgba(251,191,36,0.03)"; }}
-                              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+                              onMouseEnter={e => { e.currentTarget.style.borderColor = alpha(C.gold, 0.2); e.currentTarget.style.background = alpha(C.gold, 0.03); }}
+                              onMouseLeave={e => { e.currentTarget.style.borderColor = white(0.06); e.currentTarget.style.background = white(0.02); }}
                               >
                                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                                   <span style={{
                                     fontFamily: MONO, fontSize: 10, fontWeight: 600,
-                                    color: "#FBBF24", background: "rgba(251,191,36,0.12)",
+                                    color: C.gold, background: alpha(C.gold, 0.12),
                                     width: 20, height: 20, borderRadius: "50%",
                                     display: "flex", alignItems: "center", justifyContent: "center",
                                   }}>{src.id}</span>
-                                  <span style={{ fontFamily: BODY, fontSize: 11, color: topic?.color || "#FBBF24", fontWeight: 600 }}>{topic?.icon} {src.topicName}</span>
-                                  <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{src.date}</span>
+                                  <span style={{ fontFamily: BODY, fontSize: 11, color: topic?.color || C.gold, fontWeight: 600 }}>{topic?.icon} {src.topicName}</span>
+                                  <span style={mono}>{src.date}</span>
                                 </div>
-                                <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.4)", fontWeight: 500, marginBottom: 6 }}>{src.title}</div>
-                                <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.35)", lineHeight: 1.55, fontStyle: "italic" }}>
+                                <div style={{ fontFamily: BODY, fontSize: 12, color: white(0.4), fontWeight: 500, marginBottom: 6 }}>{src.title}</div>
+                                <div style={{ fontFamily: BODY, fontSize: 12, color: white(0.35), lineHeight: 1.55, fontStyle: "italic" }}>
                                   "{src.excerpt.split(src.highlight).map((part, pi, arr) => (
                                     <span key={pi}>
                                       {part}
                                       {pi < arr.length - 1 && (
-                                        <span style={{ background: "rgba(251,191,36,0.18)", color: "#FBBF24", padding: "1px 2px", borderRadius: 2, fontStyle: "normal", fontWeight: 500 }}>{src.highlight}</span>
+                                        <span style={{ background: alpha(C.gold, 0.18), color: C.gold, padding: "1px 2px", borderRadius: 2, fontStyle: "normal", fontWeight: 500 }}>{src.highlight}</span>
                                       )}
                                     </span>
                                   ))}"
                                 </div>
-                                <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(251,191,36,0.35)", marginTop: 8 }}>Click to view full conversation →</div>
+                                <div style={{ fontFamily: BODY, fontSize: 10, color: alpha(C.gold, 0.35), marginTop: 8 }}>Click to view full conversation →</div>
                               </div>
                             );
                           })}
@@ -465,14 +466,14 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
               {isTyping && (
                 <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 16, animation: "fadeUp 0.3s ease both" }}>
                   <div style={{
-                    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                    background: white(0.03), border: `1px solid ${white(0.06)}`,
                     borderRadius: "14px 14px 14px 4px", padding: "14px 20px",
                     display: "flex", alignItems: "center", gap: 6,
                   }}>
-                    <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.5)", fontWeight: 500, marginRight: 4 }}>Atlas</div>
-                    <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(251,191,36,0.5)", animationDelay: "0s" }} />
-                    <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(251,191,36,0.5)", animationDelay: "0.15s" }} />
-                    <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(251,191,36,0.5)", animationDelay: "0.3s" }} />
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.gold, 0.5), fontWeight: 500, marginRight: 4 }}>Atlas</div>
+                    <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: alpha(C.gold, 0.5), animationDelay: "0s" }} />
+                    <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: alpha(C.gold, 0.5), animationDelay: "0.15s" }} />
+                    <span className="atlas-typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: alpha(C.gold, 0.5), animationDelay: "0.3s" }} />
                   </div>
                 </div>
               )}
@@ -482,15 +483,15 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
           </div>
 
           {/* Suggestion chips + input */}
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(8,8,12,0.95)", padding: mobile ? "12px 16px 20px" : "16px 40px 24px" }}>
+          <div style={{ borderTop: `1px solid ${white(0.06)}`, background: alpha(C.bg0, 0.95), padding: mobile ? "12px 16px 20px" : "16px 40px 24px" }}>
             <div style={{ maxWidth: 720, margin: "0 auto" }}>
               {/* Chips */}
               {chips.length > 0 && messages.length < 3 && (
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
                   {chips.slice(0, mobile ? 2 : 4).map((chip, i) => (
                     <button key={i} onClick={() => handleSubmit(chip)} style={{
-                      fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.45)",
-                      background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+                      fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.45),
+                      background: white(0.03), border: `1px solid ${white(0.08)}`,
                       borderRadius: 20, padding: mobile ? "6px 12px" : "7px 14px",
                       cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap",
                       overflow: "hidden", textOverflow: "ellipsis", maxWidth: mobile ? "100%" : 280,
@@ -512,18 +513,18 @@ const AskAtlas = ({ onBack, onConversationClick, mobile, contradictions = [], re
                   disabled={isTyping}
                   style={{
                     flex: 1, fontFamily: BODY, fontSize: mobile ? 14 : 15,
-                    color: "#fff", background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12,
+                    color: C.white, background: white(0.04),
+                    border: `1px solid ${white(0.1)}`, borderRadius: 12,
                     padding: mobile ? "12px 16px" : "14px 20px",
                     outline: "none", transition: "border-color 0.2s",
                   }}
-                  onFocus={(e) => { e.target.style.borderColor = "rgba(251,191,36,0.3)"; }}
-                  onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; }}
+                  onFocus={(e) => { e.target.style.borderColor = alpha(C.gold, 0.3); }}
+                  onBlur={(e) => { e.target.style.borderColor = white(0.1); }}
                 />
                 <button type="submit" disabled={isTyping || !query.trim()} style={{
                   fontFamily: BODY, fontSize: 14, fontWeight: 600,
-                  color: isTyping || !query.trim() ? "rgba(255,255,255,0.2)" : "#08080C",
-                  background: isTyping || !query.trim() ? "rgba(255,255,255,0.05)" : "#FBBF24",
+                  color: isTyping || !query.trim() ? white(0.2) : C.bg0,
+                  background: isTyping || !query.trim() ? white(0.05) : C.gold,
                   border: "none", borderRadius: 12,
                   padding: mobile ? "12px 18px" : "14px 24px",
                   cursor: isTyping || !query.trim() ? "default" : "pointer",

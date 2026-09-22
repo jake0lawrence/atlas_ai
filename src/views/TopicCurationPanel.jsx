@@ -4,8 +4,10 @@ import {
   MERGE_SUGGESTIONS,
 } from '../data/constants';
 import { FONTS, BODY, MONO, CSS } from '../styles/base';
+import { grow, screen, display, lede, body } from '../styles/shared';
 import ConfidenceBadge from '../components/ConfidenceBadge';
 import MiniSparkline from '../components/MiniSparkline';
+import { C, alpha, white, black } from '../styles/tokens';
 
 const TopicCurationPanel = ({ onComplete, mobile, w }) => {
   const [topics, setTopics] = useState(() => TOPICS.map(t => ({
@@ -97,9 +99,9 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
   const totalChanges = renames + merges + splits + stars + changeLog.filter(c => c === "recolored").length;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#08080C", display: "flex", flexDirection: "column", padding: mobile ? "24px 16px" : "32px 40px" }}>
+    <div style={screen(mobile)}>
       <style>{CSS}</style>
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.04) 0%, transparent 50%)", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at 50% 30%, ${alpha(C.blue, 0.04)} 0%, transparent 50%)`, pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 1100, width: "100%", margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Header */}
@@ -107,15 +109,15 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "4px 14px", borderRadius: 20, marginBottom: 14,
-            background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)",
-            fontFamily: MONO, fontSize: 10, color: "#3B82F6", fontWeight: 600, letterSpacing: "0.08em",
+            background: alpha(C.blue, 0.08), border: `1px solid ${alpha(C.blue, 0.2)}`,
+            fontFamily: MONO, fontSize: 10, color: C.blue, fontWeight: 600, letterSpacing: "0.08em",
           }}>
             CURATION · STEP 2
           </div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 36, fontWeight: 800, color: "#fff", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            Curate <span style={{ color: "#3B82F6" }}>Topics</span>
+          <h1 style={display(mobile)}>
+            Curate <span style={{ color: C.blue }}>Topics</span>
           </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
+          <p style={{ ...lede(mobile), marginTop: 6 }}>
             Rename, recolor, merge, split, or star the topics AI discovered.
           </p>
         </div>
@@ -123,23 +125,23 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
         {done ? (
           <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "48px 20px" : "64px 40px" }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>✨</div>
-            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: "#3B82F6", marginBottom: 8 }}>
+            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: C.blue, marginBottom: 8 }}>
               Topics Curated
             </h2>
-            <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: "rgba(255,255,255,0.4)", marginBottom: 6, lineHeight: 1.6 }}>
+            <p style={body(mobile)}>
               {visibleTopics.length} topics{merges > 0 ? `, ${merges} merged` : ""}{splits > 0 ? `, ${splits} split` : ""}{renames > 0 ? `, ${renames} renamed` : ""}{stars > 0 ? `, ${stars} starred` : ""}
             </p>
-            <p style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.2)", marginBottom: 28 }}>
+            <p style={{ fontFamily: BODY, fontSize: 12, color: white(0.2), marginBottom: 28 }}>
               Your knowledge map now reflects your intent.
             </p>
             <button onClick={onComplete} style={{
-              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: "#08080C",
-              background: "linear-gradient(135deg, #3B82F6, #2563EB)", border: "none",
+              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: C.bg0,
+              background: `linear-gradient(135deg, ${C.blue}, ${C.blueDeep})`, border: "none",
               borderRadius: 12, padding: "14px 40px", cursor: "pointer",
-              boxShadow: "0 4px 24px rgba(59,130,246,0.25)", transition: "all 0.25s",
+              boxShadow: `0 4px 24px ${alpha(C.blue, 0.25)}`, transition: "all 0.25s",
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(59,130,246,0.35)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(59,130,246,0.25)"; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${alpha(C.blue, 0.35)}`; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 24px ${alpha(C.blue, 0.25)}`; }}
             >
               Continue →
             </button>
@@ -149,17 +151,17 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
             {/* Merge mode banner */}
             {merging && (
               <div className="fade-up" style={{
-                background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.25)",
+                background: alpha(C.purple, 0.08), border: `1px solid ${alpha(C.purple, 0.25)}`,
                 borderRadius: 10, padding: "10px 16px", marginBottom: 16,
                 display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
-                <span style={{ fontFamily: BODY, fontSize: 13, color: "#A855F7" }}>
+                <span style={{ fontFamily: BODY, fontSize: 13, color: C.purple }}>
                   Select a target topic to merge <strong>{topics.find(t => t.id === merging.fromId)?.name}</strong> into
-                  {merging.suggestion && <span style={{ color: "rgba(255,255,255,0.3)" }}> — suggested: {merging.suggestion.suggestedName}</span>}
+                  {merging.suggestion && <span style={{ color: white(0.3) }}> — suggested: {merging.suggestion.suggestedName}</span>}
                 </span>
                 <button onClick={() => setMerging(null)} style={{
-                  fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.3)",
-                  background: "none", border: "1px solid rgba(255,255,255,0.1)",
+                  fontFamily: MONO, fontSize: 10, color: white(0.3),
+                  background: "none", border: `1px solid ${white(0.1)}`,
                   borderRadius: 6, padding: "4px 10px", cursor: "pointer",
                 }}>Cancel</button>
               </div>
@@ -180,8 +182,8 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
 
                 return (
                   <div key={topic.id} style={{
-                    background: isSelected ? "rgba(255,255,255,0.05)" : isMergeTarget ? "rgba(168,85,247,0.04)" : "rgba(255,255,255,0.025)",
-                    border: `1px solid ${isSelected ? "rgba(59,130,246,0.35)" : isMergeTarget ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.06)"}`,
+                    background: isSelected ? white(0.05) : isMergeTarget ? alpha(C.purple, 0.04) : white(0.025),
+                    border: `1px solid ${isSelected ? alpha(C.blue, 0.35) : isMergeTarget ? alpha(C.purple, 0.25) : white(0.06)}`,
                     borderRadius: 14, padding: mobile ? "14px 14px" : "16px 18px",
                     cursor: merging ? (isMergeTarget ? "pointer" : "default") : "pointer",
                     transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
@@ -192,13 +194,13 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
                       if (merging && isMergeTarget) { executeMerge(topic.id); return; }
                       if (!merging) setSelectedId(isSelected ? null : topic.id);
                     }}
-                    onMouseEnter={e => { if (isMergeTarget) e.currentTarget.style.borderColor = "rgba(168,85,247,0.5)"; }}
-                    onMouseLeave={e => { if (isMergeTarget) e.currentTarget.style.borderColor = "rgba(168,85,247,0.25)"; }}
+                    onMouseEnter={e => { if (isMergeTarget) e.currentTarget.style.borderColor = alpha(C.purple, 0.5); }}
+                    onMouseLeave={e => { if (isMergeTarget) e.currentTarget.style.borderColor = alpha(C.purple, 0.25); }}
                   >
                     {/* Card header */}
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                       <span style={{ fontSize: 20, flexShrink: 0 }}>{topic.icon}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={grow}>
                         {editingId === topic.id ? (
                           <input
                             value={editName}
@@ -208,7 +210,7 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
                             autoFocus
                             style={{
                               fontFamily: BODY, fontSize: 14, fontWeight: 600, color: topic.color,
-                              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)",
+                              background: white(0.06), border: `1px solid ${white(0.15)}`,
                               borderRadius: 6, padding: "2px 6px", width: "100%", outline: "none",
                             }}
                             onClick={e => e.stopPropagation()}
@@ -218,7 +220,7 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
                             {topic.name}
                           </div>
                         )}
-                        <div style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.2)", marginTop: 1 }}>
+                        <div style={{ fontFamily: MONO, fontSize: 10, color: white(0.2), marginTop: 1 }}>
                           {topic.count} convos · {(topic.words / 1000).toFixed(0)}k words
                         </div>
                       </div>
@@ -246,7 +248,7 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
                           onClick={e => { e.stopPropagation(); setColorPickerId(colorPickerId === topic.id ? null : topic.id); }}
                           style={{
                             width: 14, height: 14, borderRadius: "50%", background: topic.color,
-                            cursor: "pointer", border: "2px solid rgba(255,255,255,0.1)", transition: "transform 0.2s",
+                            cursor: "pointer", border: `2px solid ${white(0.1)}`, transition: "transform 0.2s",
                           }}
                           onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.3)"; }}
                           onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; }}
@@ -255,14 +257,14 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
                         {colorPickerId === topic.id && (
                           <div onClick={e => e.stopPropagation()} style={{
                             position: "absolute", top: 22, right: 0, zIndex: 10,
-                            background: "rgba(20,20,28,0.95)", border: "1px solid rgba(255,255,255,0.12)",
+                            background: alpha(C.ink, 0.95), border: `1px solid ${white(0.12)}`,
                             borderRadius: 10, padding: 8, display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 4,
-                            boxShadow: "0 8px 32px rgba(0,0,0,0.5)", minWidth: 140,
+                            boxShadow: `0 8px 32px ${black(0.5)}`, minWidth: 140,
                           }}>
                             {CURATED_PALETTE.map(c => (
                               <div key={c} onClick={() => changeColor(topic.id, c)} style={{
                                 width: 18, height: 18, borderRadius: "50%", background: c, cursor: "pointer",
-                                border: c === topic.color ? "2px solid #fff" : "2px solid transparent",
+                                border: c === topic.color ? `2px solid ${C.white}` : "2px solid transparent",
                                 transition: "transform 0.15s",
                               }}
                                 onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.25)"; }}
@@ -278,31 +280,31 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
                     {isSelected && !merging && (
                       <div className="fade-up" style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingTop: 4 }}>
                         <button onClick={e => { e.stopPropagation(); startRename(topic); }} style={{
-                          fontFamily: BODY, fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.5)",
-                          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                          fontFamily: BODY, fontSize: 11, fontWeight: 500, color: white(0.5),
+                          background: white(0.04), border: `1px solid ${white(0.08)}`,
                           borderRadius: 8, padding: "5px 12px", cursor: "pointer", transition: "all 0.2s",
                         }}
-                          onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; }}
-                          onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
+                          onMouseEnter={e => { e.currentTarget.style.color = C.white; e.currentTarget.style.borderColor = white(0.2); }}
+                          onMouseLeave={e => { e.currentTarget.style.color = white(0.5); e.currentTarget.style.borderColor = white(0.08); }}
                         >Rename</button>
                         {hasMerge && (
                           <button onClick={e => { e.stopPropagation(); startMerge(topic.id); }} style={{
-                            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: "#A855F7",
-                            background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.2)",
+                            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: C.purple,
+                            background: alpha(C.purple, 0.06), border: `1px solid ${alpha(C.purple, 0.2)}`,
                             borderRadius: 8, padding: "5px 12px", cursor: "pointer", transition: "all 0.2s",
                           }}
-                            onMouseEnter={e => { e.currentTarget.style.background = "rgba(168,85,247,0.12)"; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = "rgba(168,85,247,0.06)"; }}
+                            onMouseEnter={e => { e.currentTarget.style.background = alpha(C.purple, 0.12); }}
+                            onMouseLeave={e => { e.currentTarget.style.background = alpha(C.purple, 0.06); }}
                           >Merge →</button>
                         )}
                         {hasSplit && (
                           <button onClick={e => { e.stopPropagation(); executeSplit(topic.id); }} style={{
-                            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: "#10B981",
-                            background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)",
+                            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: C.green,
+                            background: alpha(C.green, 0.06), border: `1px solid ${alpha(C.green, 0.2)}`,
                             borderRadius: 8, padding: "5px 12px", cursor: "pointer", transition: "all 0.2s",
                           }}
-                            onMouseEnter={e => { e.currentTarget.style.background = "rgba(16,185,129,0.12)"; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = "rgba(16,185,129,0.06)"; }}
+                            onMouseEnter={e => { e.currentTarget.style.background = alpha(C.green, 0.12); }}
+                            onMouseLeave={e => { e.currentTarget.style.background = alpha(C.green, 0.06); }}
                           >Split</button>
                         )}
                       </div>
@@ -316,18 +318,18 @@ const TopicCurationPanel = ({ onComplete, mobile, w }) => {
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: mobile ? "14px 0" : "16px 0",
-              borderTop: "1px solid rgba(255,255,255,0.05)",
+              borderTop: `1px solid ${white(0.05)}`,
             }}>
-              <div style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.2)" }}>
+              <div style={{ fontFamily: MONO, fontSize: 11, color: white(0.2) }}>
                 {totalChanges > 0 ? `${totalChanges} change${totalChanges > 1 ? "s" : ""} made` : "Click a topic to curate"}
               </div>
               <button onClick={() => setDone(true)} style={{
                 fontFamily: BODY, fontSize: 14, fontWeight: 600,
-                color: totalChanges > 0 ? "#08080C" : "rgba(255,255,255,0.5)",
-                background: totalChanges > 0 ? "linear-gradient(135deg, #3B82F6, #2563EB)" : "rgba(255,255,255,0.06)",
-                border: totalChanges > 0 ? "none" : "1px solid rgba(255,255,255,0.1)",
+                color: totalChanges > 0 ? C.bg0 : white(0.5),
+                background: totalChanges > 0 ? `linear-gradient(135deg, ${C.blue}, ${C.blueDeep})` : white(0.06),
+                border: totalChanges > 0 ? "none" : `1px solid ${white(0.1)}`,
                 borderRadius: 10, padding: "10px 28px", cursor: "pointer",
-                boxShadow: totalChanges > 0 ? "0 4px 20px rgba(59,130,246,0.25)" : "none",
+                boxShadow: totalChanges > 0 ? `0 4px 20px ${alpha(C.blue, 0.25)}` : "none",
                 transition: "all 0.3s",
               }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}

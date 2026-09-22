@@ -4,7 +4,9 @@ import {
 } from '../data/constants';
 import useSound from '../hooks/useSound';
 import { FONTS, BODY, MONO, CSS } from '../styles/base';
+import { stack, stackTight, screen, eyebrow, display, lede, body, track } from '../styles/shared';
 import ConfidenceBadge from '../components/ConfidenceBadge';
+import { C, alpha, white } from '../styles/tokens';
 
 const ReviewQueue = ({ onComplete, mobile, w }) => {
   const [items, setItems] = useState(() => REVIEW_QUEUE_DATA.map(item => ({ ...item, status: "pending" })));
@@ -101,11 +103,11 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
   const tablet = w >= 640 && w < 1024;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#08080C", display: "flex", flexDirection: "column", padding: mobile ? "24px 16px" : "32px 40px" }}>
+    <div style={screen(mobile)}>
       <style>{CSS}</style>
 
       {/* Ambient glow */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at 50% 30%, rgba(251,191,36,0.04) 0%, transparent 50%)", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at 50% 30%, ${alpha(C.gold, 0.04)} 0%, transparent 50%)`, pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 1100, width: "100%", margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Header */}
@@ -113,21 +115,21 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "4px 14px", borderRadius: 20, marginBottom: 14,
-            background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)",
-            fontFamily: MONO, fontSize: 10, color: "#FBBF24", fontWeight: 600,
+            background: alpha(C.gold, 0.08), border: `1px solid ${alpha(C.gold, 0.2)}`,
+            fontFamily: MONO, fontSize: 10, color: C.gold, fontWeight: 600,
             letterSpacing: "0.08em",
           }}>
             CURATION
           </div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 36, fontWeight: 800, color: "#fff", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            Review <span style={{ color: "#FBBF24" }}>Queue</span>
+          <h1 style={display(mobile)}>
+            Review <span style={{ color: C.gold }}>Queue</span>
           </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
+          <p style={{ ...lede(mobile), marginTop: 6 }}>
             AI classified your conversations. Verify, edit, or reject each one.
           </p>
           <button onClick={() => { const on = sound.toggle(); setSoundEnabled(on); }} style={{
-            marginTop: 8, fontFamily: MONO, fontSize: 10, color: soundEnabled ? "#FBBF24" : "rgba(255,255,255,0.2)",
-            background: "transparent", border: `1px solid ${soundEnabled ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.08)"}`,
+            marginTop: 8, fontFamily: MONO, fontSize: 10, color: soundEnabled ? C.gold : white(0.2),
+            background: "transparent", border: `1px solid ${soundEnabled ? alpha(C.gold, 0.3) : white(0.08)}`,
             borderRadius: 12, padding: "3px 10px", cursor: "pointer", transition: "all 0.2s",
           }}>
             {soundEnabled ? "♪ Sound On" : "♪ Sound Off"}
@@ -137,19 +139,19 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
         {/* Progress bar */}
         <div style={{ marginBottom: mobile ? 20 : 28 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: white(0.3) }}>
               {reviewed} / {total} reviewed
             </span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? "#10B981" : "rgba(251,191,36,0.5)" }}>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? C.green : alpha(C.gold, 0.5) }}>
               {Math.round(progress)}%
             </span>
           </div>
-          <div style={{ width: "100%", height: 6, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+          <div style={track}>
             <div style={{
               width: `${progress}%`, height: "100%",
-              background: progress === 100 ? "linear-gradient(90deg, #10B981, #059669)" : "linear-gradient(90deg, #FBBF24CC, #FBBF24)",
+              background: progress === 100 ? `linear-gradient(90deg, ${C.green}, ${C.greenDeep})` : `linear-gradient(90deg, ${C.gold}CC, ${C.gold})`,
               borderRadius: 3, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)",
-              boxShadow: progress === 100 ? "0 0 16px rgba(16,185,129,0.4)" : "0 0 12px rgba(251,191,36,0.3)",
+              boxShadow: progress === 100 ? `0 0 16px ${alpha(C.green, 0.4)}` : `0 0 12px ${alpha(C.gold, 0.3)}`,
             }} />
           </div>
         </div>
@@ -167,7 +169,7 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                   width: Math.random() > 0.5 ? 6 : 4,
                   height: Math.random() > 0.5 ? 6 : 10,
                   borderRadius: Math.random() > 0.5 ? "50%" : 2,
-                  background: ["#FBBF24", "#10B981", "#3B82F6", "#EF4444", "#8B5CF6", "#EC4899"][i % 6],
+                  background: [C.gold, C.green, C.blue, C.red, C.violet, C.pink][i % 6],
                   animation: `confettiBurst ${0.8 + Math.random() * 0.6}s ease-out ${i * 40}ms both`,
                   transform: `rotate(${Math.random() * 360}deg)`,
                   opacity: 0.9,
@@ -175,24 +177,24 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
               ))}
             </div>
             <div style={{ fontSize: 56, marginBottom: 16 }}>✓</div>
-            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: "#10B981", marginBottom: 8 }}>
+            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: C.green, marginBottom: 8 }}>
               Queue Complete
             </h2>
-            <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: "rgba(255,255,255,0.4)", marginBottom: 6, lineHeight: 1.6 }}>
+            <p style={body(mobile)}>
               {items.filter(i => i.status === "approved").length} approved, {items.filter(i => i.status === "edited").length} edited, {items.filter(i => i.status === "rejected").length} rejected, {items.filter(i => i.status === "skipped").length} skipped
             </p>
-            <p style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.2)", marginBottom: 28 }}>
+            <p style={{ fontFamily: BODY, fontSize: 12, color: white(0.2), marginBottom: 28 }}>
               Your atlas is now human-verified.
             </p>
             <button onClick={onComplete} style={{
-              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: "#08080C",
-              background: "linear-gradient(135deg, #FBBF24, #F59E0B)", border: "none",
+              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: C.bg0,
+              background: `linear-gradient(135deg, ${C.gold}, ${C.amber})`, border: "none",
               borderRadius: 12, padding: "14px 40px", cursor: "pointer",
-              boxShadow: "0 4px 24px rgba(251,191,36,0.25)",
+              boxShadow: `0 4px 24px ${alpha(C.gold, 0.25)}`,
               transition: "all 0.25s",
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(251,191,36,0.35)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(251,191,36,0.25)"; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${alpha(C.gold, 0.35)}`; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 24px ${alpha(C.gold, 0.25)}`; }}
             >
               Enter Your Atlas →
             </button>
@@ -210,8 +212,8 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
 
                 return (
                   <div key={item.id} style={{
-                    background: isActive ? "rgba(255,255,255,0.04)" : isDone ? "rgba(255,255,255,0.01)" : "rgba(255,255,255,0.02)",
-                    border: `1px solid ${isActive ? "rgba(251,191,36,0.3)" : isDone ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.06)"}`,
+                    background: isActive ? white(0.04) : isDone ? white(0.01) : white(0.02),
+                    border: `1px solid ${isActive ? alpha(C.gold, 0.3) : isDone ? white(0.03) : white(0.06)}`,
                     borderRadius: 14, overflow: "hidden",
                     opacity: isDone && !isAutoApproving ? 0.4 : 1,
                     transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
@@ -231,16 +233,16 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                         {/* Status indicator */}
                         <div style={{
                           width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-                          background: item.status === "approved" ? "#10B981" : item.status === "edited" ? "#3B82F6" : item.status === "rejected" ? "#EF4444" : item.status === "skipped" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.1)",
+                          background: item.status === "approved" ? C.green : item.status === "edited" ? C.blue : item.status === "rejected" ? C.red : item.status === "skipped" ? white(0.15) : white(0.1),
                         }} />
                         {/* Topic icon + name */}
                         <span style={{ fontSize: 14, flexShrink: 0 }}>{topic?.icon}</span>
-                        <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.5)", fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.5), fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {topic?.name}
                         </span>
                         <ConfidenceBadge confidence={item.confidence} />
                         {isDone && (
-                          <span style={{ fontFamily: MONO, fontSize: 10, color: item.status === "approved" ? "#10B981" : item.status === "edited" ? "#3B82F6" : item.status === "rejected" ? "#EF4444" : "rgba(255,255,255,0.2)", textTransform: "uppercase", flexShrink: 0 }}>
+                          <span style={{ fontFamily: MONO, fontSize: 10, color: item.status === "approved" ? C.green : item.status === "edited" ? C.blue : item.status === "rejected" ? C.red : white(0.2), textTransform: "uppercase", flexShrink: 0 }}>
                             {item.status}
                           </span>
                         )}
@@ -257,7 +259,7 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                         }}>
                           {/* LEFT: AI Classification */}
                           <div>
-                            <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
+                            <div style={eyebrow}>
                               AI Classification
                             </div>
                             {/* Topic */}
@@ -265,7 +267,7 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                               <span style={{ fontSize: 20 }}>{activeTopic?.icon}</span>
                               <div>
                                 <div style={{ fontFamily: BODY, fontSize: 14, color: activeTopic?.color, fontWeight: 600 }}>{activeTopic?.name}</div>
-                                <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{activeTopic?.count} conversations in topic</div>
+                                <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.2) }}>{activeTopic?.count} conversations in topic</div>
                               </div>
                             </div>
                             {/* Confidence */}
@@ -277,8 +279,8 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                               {activeItem.entities.map((entity, ei) => (
                                 <span key={ei} style={{
                                   fontFamily: MONO, fontSize: 10, padding: "3px 8px", borderRadius: 6,
-                                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                                  color: "rgba(255,255,255,0.45)",
+                                  background: white(0.04), border: `1px solid ${white(0.08)}`,
+                                  color: white(0.45),
                                 }}>{entity}</span>
                               ))}
                             </div>
@@ -287,12 +289,12 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                               <div style={{
                                 display: "flex", alignItems: "center", gap: 6,
                                 padding: "6px 10px", borderRadius: 8,
-                                background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)",
+                                background: alpha(C.red, 0.06), border: `1px solid ${alpha(C.red, 0.15)}`,
                               }}>
                                 <span style={{ fontSize: 12 }}>🎯</span>
                                 <div>
-                                  <div style={{ fontFamily: BODY, fontSize: 9, color: "#EF4444", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Decision Detected</div>
-                                  <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 1 }}>{activeItem.decisionText}</div>
+                                  <div style={{ fontFamily: BODY, fontSize: 9, color: C.red, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Decision Detected</div>
+                                  <div style={{ fontFamily: BODY, fontSize: 11, color: white(0.35), marginTop: 1 }}>{activeItem.decisionText}</div>
                                 </div>
                               </div>
                             )}
@@ -300,47 +302,47 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
 
                           {/* CENTER: Source Conversation */}
                           <div>
-                            <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
+                            <div style={eyebrow}>
                               Conversation Snippet
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            <div style={stack}>
                               {/* User message */}
                               <div style={{
-                                background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.12)",
+                                background: alpha(C.blue, 0.06), border: `1px solid ${alpha(C.blue, 0.12)}`,
                                 borderRadius: "12px 12px 12px 4px", padding: mobile ? "10px 12px" : "12px 16px",
                               }}>
-                                <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(59,130,246,0.5)", marginBottom: 4, fontWeight: 600 }}>YOU</div>
-                                <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.55 }}>{activeItem.snippet.user}</div>
+                                <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.blue, 0.5), marginBottom: 4, fontWeight: 600 }}>YOU</div>
+                                <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.6), lineHeight: 1.55 }}>{activeItem.snippet.user}</div>
                               </div>
                               {/* AI message */}
                               <div style={{
-                                background: "rgba(251,191,36,0.04)", border: "1px solid rgba(251,191,36,0.1)",
+                                background: alpha(C.gold, 0.04), border: `1px solid ${alpha(C.gold, 0.1)}`,
                                 borderRadius: "12px 12px 4px 12px", padding: mobile ? "10px 12px" : "12px 16px",
                               }}>
-                                <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.5)", marginBottom: 4, fontWeight: 600 }}>AI</div>
-                                <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.55 }}>{activeItem.snippet.ai}</div>
+                                <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.gold, 0.5), marginBottom: 4, fontWeight: 600 }}>AI</div>
+                                <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.6), lineHeight: 1.55 }}>{activeItem.snippet.ai}</div>
                               </div>
                             </div>
                           </div>
 
                           {/* RIGHT: Action Panel */}
                           <div>
-                            <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
+                            <div style={eyebrow}>
                               Actions
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                            <div style={stackTight}>
                               {[
-                                { action: "approved", label: "Approve", color: "#10B981", icon: "✓" },
-                                { action: "edited", label: "Edit", color: "#3B82F6", icon: "✎" },
-                                { action: "rejected", label: "Reject", color: "#EF4444", icon: "✕" },
-                                { action: "skipped", label: "Skip", color: "rgba(255,255,255,0.3)", icon: "→" },
+                                { action: "approved", label: "Approve", color: C.green, icon: "✓" },
+                                { action: "edited", label: "Edit", color: C.blue, icon: "✎" },
+                                { action: "rejected", label: "Reject", color: C.red, icon: "✕" },
+                                { action: "skipped", label: "Skip", color: white(0.3), icon: "→" },
                               ].map(btn => (
                                 <button key={btn.action} onClick={() => handleAction(activeItem.id, btn.action)}
                                   style={{
                                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                                     width: "100%", padding: mobile ? "10px 14px" : "11px 16px",
                                     fontFamily: BODY, fontSize: 13, fontWeight: 600,
-                                    color: btn.action === "approved" ? "#08080C" : btn.color,
+                                    color: btn.action === "approved" ? C.bg0 : btn.color,
                                     background: btn.action === "approved" ? btn.color : `${btn.color}10`,
                                     border: `1px solid ${btn.action === "approved" ? btn.color : btn.color + "30"}`,
                                     borderRadius: 10, cursor: "pointer", transition: "all 0.2s",
@@ -355,7 +357,7 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
                             </div>
                             {/* Keyboard hint */}
                             {!mobile && (
-                              <div style={{ marginTop: 12, fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.12)", lineHeight: 1.8 }}>
+                              <div style={{ marginTop: 12, fontFamily: MONO, fontSize: 9, color: white(0.12), lineHeight: 1.8 }}>
                                 Enter approve · E edit · X reject · ↑↓ navigate · → skip
                               </div>
                             )}
@@ -371,7 +373,7 @@ const ReviewQueue = ({ onComplete, mobile, w }) => {
             {/* Skip all / proceed button when no active item but not all done */}
             {activeIdx === null && !allDone && reviewed < total && (
               <div className="fade-up" style={{ textAlign: "center", padding: "20px 0" }}>
-                <div style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.2)", marginBottom: 12 }}>
+                <div style={{ fontFamily: BODY, fontSize: 12, color: white(0.2), marginBottom: 12 }}>
                   Auto-approving high-confidence items...
                 </div>
               </div>
