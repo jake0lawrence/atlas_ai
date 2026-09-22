@@ -135,6 +135,9 @@ Every view PR carries the same body, so review is the same every time:
 - ~~`useRouterSync` still carries two `exhaustive-deps` suppressions~~ → fixed in PR 1
   (router values read through a ref that a layout effect keeps current).
 - ~~The footer says "Atlas · v5."~~ → fixed in PR 1.
+- The screenshot tolerance was a ratio (`maxDiffPixelRatio: 0.002`), which let a
+  changed word pass and left a stale baseline in place. → fixed in PR 3
+  (`maxDiffPixels: 40`, and local runs never reuse a server).
 
 ## What v7 does NOT include
 
