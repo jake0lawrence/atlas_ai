@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FONTS, BODY } from '../styles/base';
 import AnimatedNumber from './AnimatedNumber';
-import { C, white } from '../styles/tokens';
+import { C, white, TYPE } from '../styles/tokens';
 
 const StatCard = ({ label, value, sub, delay, accent, mobile }) => {
   const [visible, setVisible] = useState(false);
@@ -19,8 +19,8 @@ const StatCard = ({ label, value, sub, delay, accent, mobile }) => {
       <div style={{ fontFamily: FONTS, fontSize: mobile ? 32 : 38, fontWeight: 700, color: accent || C.gold, lineHeight: 1, letterSpacing: "-0.02em" }}>
         {isNum ? <AnimatedNumber value={value} delay={delay} /> : value}
       </div>
-      <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.4), marginTop: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>{label}</div>
-      {sub && <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.2), marginTop: 3 }}>{sub}</div>}
+      <div style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6), marginTop: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>{label}</div>
+      {sub && <div style={{ fontFamily: BODY, fontSize: TYPE.xs, color: white(0.45), marginTop: 3 }}>{sub}</div>}
     </div>
   );
 };
