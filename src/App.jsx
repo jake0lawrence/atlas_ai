@@ -175,7 +175,7 @@ export default function App() {
 
   // ─── CURATION (Review Queue) ────────────────────
   if (view === "curation") {
-    return <div key="curation" className="view-transition"><ReviewQueue onComplete={handleCurationComplete} mobile={mobile} w={w} /></div>;
+    return <div key="curation" className="view-transition"><ReviewQueue onComplete={handleCurationComplete} onNavigate={handleNavigate} mobile={mobile} w={w} /></div>;
   }
 
   // ─── TOPIC CURATION ────────────────────────────
