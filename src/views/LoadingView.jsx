@@ -1,167 +1,157 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  LOAD_PIPELINE, PHASE_META,
-} from '../data/constants';
-import { FONTS, BODY, MONO, CSS } from '../styles/base';
-import { C, alpha, white } from '../styles/tokens';
-import { row, stackTight } from '../styles/shared';
+import { LOAD_PIPELINE, PHASE_META } from '../data/constants';
+import { CSS } from '../styles/base';
+import { C, alpha, white, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
 
-// ═══════════════════════════════════════════════════════════════
-// ENHANCED LOADING VIEW
-// ═══════════════════════════════════════════════════════════════
+// The pipeline as the story of what Atlas does: five named stages, each
+// showing its state (done / running / waiting) and what it found. The step
+// log lives inside the running stage; the topics discovered while enriching
+// land as chips under that stage. V7_PLAN.md row 3.
+
+const PHASES = ["parse", "normalize", "enrich", "connect", "build"];
+const BLURB = {
+  parse: "Read both exports",
+  normalize: "One message format across platforms",
+  enrich: "Topics, entities and decisions",
+  connect: "Connections, insights and the timeline",
+  build: "Index and render the atlas",
+};
+const TIMINGS = [300, 900, 1600, 2300, 2800, 3400, 4100, 4800, 5500, 6200, 6800, 7400, 8000, 8500, 9000, 9600, 10100, 10400];
+const REVEAL_AT = 10800;
+const DONE_AT = 12000;
+const SKIP_AFTER = 1500;
+const TOTAL_CONVOS = 3847;
+
 const LoadingView = ({ onComplete, mobile }) => {
   const [stageIdx, setStageIdx] = useState(0);
   const [discoveries, setDiscoveries] = useState([]);
   const [showReveal, setShowReveal] = useState(false);
-  const totalConvos = 3847;
+  const [canSkip, setCanSkip] = useState(false);
   const timersRef = useRef([]);
 
-  useEffect(() => {
-    return () => timersRef.current.forEach(clearTimeout);
-  }, []);
+  useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
 
   useEffect(() => {
-    const timings = [
-      300, 900, 1600, 2300, 2800, 3400, 4100, 4800, 5500,
-      6200, 6800, 7400, 8000, 8500, 9000, 9600, 10100, 10400,
-    ];
-    timings.forEach((t, i) => {
+    TIMINGS.forEach((t, i) => {
       timersRef.current.push(setTimeout(() => {
         setStageIdx(i);
-        if (LOAD_PIPELINE[i].discovery) {
-          setDiscoveries(prev => [...prev, LOAD_PIPELINE[i].discovery]);
-        }
+        if (LOAD_PIPELINE[i].discovery) setDiscoveries(prev => [...prev, LOAD_PIPELINE[i].discovery]);
       }, t));
     });
-    timersRef.current.push(setTimeout(() => setShowReveal(true), 10800));
-    timersRef.current.push(setTimeout(() => onComplete(), 12000));
+    timersRef.current.push(setTimeout(() => setCanSkip(true), SKIP_AFTER));
+    timersRef.current.push(setTimeout(() => setShowReveal(true), REVEAL_AT));
+    timersRef.current.push(setTimeout(() => onComplete(), DONE_AT));
   }, [onComplete]);
 
-  const stage = LOAD_PIPELINE[stageIdx] || LOAD_PIPELINE[LOAD_PIPELINE.length - 1];
-  const phaseMeta = PHASE_META[stage.phase];
-  const convoCount = Math.floor((stage.pct / 100) * totalConvos);
+  const step = LOAD_PIPELINE[stageIdx] || LOAD_PIPELINE[LOAD_PIPELINE.length - 1];
+  const phaseIdx = PHASES.indexOf(step.phase);
+  const accent = PHASE_META[step.phase].color;
+  const convoCount = Math.floor((step.pct / 100) * TOTAL_CONVOS);
+
+  // The last detail each finished phase produced is its one-line summary.
+  const summaryOf = (phase) => {
+    const details = LOAD_PIPELINE.filter(s => s.phase === phase && s.detail).map(s => s.detail);
+    return details[details.length - 1] || BLURB[phase];
+  };
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: mobile ? "24px 16px" : "32px", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: C.bg0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: mobile ? `${SPACE.xl}px ${SPACE.lg}px` : SPACE.xxl, position: "relative", overflow: "hidden" }}>
       <style>{CSS}</style>
+      <div aria-hidden style={{ position: "fixed", inset: 0, background: `radial-gradient(ellipse at 50% 30%, ${accent}0A 0%, transparent 55%)`, transition: "background 1s ease", pointerEvents: "none" }} />
 
-      {/* Ambient glow that shifts with phase */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at 50% 40%, ${phaseMeta.color}08 0%, transparent 50%)`, transition: "background 1s ease", pointerEvents: "none" }} />
-
-      <div style={{ maxWidth: 560, width: "100%", position: "relative", zIndex: 1 }}>
-        {/* Brain + phase indicator */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ fontSize: mobile ? 48 : 56, marginBottom: 16, animation: "glow 2.5s infinite ease-in-out" }}>🧠</div>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "4px 14px", borderRadius: 20,
-            background: `${phaseMeta.color}12`, border: `1px solid ${phaseMeta.color}25`,
-            fontFamily: MONO, fontSize: 10, color: phaseMeta.color, fontWeight: 600,
-            letterSpacing: "0.08em", transition: "all 0.4s",
-          }}>
-            {phaseMeta.icon} {phaseMeta.label}
+      <main aria-live="polite" style={{ maxWidth: 600, width: "100%", position: "relative", zIndex: 1 }}>
+        {/* Header: what is happening overall */}
+        <div style={{ textAlign: "center", marginBottom: SPACE.xl }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: SPACE.sm, marginBottom: SPACE.md }}>
+            <span style={{ fontSize: 24, lineHeight: 1 }}>🧠</span>
+            <span style={{ fontFamily: FONTS, fontSize: TYPE.lg, fontWeight: 700, color: C.white }}>Atlas</span>
           </div>
-        </div>
-
-        {/* Status message */}
-        <div style={{ textAlign: "center", minHeight: 56, marginBottom: 24 }}>
-          <div style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 22, color: C.white, marginBottom: 6, transition: "all 0.3s" }}>
-            {stage.msg}
-          </div>
-          {stage.detail && (
-            <div key={stageIdx} className="fade-up" style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: white(0.3), lineHeight: 1.5 }}>
-              {stage.detail}
+          {showReveal ? (
+            <div className="fade-up">
+              <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xl : TYPE.xxl, fontWeight: 700, color: C.gold, lineHeight: 1.15 }}>Your atlas is ready.</h1>
+              <p style={{ fontFamily: BODY, fontSize: TYPE.base, color: white(0.4), marginTop: SPACE.sm }}>Opening your knowledge map.</p>
             </div>
+          ) : (
+            <>
+              <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xl : TYPE.xxl, fontWeight: 700, color: C.white, lineHeight: 1.15 }}>Building your atlas</h1>
+              <p style={{ fontFamily: BODY, fontSize: TYPE.base, color: white(0.4), marginTop: SPACE.sm }}>Five passes over {TOTAL_CONVOS.toLocaleString()} conversations, all in your browser.</p>
+            </>
           )}
         </div>
 
-        {/* Progress bar */}
-        <div style={{ marginBottom: 10 }}>
-          <div style={{ width: "100%", height: 5, background: white(0.04), borderRadius: 3, overflow: "hidden" }}>
-            <div style={{
-              width: `${stage.pct}%`, height: "100%",
-              background: `linear-gradient(90deg, ${phaseMeta.color}CC, ${phaseMeta.color})`,
-              borderRadius: 3, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1), background 0.5s ease",
-              boxShadow: `0 0 16px ${phaseMeta.color}40`,
-            }} />
+        {/* Overall progress */}
+        <div role="progressbar" aria-valuenow={step.pct} aria-valuemin={0} aria-valuemax={100} aria-label="Overall progress" style={{ marginBottom: SPACE.xl }}>
+          <div style={{ width: "100%", height: 6, background: white(0.05), borderRadius: 3, overflow: "hidden" }}>
+            <div style={{ width: `${step.pct}%`, height: "100%", background: accent, borderRadius: 3, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1), background 0.5s ease" }} />
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-            <span style={{ fontFamily: MONO, fontSize: 10, color: white(0.15) }}>
-              {convoCount.toLocaleString()} / {totalConvos.toLocaleString()} conversations
-            </span>
-            <span style={{ fontFamily: MONO, fontSize: 10, color: phaseMeta.color + "80" }}>
-              {stage.pct}%
-            </span>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: SPACE.sm }}>
+            <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: white(0.3) }}>{convoCount.toLocaleString()} / {TOTAL_CONVOS.toLocaleString()} conversations</span>
+            <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: accent }}>{step.pct}%</span>
           </div>
         </div>
 
-        {/* Phase progress dots */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 4, margin: "20px 0 28px" }}>
-          {Object.entries(PHASE_META).map(([key, meta]) => {
-            const phaseOrder = ["parse", "normalize", "enrich", "connect", "build"];
-            const currentPhaseIdx = phaseOrder.indexOf(stage.phase);
-            const thisIdx = phaseOrder.indexOf(key);
-            const isActive = thisIdx === currentPhaseIdx;
-            const isDone = thisIdx < currentPhaseIdx;
+        {/* The five stages */}
+        <ol aria-label="Stages" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: SPACE.sm }}>
+          {PHASES.map((phase, i) => {
+            const meta = PHASE_META[phase];
+            const state = i < phaseIdx || showReveal ? "done" : i === phaseIdx ? "running" : "waiting";
+            const color = state === "waiting" ? white(0.25) : meta.color;
             return (
-              <div key={key} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <div style={{
-                  width: isActive ? 24 : 8, height: 8, borderRadius: 4,
-                  background: isDone ? meta.color : isActive ? meta.color : white(0.06),
-                  opacity: isDone ? 0.5 : 1,
-                  transition: "all 0.4s cubic-bezier(0.16,1,0.3,1)",
-                  boxShadow: isActive ? `0 0 8px ${meta.color}40` : "none",
-                }} />
-              </div>
+              <li key={phase} aria-current={state === "running" ? "step" : undefined} style={{
+                display: "flex", gap: SPACE.md, alignItems: "flex-start",
+                padding: `${SPACE.md}px ${SPACE.lg}px`, borderRadius: 12,
+                background: state === "running" ? alpha(C.white, 0.035) : state === "done" ? white(0.02) : "transparent",
+                border: `1px solid ${state === "running" ? `${meta.color}40` : state === "done" ? white(0.06) : white(0.04)}`,
+                opacity: state === "waiting" ? 0.55 : 1, transition: "background 0.4s, border-color 0.4s, opacity 0.4s",
+              }}>
+                <div aria-hidden style={{
+                  width: 32, height: 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: state === "done" ? TYPE.base : 16, fontWeight: 700, color: state === "done" ? C.bg0 : color,
+                  background: state === "done" ? meta.color : state === "running" ? `${meta.color}1A` : white(0.04),
+                  border: `1px solid ${state === "done" ? meta.color : state === "running" ? `${meta.color}60` : white(0.08)}`,
+                }}>{state === "done" ? "✓" : meta.icon}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: SPACE.sm }}>
+                    <span style={{ fontFamily: BODY, fontSize: TYPE.md, fontWeight: 600, color: state === "waiting" ? white(0.5) : C.white }}>
+                      {phase.charAt(0).toUpperCase() + phase.slice(1)}
+                      <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: white(0.25), marginLeft: SPACE.sm }}>{i + 1}/5</span>
+                    </span>
+                    <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color, letterSpacing: "0.06em", flexShrink: 0 }}>
+                      {state === "done" ? "DONE" : state === "running" ? meta.label : "WAITING"}
+                    </span>
+                  </div>
+                  <div style={{ fontFamily: BODY, fontSize: TYPE.base, color: state === "running" ? white(0.75) : white(0.4), marginTop: 2, lineHeight: 1.5 }}>
+                    {state === "running" && !showReveal ? step.msg : state === "done" ? summaryOf(phase) : BLURB[phase]}
+                  </div>
+                  {state === "running" && !showReveal && step.detail && (
+                    <div key={stageIdx} className="fade-up" style={{ fontFamily: MONO, fontSize: TYPE.xs, color: `${meta.color}B3`, marginTop: SPACE.xs, lineHeight: 1.5 }}>{step.detail}</div>
+                  )}
+                  {phase === "enrich" && discoveries.length > 0 && (
+                    <ul aria-label="Discovered topics" style={{ listStyle: "none", margin: `${SPACE.sm}px 0 0`, padding: 0, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {discoveries.map((d, k) => (
+                        <li key={d.name} className="slide-in" style={{
+                          display: "inline-flex", alignItems: "center", gap: 6, fontFamily: BODY, fontSize: TYPE.sm, color: white(0.7),
+                          background: white(0.04), border: `1px solid ${white(0.08)}`, borderRadius: 20, padding: `3px ${SPACE.md}px 3px ${SPACE.sm}px`, animationDelay: `${k * 40}ms`,
+                        }}>
+                          <span>{d.icon}</span>{d.name}<span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: alpha(C.gold, 0.6) }}>{d.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </li>
             );
           })}
+        </ol>
+
+        <div style={{ textAlign: "center", marginTop: SPACE.xl, minHeight: 20 }}>
+          {canSkip && !showReveal && (
+            <button onClick={onComplete} className="fade-up" style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.35), background: "none", border: "none", cursor: "pointer", padding: `${SPACE.xs}px ${SPACE.sm}px`, textDecoration: "underline", textUnderlineOffset: 3 }}>
+              Skip to the atlas
+            </button>
+          )}
         </div>
-
-        {/* Discovery feed */}
-        {discoveries.length > 0 && (
-          <div style={{
-            background: white(0.02), border: `1px solid ${white(0.05)}`,
-            borderRadius: 12, padding: mobile ? "14px 16px" : "16px 20px",
-          }}>
-            <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.2), textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
-              Discovered Topics
-            </div>
-            <div style={stackTight}>
-              {discoveries.map((d, i) => (
-                <div key={i} className="slide-in" style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "8px 12px", borderRadius: 8,
-                  background: white(0.02),
-                  animationDelay: `${i * 50}ms`,
-                }}>
-                  <div style={row}>
-                    <span style={{ fontSize: 16 }}>{d.icon}</span>
-                    <span style={{ fontFamily: BODY, fontSize: 13, color: white(0.6), fontWeight: 500 }}>{d.name}</span>
-                  </div>
-                  <span style={{ fontFamily: MONO, fontSize: 11, color: alpha(C.gold, 0.4) }}>{d.count} convos</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Reveal animation */}
-        {showReveal && (
-          <div className="fade-up" style={{ textAlign: "center", marginTop: 28 }}>
-            <div style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 24, color: C.gold, fontWeight: 700 }}>
-              Your atlas is ready.
-            </div>
-            <div style={{
-              fontFamily: BODY, fontSize: 12, color: white(0.25), marginTop: 6,
-              background: `linear-gradient(90deg, ${alpha(C.gold, 0)} 0%, ${alpha(C.gold, 0.08)} 50%, ${alpha(C.gold, 0)} 100%)`,
-              backgroundSize: "200% 100%", animation: "shimmer 2s infinite linear",
-              padding: "6px 0", borderRadius: 4,
-            }}>
-              Entering your knowledge map...
-            </div>
-          </div>
-        )}
-      </div>
+      </main>
     </div>
   );
 };
