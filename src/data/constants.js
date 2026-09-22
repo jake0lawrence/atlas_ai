@@ -1,18 +1,19 @@
+import { C } from '../styles/tokens';
 export const TOPICS = [
-  { id: "courtcollect", name: "CourtCollect", count: 47, words: 128400, color: "#F59E0B", category: "product", firstSeen: "Aug 2024", lastSeen: "Feb 2026", depth: 4.2, icon: "⚖️", platform: { claude: 38, gpt: 9 } },
-  { id: "hmprg", name: "HMPRG Campaigns", count: 38, words: 98200, color: "#3B82F6", category: "client", firstSeen: "Sep 2024", lastSeen: "Feb 2026", depth: 3.8, icon: "🏥", platform: { claude: 30, gpt: 8 } },
-  { id: "jobsearch", name: "Job Search", count: 62, words: 142000, color: "#EF4444", category: "career", firstSeen: "Dec 2024", lastSeen: "Feb 2026", depth: 3.5, icon: "💼", platform: { claude: 48, gpt: 14 } },
-  { id: "gamedev", name: "Dice or Die", count: 23, words: 67800, color: "#8B5CF6", category: "creative", firstSeen: "Oct 2024", lastSeen: "Jan 2026", depth: 3.9, icon: "🎲", platform: { claude: 15, gpt: 8 } },
-  { id: "keymaster", name: "Keymaster", count: 18, words: 52100, color: "#10B981", category: "product", firstSeen: "Jul 2024", lastSeen: "Dec 2025", depth: 4.0, icon: "🔐", platform: { claude: 14, gpt: 4 } },
-  { id: "automation", name: "AI Automation", count: 34, words: 89500, color: "#EC4899", category: "tech", firstSeen: "Jun 2024", lastSeen: "Feb 2026", depth: 3.6, icon: "🤖", platform: { claude: 20, gpt: 14 } },
-  { id: "resumes", name: "Resumes & Cover Letters", count: 41, words: 95300, color: "#F97316", category: "career", firstSeen: "Dec 2024", lastSeen: "Feb 2026", depth: 2.8, icon: "📄", platform: { claude: 36, gpt: 5 } },
-  { id: "tyler", name: "Tyler Technologies", count: 89, words: 234500, color: "#6366F1", category: "work", firstSeen: "Mar 2023", lastSeen: "Dec 2025", depth: 3.4, icon: "🏢", platform: { claude: 31, gpt: 58 } },
-  { id: "obsidian", name: "Knowledge Mgmt", count: 15, words: 41200, color: "#14B8A6", category: "tech", firstSeen: "Nov 2024", lastSeen: "Feb 2026", depth: 4.5, icon: "🧠", platform: { claude: 13, gpt: 2 } },
-  { id: "finance", name: "Personal Finance", count: 28, words: 61400, color: "#84CC16", category: "personal", firstSeen: "Jun 2023", lastSeen: "Jan 2026", depth: 2.9, icon: "💰", platform: { claude: 10, gpt: 18 } },
-  { id: "n8n", name: "n8n & Airtable", count: 21, words: 58900, color: "#A855F7", category: "tech", firstSeen: "Aug 2024", lastSeen: "Jan 2026", depth: 3.7, icon: "⚡", platform: { claude: 16, gpt: 5 } },
-  { id: "webdev", name: "Web Development", count: 156, words: 412000, color: "#06B6D4", category: "tech", firstSeen: "Jan 2023", lastSeen: "Feb 2026", depth: 3.2, icon: "🌐", platform: { claude: 72, gpt: 84 } },
-  { id: "writing", name: "Creative Writing", count: 32, words: 87600, color: "#FB923C", category: "creative", firstSeen: "Apr 2023", lastSeen: "Jan 2026", depth: 3.1, icon: "✍️", platform: { claude: 12, gpt: 20 } },
-  { id: "govtech", name: "Gov Tech & Policy", count: 44, words: 119000, color: "#64748B", category: "domain", firstSeen: "Feb 2023", lastSeen: "Feb 2026", depth: 3.3, icon: "🏛️", platform: { claude: 22, gpt: 22 } },
+  { id: "courtcollect", name: "CourtCollect", count: 47, words: 128400, color: C.amber, category: "product", firstSeen: "Aug 2024", lastSeen: "Feb 2026", depth: 4.2, icon: "⚖️", platform: { claude: 38, gpt: 9 } },
+  { id: "hmprg", name: "HMPRG Campaigns", count: 38, words: 98200, color: C.blue, category: "client", firstSeen: "Sep 2024", lastSeen: "Feb 2026", depth: 3.8, icon: "🏥", platform: { claude: 30, gpt: 8 } },
+  { id: "jobsearch", name: "Job Search", count: 62, words: 142000, color: C.red, category: "career", firstSeen: "Dec 2024", lastSeen: "Feb 2026", depth: 3.5, icon: "💼", platform: { claude: 48, gpt: 14 } },
+  { id: "gamedev", name: "Dice or Die", count: 23, words: 67800, color: C.violet, category: "creative", firstSeen: "Oct 2024", lastSeen: "Jan 2026", depth: 3.9, icon: "🎲", platform: { claude: 15, gpt: 8 } },
+  { id: "keymaster", name: "Keymaster", count: 18, words: 52100, color: C.green, category: "product", firstSeen: "Jul 2024", lastSeen: "Dec 2025", depth: 4.0, icon: "🔐", platform: { claude: 14, gpt: 4 } },
+  { id: "automation", name: "AI Automation", count: 34, words: 89500, color: C.pink, category: "tech", firstSeen: "Jun 2024", lastSeen: "Feb 2026", depth: 3.6, icon: "🤖", platform: { claude: 20, gpt: 14 } },
+  { id: "resumes", name: "Resumes & Cover Letters", count: 41, words: 95300, color: C.orange, category: "career", firstSeen: "Dec 2024", lastSeen: "Feb 2026", depth: 2.8, icon: "📄", platform: { claude: 36, gpt: 5 } },
+  { id: "tyler", name: "Tyler Technologies", count: 89, words: 234500, color: C.indigo, category: "work", firstSeen: "Mar 2023", lastSeen: "Dec 2025", depth: 3.4, icon: "🏢", platform: { claude: 31, gpt: 58 } },
+  { id: "obsidian", name: "Knowledge Mgmt", count: 15, words: 41200, color: C.teal, category: "tech", firstSeen: "Nov 2024", lastSeen: "Feb 2026", depth: 4.5, icon: "🧠", platform: { claude: 13, gpt: 2 } },
+  { id: "finance", name: "Personal Finance", count: 28, words: 61400, color: C.lime, category: "personal", firstSeen: "Jun 2023", lastSeen: "Jan 2026", depth: 2.9, icon: "💰", platform: { claude: 10, gpt: 18 } },
+  { id: "n8n", name: "n8n & Airtable", count: 21, words: 58900, color: C.purple, category: "tech", firstSeen: "Aug 2024", lastSeen: "Jan 2026", depth: 3.7, icon: "⚡", platform: { claude: 16, gpt: 5 } },
+  { id: "webdev", name: "Web Development", count: 156, words: 412000, color: C.cyan, category: "tech", firstSeen: "Jan 2023", lastSeen: "Feb 2026", depth: 3.2, icon: "🌐", platform: { claude: 72, gpt: 84 } },
+  { id: "writing", name: "Creative Writing", count: 32, words: 87600, color: C.orangeLight, category: "creative", firstSeen: "Apr 2023", lastSeen: "Jan 2026", depth: 3.1, icon: "✍️", platform: { claude: 12, gpt: 20 } },
+  { id: "govtech", name: "Gov Tech & Policy", count: 44, words: 119000, color: C.slate, category: "domain", firstSeen: "Feb 2023", lastSeen: "Feb 2026", depth: 3.3, icon: "🏛️", platform: { claude: 22, gpt: 22 } },
 ];
 
 export const CONNECTIONS = [
@@ -157,13 +158,13 @@ export const TIMELINE_DATA = {
 };
 
 export const TYPE_META = {
-  idea: { label: "Idea", color: "#FBBF24", icon: "💡" },
-  research: { label: "Research", color: "#3B82F6", icon: "🔬" },
-  decision: { label: "Decision", color: "#EF4444", icon: "🎯" },
-  build: { label: "Build", color: "#10B981", icon: "🔨" },
-  problem: { label: "Problem", color: "#F87171", icon: "🔥" },
-  pivot: { label: "Pivot", color: "#A855F7", icon: "↩️" },
-  milestone: { label: "Milestone", color: "#EAB308", icon: "🏆" },
+  idea: { label: "Idea", color: C.gold, icon: "💡" },
+  research: { label: "Research", color: C.blue, icon: "🔬" },
+  decision: { label: "Decision", color: C.red, icon: "🎯" },
+  build: { label: "Build", color: C.green, icon: "🔨" },
+  problem: { label: "Problem", color: C.redLight, icon: "🔥" },
+  pivot: { label: "Pivot", color: C.purple, icon: "↩️" },
+  milestone: { label: "Milestone", color: C.yellow, icon: "🏆" },
 };
 
 export const MONTHLY_ACTIVITY = [
@@ -212,17 +213,17 @@ export const INSIGHTS = [
 ];
 
 export const PLATFORM_INSIGHTS = [
-  { label: "You use Claude for", items: ["Architecture & system design", "Long implementation sessions", "Resume & career materials", "Complex debugging"], color: "#FBBF24" },
-  { label: "You use ChatGPT for", items: ["Quick research questions", "Creative brainstorming", "Personal & life topics", "Early-stage exploration"], color: "#3B82F6" },
+  { label: "You use Claude for", items: ["Architecture & system design", "Long implementation sessions", "Resume & career materials", "Complex debugging"], color: C.gold },
+  { label: "You use ChatGPT for", items: ["Quick research questions", "Creative brainstorming", "Personal & life topics", "Early-stage exploration"], color: C.blue },
 ];
 
 export const EVOLUTION_PHASES = [
-  { period: "Jan – Jun 2023", title: "The Learner", desc: "Mostly how-to questions. Web dev fundamentals, career research, simple automations. Average conversation: 8 messages.", color: "#3B82F6", conversations: 371 },
-  { period: "Jul – Dec 2023", title: "The Practitioner", desc: "Building real things. Tyler work got sophisticated. Financial planning and creative writing began.", color: "#10B981", conversations: 483 },
-  { period: "Jan – Jun 2024", title: "The Builder", desc: "Launched Keymaster and automation projects. Shifted from 'how' to 'what should I build.' Claude adoption began.", color: "#F59E0B", conversations: 548 },
-  { period: "Jul – Dec 2024", title: "The Architect", desc: "CourtCollect, HMPRG campaigns, game design. Multi-project orchestration. Average conversation: 35 messages.", color: "#EF4444", conversations: 726 },
-  { period: "Jan – Jun 2025", title: "The Strategist", desc: "Job search + consulting + product development simultaneously. AI as thinking partner, not just tool.", color: "#A855F7", conversations: 520 },
-  { period: "Jul 2025 – Feb 2026", title: "The Meta-Thinker", desc: "Designing systems to extract knowledge from your own AI use. Building Atlas. The snake eats its tail.", color: "#EC4899", conversations: 480 },
+  { period: "Jan – Jun 2023", title: "The Learner", desc: "Mostly how-to questions. Web dev fundamentals, career research, simple automations. Average conversation: 8 messages.", color: C.blue, conversations: 371 },
+  { period: "Jul – Dec 2023", title: "The Practitioner", desc: "Building real things. Tyler work got sophisticated. Financial planning and creative writing began.", color: C.green, conversations: 483 },
+  { period: "Jan – Jun 2024", title: "The Builder", desc: "Launched Keymaster and automation projects. Shifted from 'how' to 'what should I build.' Claude adoption began.", color: C.amber, conversations: 548 },
+  { period: "Jul – Dec 2024", title: "The Architect", desc: "CourtCollect, HMPRG campaigns, game design. Multi-project orchestration. Average conversation: 35 messages.", color: C.red, conversations: 726 },
+  { period: "Jan – Jun 2025", title: "The Strategist", desc: "Job search + consulting + product development simultaneously. AI as thinking partner, not just tool.", color: C.purple, conversations: 520 },
+  { period: "Jul 2025 – Feb 2026", title: "The Meta-Thinker", desc: "Designing systems to extract knowledge from your own AI use. Building Atlas. The snake eats its tail.", color: C.pink, conversations: 480 },
 ];
 
 export const REDISCOVERIES = [
@@ -501,7 +502,7 @@ export const BELIEF_DIFFS = [
     id: "ai-tools",
     topic: "AI Development Tools",
     icon: "🤖",
-    color: "#EC4899",
+    color: C.pink,
     earlier: { label: "Early 2024", date: "2024-03" },
     current: { label: "Late 2025", date: "2025-11" },
     lines: [
@@ -520,7 +521,7 @@ export const BELIEF_DIFFS = [
     id: "automation",
     topic: "Automation Philosophy",
     icon: "⚡",
-    color: "#A855F7",
+    color: C.purple,
     earlier: { label: "Mid 2024", date: "2024-06" },
     current: { label: "2025", date: "2025-09" },
     lines: [
@@ -539,7 +540,7 @@ export const BELIEF_DIFFS = [
     id: "courtcollect-arch",
     topic: "CourtCollect Architecture",
     icon: "⚖️",
-    color: "#F59E0B",
+    color: C.amber,
     earlier: { label: "Initial (Aug 2024)", date: "2024-08" },
     current: { label: "Current (Feb 2026)", date: "2026-02" },
     lines: [
@@ -565,7 +566,7 @@ export const ARCHAEOLOGY_CHAINS = {
     title: "Why TypeScript?",
     summary: "From JavaScript frustration to full TypeScript adoption across all projects",
     icon: "🔷",
-    color: "#3178C6",
+    color: C.tsBlue,
     topicId: "webdev",
     resolution: "TypeScript became the default for all new projects after team scalability concerns crystallized",
     nodes: [
@@ -636,7 +637,7 @@ export const ARCHAEOLOGY_CHAINS = {
     title: "Why event-driven architecture?",
     summary: "From monolithic pain to event-driven design for CourtCollect's payment and notification systems",
     icon: "⚡",
-    color: "#F59E0B",
+    color: C.amber,
     topicId: "courtcollect",
     resolution: "Event-driven architecture adopted for CourtCollect after monolith scaling issues at Tyler and successful pub/sub prototyping",
     nodes: [
@@ -707,7 +708,7 @@ export const ARCHAEOLOGY_CHAINS = {
     title: "Why Vercel over Docker?",
     summary: "From Docker containerization struggles to serverless simplicity with Vercel",
     icon: "▲",
-    color: "#10B981",
+    color: C.green,
     topicId: "courtcollect",
     resolution: "Pivoted to Vercel after 3 days of Docker deployment pain, embracing serverless as the right fit for the project's scale",
     nodes: [
@@ -772,16 +773,16 @@ export const DIGEST_DATA = [
     stats: { conversations: 18, newTopics: 0, pivots: 0, insights: 2 },
     newTopics: [],
     deepened: [
-      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: "#F59E0B", delta: "+6 conversations", detail: "Josephine TX integration and agency portal refinements" },
-      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: "#EF4444", delta: "+4 conversations", detail: "Interview pipeline strategy updates" },
+      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: C.amber, delta: "+6 conversations", detail: "Josephine TX integration and agency portal refinements" },
+      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: C.red, delta: "+4 conversations", detail: "Interview pipeline strategy updates" },
     ],
     goneQuiet: [],
     decisions: [
-      { text: "GovTech market positioning finalized for CourtCollect", topicId: "govtech", color: "#64748B" },
+      { text: "GovTech market positioning finalized for CourtCollect", topicId: "govtech", color: C.slate },
     ],
     pivots: [],
     connections: [
-      { from: "CourtCollect", to: "Gov Tech & Policy", label: "GovTech narrative alignment", color: "#F59E0B" },
+      { from: "CourtCollect", to: "Gov Tech & Policy", label: "GovTech narrative alignment", color: C.amber },
     ],
   },
   {
@@ -791,26 +792,26 @@ export const DIGEST_DATA = [
     stats: { conversations: 47, newTopics: 0, pivots: 1, insights: 5 },
     newTopics: [],
     deepened: [
-      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: "#F59E0B", delta: "+12 conversations", detail: "Clearwater KS data conversion, collections agency portal MVP, Josephine TX integration" },
-      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: "#EF4444", delta: "+8 conversations", detail: "TransUnion 3rd round, Veritone prep, pipeline management" },
-      { topicId: "resumes", name: "Resumes & Cover Letters", icon: "📄", color: "#F97316", delta: "+5 conversations", detail: "Portfolio narrative refinement and helping others" },
-      { topicId: "automation", name: "AI Automation", icon: "🤖", color: "#EC4899", delta: "+3 conversations", detail: "Personal productivity system with integrated AI assistants" },
+      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: C.amber, delta: "+12 conversations", detail: "Clearwater KS data conversion, collections agency portal MVP, Josephine TX integration" },
+      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: C.red, delta: "+8 conversations", detail: "TransUnion 3rd round, Veritone prep, pipeline management" },
+      { topicId: "resumes", name: "Resumes & Cover Letters", icon: "📄", color: C.orange, delta: "+5 conversations", detail: "Portfolio narrative refinement and helping others" },
+      { topicId: "automation", name: "AI Automation", icon: "🤖", color: C.pink, delta: "+3 conversations", detail: "Personal productivity system with integrated AI assistants" },
     ],
     goneQuiet: [
-      { topicId: "gamedev", name: "Dice or Die", icon: "🎲", color: "#8B5CF6", lastActive: "Jan 5", detail: "Monetization strategy was last touch — waiting for CourtCollect to stabilize" },
-      { topicId: "writing", name: "Creative Writing", icon: "✍️", color: "#FB923C", lastActive: "Jan 5", detail: "Professional bio iterations, but no creative work" },
+      { topicId: "gamedev", name: "Dice or Die", icon: "🎲", color: C.violet, lastActive: "Jan 5", detail: "Monetization strategy was last touch — waiting for CourtCollect to stabilize" },
+      { topicId: "writing", name: "Creative Writing", icon: "✍️", color: C.orangeLight, lastActive: "Jan 5", detail: "Professional bio iterations, but no creative work" },
     ],
     decisions: [
-      { text: "Portfolio narrative refined — leading with 100+ implementations story", topicId: "resumes", color: "#F97316" },
-      { text: "Consulting income cash flow projections completed", topicId: "finance", color: "#84CC16" },
-      { text: "Personal productivity system architecture selected", topicId: "automation", color: "#EC4899" },
+      { text: "Portfolio narrative refined — leading with 100+ implementations story", topicId: "resumes", color: C.orange },
+      { text: "Consulting income cash flow projections completed", topicId: "finance", color: C.lime },
+      { text: "Personal productivity system architecture selected", topicId: "automation", color: C.pink },
     ],
     pivots: [
-      { text: "HMPRG: Shifted budget from Facebook to Instagram (3:1 outperformance)", topicId: "hmprg", color: "#3B82F6", before: "Even split across Meta platforms", after: "Instagram-heavy allocation" },
+      { text: "HMPRG: Shifted budget from Facebook to Instagram (3:1 outperformance)", topicId: "hmprg", color: C.blue, before: "Even split across Meta platforms", after: "Instagram-heavy allocation" },
     ],
     connections: [
-      { from: "CourtCollect", to: "Tyler Technologies", label: "Clearwater KS data conversion leveraged Tyler expertise", color: "#F59E0B" },
-      { from: "Job Search", to: "CourtCollect", label: "Portfolio piece for interview narratives", color: "#EF4444" },
+      { from: "CourtCollect", to: "Tyler Technologies", label: "Clearwater KS data conversion leveraged Tyler expertise", color: C.amber },
+      { from: "Job Search", to: "CourtCollect", label: "Portfolio piece for interview narratives", color: C.red },
     ],
   },
   {
@@ -820,26 +821,26 @@ export const DIGEST_DATA = [
     stats: { conversations: 58, newTopics: 0, pivots: 2, insights: 4 },
     newTopics: [],
     deepened: [
-      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: "#F59E0B", delta: "+9 conversations", detail: "Demo prep, pitch deck creation, investor-ready demo environment" },
-      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: "#EF4444", delta: "+7 conversations", detail: "Post-Tyler transition planning, master resume overhaul" },
-      { topicId: "obsidian", name: "Knowledge Mgmt", icon: "🧠", color: "#14B8A6", delta: "+4 conversations", detail: "Obsidian vault architecture decisions, AI + PKM integration ideas" },
+      { topicId: "courtcollect", name: "CourtCollect", icon: "⚖️", color: C.amber, delta: "+9 conversations", detail: "Demo prep, pitch deck creation, investor-ready demo environment" },
+      { topicId: "jobsearch", name: "Job Search", icon: "💼", color: C.red, delta: "+7 conversations", detail: "Post-Tyler transition planning, master resume overhaul" },
+      { topicId: "obsidian", name: "Knowledge Mgmt", icon: "🧠", color: C.teal, delta: "+4 conversations", detail: "Obsidian vault architecture decisions, AI + PKM integration ideas" },
     ],
     goneQuiet: [
-      { topicId: "keymaster", name: "Keymaster", icon: "🔐", color: "#10B981", lastActive: "Dec 5", detail: "Project paused — prioritizing CourtCollect and job search" },
+      { topicId: "keymaster", name: "Keymaster", icon: "🔐", color: C.green, lastActive: "Dec 5", detail: "Project paused — prioritizing CourtCollect and job search" },
     ],
     decisions: [
-      { text: "Tyler departure — knowledge capture and institutional docs completed", topicId: "tyler", color: "#6366F1" },
-      { text: "CourtCollect pitch: lead with 23% revenue loss statistic", topicId: "courtcollect", color: "#F59E0B" },
-      { text: "Obsidian vault folder structure and tagging system finalized", topicId: "obsidian", color: "#14B8A6" },
+      { text: "Tyler departure — knowledge capture and institutional docs completed", topicId: "tyler", color: C.indigo },
+      { text: "CourtCollect pitch: lead with 23% revenue loss statistic", topicId: "courtcollect", color: C.amber },
+      { text: "Obsidian vault folder structure and tagging system finalized", topicId: "obsidian", color: C.teal },
     ],
     pivots: [
-      { text: "Keymaster shelved to focus on CourtCollect + job search", topicId: "keymaster", color: "#10B981", before: "Active development on browser extension", after: "Project paused indefinitely" },
-      { text: "Shifted from ChatGPT-primary to Claude-primary workflow", topicId: "webdev", color: "#06B6D4", before: "ChatGPT for most development tasks", after: "Claude for architecture & long sessions, ChatGPT for quick research" },
+      { text: "Keymaster shelved to focus on CourtCollect + job search", topicId: "keymaster", color: C.green, before: "Active development on browser extension", after: "Project paused indefinitely" },
+      { text: "Shifted from ChatGPT-primary to Claude-primary workflow", topicId: "webdev", color: C.cyan, before: "ChatGPT for most development tasks", after: "Claude for architecture & long sessions, ChatGPT for quick research" },
     ],
     connections: [
-      { from: "Tyler Technologies", to: "CourtCollect", label: "Domain expertise transfer crystallized in pitch deck", color: "#6366F1" },
-      { from: "Knowledge Mgmt", to: "AI Automation", label: "PKM + AI integration concept emerged", color: "#14B8A6" },
-      { from: "Job Search", to: "Resumes & Cover Letters", label: "Application materials pipeline established", color: "#EF4444" },
+      { from: "Tyler Technologies", to: "CourtCollect", label: "Domain expertise transfer crystallized in pitch deck", color: C.indigo },
+      { from: "Knowledge Mgmt", to: "AI Automation", label: "PKM + AI integration concept emerged", color: C.teal },
+      { from: "Job Search", to: "Resumes & Cover Letters", label: "Application materials pipeline established", color: C.red },
     ],
   },
   {
@@ -849,24 +850,24 @@ export const DIGEST_DATA = [
     stats: { conversations: 52, newTopics: 0, pivots: 1, insights: 3 },
     newTopics: [],
     deepened: [
-      { topicId: "automation", name: "AI Automation", icon: "🤖", color: "#EC4899", delta: "+8 conversations", detail: "AI-for-good nonprofit concept, client reporting automation" },
-      { topicId: "n8n", name: "n8n & Airtable", icon: "⚡", color: "#A855F7", delta: "+6 conversations", detail: "Complex multi-step workflows, error handling patterns" },
-      { topicId: "hmprg", name: "HMPRG Campaigns", icon: "🏥", color: "#3B82F6", delta: "+5 conversations", detail: "Campaign performance analysis and content calendar" },
+      { topicId: "automation", name: "AI Automation", icon: "🤖", color: C.pink, delta: "+8 conversations", detail: "AI-for-good nonprofit concept, client reporting automation" },
+      { topicId: "n8n", name: "n8n & Airtable", icon: "⚡", color: C.purple, delta: "+6 conversations", detail: "Complex multi-step workflows, error handling patterns" },
+      { topicId: "hmprg", name: "HMPRG Campaigns", icon: "🏥", color: C.blue, delta: "+5 conversations", detail: "Campaign performance analysis and content calendar" },
     ],
     goneQuiet: [
-      { topicId: "finance", name: "Personal Finance", icon: "💰", color: "#84CC16", lastActive: "Aug 2025", detail: "Tax strategies settled, no active financial planning" },
-      { topicId: "tyler", name: "Tyler Technologies", icon: "🏢", color: "#6366F1", lastActive: "Sep 2025", detail: "Winding down, approaching departure" },
+      { topicId: "finance", name: "Personal Finance", icon: "💰", color: C.lime, lastActive: "Aug 2025", detail: "Tax strategies settled, no active financial planning" },
+      { topicId: "tyler", name: "Tyler Technologies", icon: "🏢", color: C.indigo, lastActive: "Sep 2025", detail: "Winding down, approaching departure" },
     ],
     decisions: [
-      { text: "Strategic automation philosophy: automate the boring, hand-craft the critical", topicId: "automation", color: "#EC4899" },
-      { text: "n8n for simple pipelines, custom code for complex logic", topicId: "n8n", color: "#A855F7" },
+      { text: "Strategic automation philosophy: automate the boring, hand-craft the critical", topicId: "automation", color: C.pink },
+      { text: "n8n for simple pipelines, custom code for complex logic", topicId: "n8n", color: C.purple },
     ],
     pivots: [
-      { text: "From 'automate everything' to strategic automation", topicId: "automation", color: "#EC4899", before: "If it can be automated, it should be", after: "Automate the boring, hand-craft the critical" },
+      { text: "From 'automate everything' to strategic automation", topicId: "automation", color: C.pink, before: "If it can be automated, it should be", after: "Automate the boring, hand-craft the critical" },
     ],
     connections: [
-      { from: "n8n & Airtable", to: "AI Automation", label: "Workflow tooling matured into automation philosophy", color: "#A855F7" },
-      { from: "HMPRG Campaigns", to: "n8n & Airtable", label: "Campaign reporting automated via n8n pipeline", color: "#3B82F6" },
+      { from: "n8n & Airtable", to: "AI Automation", label: "Workflow tooling matured into automation philosophy", color: C.purple },
+      { from: "HMPRG Campaigns", to: "n8n & Airtable", label: "Campaign reporting automated via n8n pipeline", color: C.blue },
     ],
   },
 ];
@@ -879,7 +880,7 @@ export const PIVOT_ENTRIES = [
     topicId: "webdev",
     topicName: "Web Development",
     topicIcon: "🌐",
-    topicColor: "#06B6D4",
+    topicColor: C.cyan,
     title: "Shifted from ChatGPT-primary to Claude-primary workflow",
     before: "ChatGPT for most development tasks, including architecture and debugging",
     trigger: "A week-long architecture session with Claude on CourtCollect showed dramatically better context retention and code quality. Claude handled the multi-tenant RLS schema design in a single session that took three ChatGPT conversations to approximate.",
@@ -894,7 +895,7 @@ export const PIVOT_ENTRIES = [
     topicId: "automation",
     topicName: "AI Automation",
     topicIcon: "🤖",
-    topicColor: "#EC4899",
+    topicColor: C.pink,
     title: "From 'automate everything' to strategic automation",
     before: "If it can be automated, it should be — spent weeks building complex n8n workflows for edge cases",
     trigger: "An n8n workflow for client reporting broke silently for 2 weeks. The maintenance burden of over-automated systems became clear when a simple manual process would have taken 5 minutes per week.",
@@ -909,7 +910,7 @@ export const PIVOT_ENTRIES = [
     topicId: "keymaster",
     topicName: "Keymaster",
     topicIcon: "🔐",
-    topicColor: "#10B981",
+    topicColor: C.green,
     title: "Keymaster shelved to focus on CourtCollect + job search",
     before: "Active development on browser extension with weekly progress milestones",
     trigger: "Tyler departure accelerated job search timeline. CourtCollect became the primary portfolio piece. Available hours dropped by 60% and Keymaster wasn't generating revenue.",
@@ -924,7 +925,7 @@ export const PIVOT_ENTRIES = [
     topicId: "hmprg",
     topicName: "HMPRG Campaigns",
     topicIcon: "🏥",
-    topicColor: "#3B82F6",
+    topicColor: C.blue,
     title: "Shifted budget from Facebook to Instagram (3:1 outperformance)",
     before: "Even split across Meta platforms — running similar campaigns on both Facebook and Instagram",
     trigger: "Q4 2025 analytics showed Instagram Stories outperforming Facebook feed ads by 3:1 on CPE. The HMPRG target demographic (healthcare workers 25-45) was engaging far more on Instagram.",
@@ -1043,7 +1044,7 @@ export const CONTRADICTIONS_INITIAL = [
     topic: "CourtCollect Architecture",
     topicId: "courtcollect",
     icon: "⚖️",
-    color: "#F59E0B",
+    color: C.amber,
     summary: "In March you explicitly decided against microservices. Your last 3 conversations assume a microservices architecture.",
     earlier: {
       date: "2024-11-16",
@@ -1064,7 +1065,7 @@ export const CONTRADICTIONS_INITIAL = [
     topic: "Automation Philosophy",
     topicId: "automation",
     icon: "🤖",
-    color: "#EC4899",
+    color: C.pink,
     summary: "Your early conversations emphasized no-code tools. Recent conversations are increasingly code-heavy. Intentional evolution?",
     earlier: {
       date: "2024-06-10",
@@ -1085,7 +1086,7 @@ export const CONTRADICTIONS_INITIAL = [
     topic: "n8n & Airtable",
     topicId: "n8n",
     icon: "⚡",
-    color: "#A855F7",
+    color: C.purple,
     summary: "This conversation references your Airtable setup, but you migrated away from Airtable 4 months ago.",
     earlier: {
       date: "2024-08-22",
@@ -1106,7 +1107,7 @@ export const CONTRADICTIONS_INITIAL = [
     topic: "Job Search",
     topicId: "jobsearch",
     icon: "💼",
-    color: "#EF4444",
+    color: C.red,
     summary: "You decided to focus exclusively on GovTech roles, but your last 2 applications were to general B2B SaaS companies.",
     earlier: {
       date: "2025-01-15",
@@ -1123,9 +1124,9 @@ export const CONTRADICTIONS_INITIAL = [
 ];
 
 export const CONTRADICTION_TYPE_CONFIG = {
-  hard: { label: "Hard Contradiction", color: "#EF4444", icon: "⊘", bgAlpha: "0.06" },
-  soft: { label: "Soft Drift", color: "#F97316", icon: "◎", bgAlpha: "0.05" },
-  stale: { label: "Stale Assumption", color: "#A855F7", icon: "⏳", bgAlpha: "0.05" },
+  hard: { label: "Hard Contradiction", color: C.red, icon: "⊘", bgAlpha: "0.06" },
+  soft: { label: "Soft Drift", color: C.orange, icon: "◎", bgAlpha: "0.05" },
+  stale: { label: "Stale Assumption", color: C.purple, icon: "⏳", bgAlpha: "0.05" },
 };
 
 export const RESOLUTION_OPTIONS = [
@@ -1136,10 +1137,10 @@ export const RESOLUTION_OPTIONS = [
 
 // ─── FRESHNESS & STALENESS ───────────────────────────────────
 export const FRESHNESS_CONFIG = {
-  active:   { label: "Active",   color: "#10B981", icon: "●" },
-  cooling:  { label: "Cooling",  color: "#F59E0B", icon: "◐" },
-  dormant:  { label: "Dormant",  color: "#64748B", icon: "○" },
-  archived: { label: "Archived", color: "#475569", icon: "◻" },
+  active:   { label: "Active",   color: C.green, icon: "●" },
+  cooling:  { label: "Cooling",  color: C.amber, icon: "◐" },
+  dormant:  { label: "Dormant",  color: C.slate, icon: "○" },
+  archived: { label: "Archived", color: C.slateDeep, icon: "◻" },
 };
 
 export const MONTH_MAP = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
@@ -1176,10 +1177,10 @@ export const SYNC_NEW_EVENTS = {
 
 // ─── TOPIC CURATION DATA ────────────────────────────────────
 export const CURATED_PALETTE = [
-  "#F59E0B", "#3B82F6", "#EF4444", "#8B5CF6", "#10B981",
-  "#EC4899", "#F97316", "#6366F1", "#14B8A6", "#84CC16",
-  "#A855F7", "#06B6D4", "#FB923C", "#64748B", "#E11D48",
-  "#0EA5E9", "#D946EF", "#22C55E",
+  C.amber, C.blue, C.red, C.violet, C.green,
+  C.pink, C.orange, C.indigo, C.teal, C.lime,
+  C.purple, C.cyan, C.orangeLight, C.slate, C.rose,
+  C.sky, C.fuchsia, C.greenBright,
 ];
 
 // Mini-sparkline activity data per topic (last 6 months relative values)
@@ -1214,9 +1215,9 @@ export const MERGE_SUGGESTIONS = [
 ];
 
 export const DEMO_PERSONAS = [
-  { id: "power", label: "Power User", convos: "3,847", detail: "3 years · ChatGPT + Claude", icon: "⚡", color: "#FBBF24", enabled: true },
-  { id: "new", label: "New User", convos: "200", detail: "3 months · ChatGPT only", icon: "🌱", color: "#10B981", enabled: true },
-  { id: "team", label: "Team Lead", convos: "—", detail: "Multi-user · Coming soon", icon: "👥", color: "#8B5CF6", enabled: false },
+  { id: "power", label: "Power User", convos: "3,847", detail: "3 years · ChatGPT + Claude", icon: "⚡", color: C.gold, enabled: true },
+  { id: "new", label: "New User", convos: "200", detail: "3 months · ChatGPT only", icon: "🌱", color: C.green, enabled: true },
+  { id: "team", label: "Team Lead", convos: "—", detail: "Multi-user · Coming soon", icon: "👥", color: C.violet, enabled: false },
 ];
 
 export const LOAD_PIPELINE = [
@@ -1241,11 +1242,11 @@ export const LOAD_PIPELINE = [
 ];
 
 export const PHASE_META = {
-  parse: { label: "PARSING", color: "#3B82F6", icon: "📄" },
-  normalize: { label: "NORMALIZING", color: "#10B981", icon: "🔄" },
-  enrich: { label: "ENRICHING", color: "#FBBF24", icon: "🧠" },
-  connect: { label: "CONNECTING", color: "#A855F7", icon: "🔗" },
-  build: { label: "BUILDING", color: "#EC4899", icon: "✨" },
+  parse: { label: "PARSING", color: C.blue, icon: "📄" },
+  normalize: { label: "NORMALIZING", color: C.green, icon: "🔄" },
+  enrich: { label: "ENRICHING", color: C.gold, icon: "🧠" },
+  connect: { label: "CONNECTING", color: C.purple, icon: "🔗" },
+  build: { label: "BUILDING", color: C.pink, icon: "✨" },
 };
 
 export const VAULT_TREE = [
@@ -1401,28 +1402,28 @@ export const PAST_ANALOGIES = [
 // ─── COMPANION SIDEBAR SUGGESTIONS ──────────────────────
 export const COMPANION_SIDEBAR_SUGGESTIONS = {
   dashboard: [
-    { id: "dash-1", icon: "🧠", title: "Knowledge Mgmt is getting stale", description: "You haven't visited Knowledge Mgmt in 3 months — here's what's changed since your last deep dive.", accent: "#14B8A6", actions: ["Brief me", "Ask Atlas"] },
-    { id: "dash-2", icon: "💡", title: "New connection pattern", description: "Your conversations about AI Automation and n8n & Airtable are converging — you may be developing a unified workflow philosophy.", accent: "#EC4899", actions: ["View diff", "Ask Atlas"] },
-    { id: "dash-3", icon: "📊", title: "Thinking streak active", description: "You've had 12 conversations about CourtCollect this month — that's 3x your average.", accent: "#F59E0B", actions: ["View timeline", "Brief me"] },
+    { id: "dash-1", icon: "🧠", title: "Knowledge Mgmt is getting stale", description: "You haven't visited Knowledge Mgmt in 3 months — here's what's changed since your last deep dive.", accent: C.teal, actions: ["Brief me", "Ask Atlas"] },
+    { id: "dash-2", icon: "💡", title: "New connection pattern", description: "Your conversations about AI Automation and n8n & Airtable are converging — you may be developing a unified workflow philosophy.", accent: C.pink, actions: ["View diff", "Ask Atlas"] },
+    { id: "dash-3", icon: "📊", title: "Thinking streak active", description: "You've had 12 conversations about CourtCollect this month — that's 3x your average.", accent: C.amber, actions: ["View timeline", "Brief me"] },
   ],
   timeline: [
-    { id: "time-1", icon: "🔗", title: "Cross-topic connection", description: "This event connects to a similar architecture decision in Web Development from 6 months ago.", accent: "#06B6D4", actions: ["View connection", "Ask Atlas"] },
-    { id: "time-2", icon: "⚡", title: "Thinking velocity spike", description: "You had 5 conversations on this topic in one week — something was driving urgency.", accent: "#FBBF24", actions: ["Brief me", "Ask Atlas"] },
+    { id: "time-1", icon: "🔗", title: "Cross-topic connection", description: "This event connects to a similar architecture decision in Web Development from 6 months ago.", accent: C.cyan, actions: ["View connection", "Ask Atlas"] },
+    { id: "time-2", icon: "⚡", title: "Thinking velocity spike", description: "You had 5 conversations on this topic in one week — something was driving urgency.", accent: C.gold, actions: ["Brief me", "Ask Atlas"] },
   ],
   connections: [
-    { id: "conn-1", icon: "🌐", title: "Potential new connection", description: "Atlas found a potential new connection between Dice or Die and Creative Writing — game narrative design overlaps.", accent: "#8B5CF6", actions: ["View diff", "Ask Atlas"] },
-    { id: "conn-2", icon: "💪", title: "Strongest bridge topic", description: "AI Automation connects to 5 other topics — it's your most interconnected area of thinking.", accent: "#EC4899", actions: ["Brief me", "Ask Atlas"] },
+    { id: "conn-1", icon: "🌐", title: "Potential new connection", description: "Atlas found a potential new connection between Dice or Die and Creative Writing — game narrative design overlaps.", accent: C.violet, actions: ["View diff", "Ask Atlas"] },
+    { id: "conn-2", icon: "💪", title: "Strongest bridge topic", description: "AI Automation connects to 5 other topics — it's your most interconnected area of thinking.", accent: C.pink, actions: ["Brief me", "Ask Atlas"] },
   ],
   evolution: [
-    { id: "evo-1", icon: "🔄", title: "Thinking shifted 3 times", description: "Your thinking on serverless architecture has shifted 3 times — see the diffs between each phase.", accent: "#3B82F6", actions: ["View diff", "Ask Atlas"] },
-    { id: "evo-2", icon: "📈", title: "Deepening pattern", description: "Your conversations are getting longer and more technical — expertise is compounding.", accent: "#10B981", actions: ["Brief me", "Ask Atlas"] },
+    { id: "evo-1", icon: "🔄", title: "Thinking shifted 3 times", description: "Your thinking on serverless architecture has shifted 3 times — see the diffs between each phase.", accent: C.blue, actions: ["View diff", "Ask Atlas"] },
+    { id: "evo-2", icon: "📈", title: "Deepening pattern", description: "Your conversations are getting longer and more technical — expertise is compounding.", accent: C.green, actions: ["Brief me", "Ask Atlas"] },
   ],
   conversation: [
-    { id: "conv-1", icon: "⚠️", title: "Possible contradiction", description: "This contradicts a decision you made on Nov 14, 2024 about deployment strategy.", accent: "#EF4444", actions: ["View diff", "Ask Atlas"] },
-    { id: "conv-2", icon: "🔗", title: "Referenced elsewhere", description: "This conversation is referenced in 3 other topic threads — it was a pivotal moment.", accent: "#A855F7", actions: ["Brief me", "Ask Atlas"] },
+    { id: "conv-1", icon: "⚠️", title: "Possible contradiction", description: "This contradicts a decision you made on Nov 14, 2024 about deployment strategy.", accent: C.red, actions: ["View diff", "Ask Atlas"] },
+    { id: "conv-2", icon: "🔗", title: "Referenced elsewhere", description: "This conversation is referenced in 3 other topic threads — it was a pivotal moment.", accent: C.purple, actions: ["Brief me", "Ask Atlas"] },
   ],
   companion: [
-    { id: "comp-1", icon: "🎯", title: "Popular question pattern", description: "Most users ask about their decision history first — try 'What decisions have I revisited most?'", accent: "#FBBF24", actions: ["Ask this", "Brief me"] },
-    { id: "comp-2", icon: "🧩", title: "Knowledge gap detected", description: "You've discussed Personal Finance 28 times but never connected it to your automation workflows.", accent: "#84CC16", actions: ["View connection", "Ask Atlas"] },
+    { id: "comp-1", icon: "🎯", title: "Popular question pattern", description: "Most users ask about their decision history first — try 'What decisions have I revisited most?'", accent: C.gold, actions: ["Ask this", "Brief me"] },
+    { id: "comp-2", icon: "🧩", title: "Knowledge gap detected", description: "You've discussed Personal Finance 28 times but never connected it to your automation workflows.", accent: C.lime, actions: ["View connection", "Ask Atlas"] },
   ],
 };

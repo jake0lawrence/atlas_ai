@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { FONTS, BODY, MONO, CSS } from '../styles/base';
+import { C, alpha, white } from '../styles/tokens';
+import { screen, display } from '../styles/shared';
 
 // ═══════════════════════════════════════════════════════════════
 // CURATION SUMMARY & CONFIDENCE DASHBOARD (v5 1E)
 // ═══════════════════════════════════════════════════════════════
 
-const CurationSummary = ({ onComplete, mobile, w }) => {
+const CurationSummary = ({ onComplete, mobile }) => {
   const [phase, setPhase] = useState(0); // 0: counting, 1: stats revealed, 2: before/after, 3: ready
   const [counters, setCounters] = useState({ reviewed: 0, approved: 0, edited: 0, rejected: 0, confidence: 0 });
   const curationTimersRef = useRef([]);
@@ -14,7 +16,6 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
     return () => curationTimersRef.current.forEach(clearTimeout);
   }, []);
 
-  const tablet = w >= 640 && w < 1024;
 
   // Aggregate stats from the full curation pipeline (simulated from demo data)
   const finalStats = {
@@ -63,16 +64,16 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
   }, []);
 
   const statCards = [
-    { label: "Items Reviewed", value: counters.reviewed, color: "#FBBF24", icon: "📋" },
-    { label: "Approved", value: counters.approved, color: "#10B981", icon: "✓" },
-    { label: "Edited", value: counters.edited, color: "#3B82F6", icon: "✎" },
-    { label: "Rejected", value: counters.rejected, color: "#EF4444", icon: "✕" },
+    { label: "Items Reviewed", value: counters.reviewed, color: C.gold, icon: "📋" },
+    { label: "Approved", value: counters.approved, color: C.green, icon: "✓" },
+    { label: "Edited", value: counters.edited, color: C.blue, icon: "✎" },
+    { label: "Rejected", value: counters.rejected, color: C.red, icon: "✕" },
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#08080C", display: "flex", flexDirection: "column", padding: mobile ? "24px 16px" : "32px 40px" }}>
+    <div style={screen(mobile)}>
       <style>{CSS}</style>
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at 50% 30%, rgba(16,185,129,0.05) 0%, transparent 50%)", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at 50% 30%, ${alpha(C.green, 0.05)} 0%, transparent 50%)`, pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 800, width: "100%", margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Header */}
@@ -80,15 +81,15 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "4px 14px", borderRadius: 20, marginBottom: 14,
-            background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)",
-            fontFamily: MONO, fontSize: 10, color: "#10B981", fontWeight: 600, letterSpacing: "0.08em",
+            background: alpha(C.green, 0.08), border: `1px solid ${alpha(C.green, 0.25)}`,
+            fontFamily: MONO, fontSize: 10, color: C.green, fontWeight: 600, letterSpacing: "0.08em",
           }}>
             CURATION COMPLETE
           </div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 36, fontWeight: 800, color: "#fff", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            Your Atlas is Now <span style={{ color: "#10B981" }}>Human-Verified</span>
+          <h1 style={display(mobile)}>
+            Your Atlas is Now <span style={{ color: C.green }}>Human-Verified</span>
           </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)", marginTop: 8, lineHeight: 1.6 }}>
+          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: white(0.3), marginTop: 8, lineHeight: 1.6 }}>
             You reviewed AI classifications, curated topics, validated connections, and confirmed insights.
             <br />Every data point in your knowledge base has been shaped by your judgment.
           </p>
@@ -98,15 +99,15 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
         <div className="fade-up" style={{ textAlign: "center", marginBottom: mobile ? 28 : 40, animationDelay: "0.2s" }}>
           <div style={{ position: "relative", display: "inline-block", width: mobile ? 120 : 150, height: mobile ? 120 : 150 }}>
             <svg width={mobile ? 120 : 150} height={mobile ? 120 : 150} viewBox="0 0 150 150" style={{ transform: "rotate(-90deg)" }}>
-              <circle cx="75" cy="75" r="62" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="8" />
+              <circle cx="75" cy="75" r="62" fill="none" stroke={white(0.04)} strokeWidth="8" />
               <circle cx="75" cy="75" r="62" fill="none" stroke="url(#confidenceGrad)" strokeWidth="8"
                 strokeLinecap="round" strokeDasharray={`${2 * Math.PI * 62}`}
                 strokeDashoffset={`${2 * Math.PI * 62 * (1 - counters.confidence / 100)}`}
                 style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1)" }} />
               <defs>
                 <linearGradient id="confidenceGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#10B981" />
-                  <stop offset="100%" stopColor="#059669" />
+                  <stop offset="0%" stopColor={C.green} />
+                  <stop offset="100%" stopColor={C.greenDeep} />
                 </linearGradient>
               </defs>
             </svg>
@@ -114,10 +115,10 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
               position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
               textAlign: "center",
             }}>
-              <div style={{ fontFamily: MONO, fontSize: mobile ? 32 : 40, fontWeight: 700, color: "#10B981", lineHeight: 1 }}>
+              <div style={{ fontFamily: MONO, fontSize: mobile ? 32 : 40, fontWeight: 700, color: C.green, lineHeight: 1 }}>
                 {counters.confidence}%
               </div>
-              <div style={{ fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 4, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.25), marginTop: 4, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 confidence
               </div>
             </div>
@@ -131,7 +132,7 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
         }}>
           {statCards.map((stat, i) => (
             <div key={stat.label} className="fade-up" style={{
-              background: "rgba(255,255,255,0.025)", borderRadius: 14,
+              background: white(0.025), borderRadius: 14,
               border: `1px solid ${stat.color}15`, padding: mobile ? "16px 14px" : "20px 18px",
               textAlign: "center", animationDelay: `${0.3 + i * 0.1}s`,
             }}>
@@ -143,7 +144,7 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
                 {stat.value}
               </div>
               <div style={{
-                fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.3)",
+                fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.3),
                 fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.04em",
               }}>
                 {stat.label}
@@ -158,7 +159,7 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
             <div style={{
               display: "flex", alignItems: "center", gap: 8, marginBottom: mobile ? 14 : 18,
             }}>
-              <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 22, fontWeight: 700, color: "#fff" }}>
+              <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 22, fontWeight: 700, color: C.white }}>
                 How Curation Improved Your Atlas
               </h2>
             </div>
@@ -166,8 +167,8 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
             <div style={{ display: "flex", flexDirection: "column", gap: mobile ? 8 : 10 }}>
               {beforeAfter.map((item, i) => (
                 <div key={item.label} className="fade-up" style={{
-                  background: "rgba(255,255,255,0.02)", borderRadius: 14,
-                  border: "1px solid rgba(255,255,255,0.05)", overflow: "hidden",
+                  background: white(0.02), borderRadius: 14,
+                  border: `1px solid ${white(0.05)}`, overflow: "hidden",
                   animationDelay: `${i * 0.1}s`,
                 }}>
                   <div style={{
@@ -182,7 +183,7 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
                       width: mobile ? "100%" : "160px", flexShrink: 0,
                     }}>
                       <span style={{ fontSize: 16 }}>{item.icon}</span>
-                      <span style={{ fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>
+                      <span style={{ fontFamily: BODY, fontSize: 13, color: white(0.5), fontWeight: 600 }}>
                         {item.label}
                       </span>
                     </div>
@@ -194,22 +195,22 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
                     }}>
                       <div style={{
                         flex: 1, padding: "8px 12px", borderRadius: 8,
-                        background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.1)",
+                        background: alpha(C.red, 0.04), border: `1px solid ${alpha(C.red, 0.1)}`,
                         width: mobile ? "100%" : "auto",
                       }}>
-                        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(239,68,68,0.4)", display: "block", marginBottom: 2 }}>BEFORE</span>
-                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.3)" }}>{item.before}</span>
+                        <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.red, 0.4), display: "block", marginBottom: 2 }}>BEFORE</span>
+                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.3) }}>{item.before}</span>
                       </div>
 
-                      <span style={{ fontFamily: MONO, fontSize: 14, color: "rgba(255,255,255,0.15)", flexShrink: 0 }}>→</span>
+                      <span style={{ fontFamily: MONO, fontSize: 14, color: white(0.15), flexShrink: 0 }}>→</span>
 
                       <div style={{
                         flex: 1, padding: "8px 12px", borderRadius: 8,
-                        background: "rgba(16,185,129,0.04)", border: "1px solid rgba(16,185,129,0.1)",
+                        background: alpha(C.green, 0.04), border: `1px solid ${alpha(C.green, 0.1)}`,
                         width: mobile ? "100%" : "auto",
                       }}>
-                        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(16,185,129,0.4)", display: "block", marginBottom: 2 }}>AFTER</span>
-                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.45)" }}>{item.after}</span>
+                        <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.green, 0.4), display: "block", marginBottom: 2 }}>AFTER</span>
+                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.45) }}>{item.after}</span>
                       </div>
                     </div>
 
@@ -218,8 +219,8 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
                       <div style={{
                         flexShrink: 0, marginLeft: 12,
                         padding: "4px 10px", borderRadius: 8,
-                        background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)",
-                        fontFamily: MONO, fontSize: 10, color: "#10B981", fontWeight: 500,
+                        background: alpha(C.green, 0.08), border: `1px solid ${alpha(C.green, 0.15)}`,
+                        fontFamily: MONO, fontSize: 10, color: C.green, fontWeight: 500,
                       }}>
                         {item.delta}
                       </div>
@@ -235,19 +236,19 @@ const CurationSummary = ({ onComplete, mobile, w }) => {
         {phase >= 3 && (
           <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "16px 0 48px" : "24px 0 64px" }}>
             <p style={{
-              fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.2)",
+              fontFamily: BODY, fontSize: mobile ? 12 : 14, color: white(0.2),
               marginBottom: 20, lineHeight: 1.6,
             }}>
               Your knowledge base is ready. Every insight, connection, and classification has been shaped by you.
             </p>
             <button onClick={onComplete} style={{
-              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: "#08080C",
-              background: "linear-gradient(135deg, #10B981, #059669)", border: "none",
+              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: C.bg0,
+              background: `linear-gradient(135deg, ${C.green}, ${C.greenDeep})`, border: "none",
               borderRadius: 12, padding: "14px 44px", cursor: "pointer",
-              boxShadow: "0 4px 24px rgba(16,185,129,0.3)", transition: "all 0.25s",
+              boxShadow: `0 4px 24px ${alpha(C.green, 0.3)}`, transition: "all 0.25s",
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(16,185,129,0.4)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(16,185,129,0.3)"; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${alpha(C.green, 0.4)}`; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 24px ${alpha(C.green, 0.3)}`; }}
             >
               Explore Your Atlas →
             </button>

@@ -3,6 +3,8 @@ import {
   TOPICS, CONNECTIONS,
 } from '../data/constants';
 import { FONTS, BODY, MONO, CSS } from '../styles/base';
+import { C, alpha, white } from '../styles/tokens';
+import { row, stackTight, screen, eyebrow, display, lede, body, mono, track } from '../styles/shared';
 
 // ═══════════════════════════════════════════════════════════════
 // CONNECTION VALIDATION (v5 Curation Pipeline — Section 1C)
@@ -112,9 +114,9 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
   if (active) { highlightedTopics.add(active.from); highlightedTopics.add(active.to); }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#08080C", display: "flex", flexDirection: "column", padding: mobile ? "24px 16px" : "32px 40px" }}>
+    <div style={screen(mobile)}>
       <style>{CSS}</style>
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at 50% 30%, rgba(168,85,247,0.04) 0%, transparent 50%)", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at 50% 30%, ${alpha(C.purple, 0.04)} 0%, transparent 50%)`, pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 1100, width: "100%", margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Header */}
@@ -122,15 +124,15 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "4px 14px", borderRadius: 20, marginBottom: 14,
-            background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)",
-            fontFamily: MONO, fontSize: 10, color: "#A855F7", fontWeight: 600, letterSpacing: "0.08em",
+            background: alpha(C.purple, 0.08), border: `1px solid ${alpha(C.purple, 0.2)}`,
+            fontFamily: MONO, fontSize: 10, color: C.purple, fontWeight: 600, letterSpacing: "0.08em",
           }}>
             CURATION · STEP 3
           </div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 36, fontWeight: 800, color: "#fff", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            Validate <span style={{ color: "#A855F7" }}>Connections</span>
+          <h1 style={display(mobile)}>
+            Validate <span style={{ color: C.purple }}>Connections</span>
           </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
+          <p style={{ ...lede(mobile), marginTop: 6 }}>
             AI discovered {CONNECTIONS.length} connections between your topics. Confirm, edit, or reject.
           </p>
         </div>
@@ -138,15 +140,15 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
         {/* Progress bar */}
         <div style={{ marginBottom: mobile ? 20 : 28 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{reviewed} / {total} reviewed</span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? "#10B981" : "rgba(168,85,247,0.5)" }}>{Math.round(progress)}%</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: white(0.3) }}>{reviewed} / {total} reviewed</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? C.green : alpha(C.purple, 0.5) }}>{Math.round(progress)}%</span>
           </div>
-          <div style={{ width: "100%", height: 6, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+          <div style={track}>
             <div style={{
               width: `${progress}%`, height: "100%",
-              background: progress === 100 ? "linear-gradient(90deg, #10B981, #059669)" : "linear-gradient(90deg, #A855F7CC, #A855F7)",
+              background: progress === 100 ? `linear-gradient(90deg, ${C.green}, ${C.greenDeep})` : `linear-gradient(90deg, ${C.purple}CC, ${C.purple})`,
               borderRadius: 3, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)",
-              boxShadow: progress === 100 ? "0 0 16px rgba(16,185,129,0.4)" : "0 0 12px rgba(168,85,247,0.3)",
+              boxShadow: progress === 100 ? `0 0 16px ${alpha(C.green, 0.4)}` : `0 0 12px ${alpha(C.purple, 0.3)}`,
             }} />
           </div>
         </div>
@@ -154,23 +156,23 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
         {done ? (
           <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "48px 20px" : "64px 40px" }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>🔗</div>
-            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: "#A855F7", marginBottom: 8 }}>
+            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: C.purple, marginBottom: 8 }}>
               Connections Validated
             </h2>
-            <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: "rgba(255,255,255,0.4)", marginBottom: 6, lineHeight: 1.6 }}>
+            <p style={body(mobile)}>
               {confirmed} confirmed, {edited} edited, {rejected} rejected{connections.length > CONNECTIONS.length ? `, ${connections.length - CONNECTIONS.length} added` : ""}
             </p>
-            <p style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.2)", marginBottom: 28 }}>
+            <p style={{ fontFamily: BODY, fontSize: 12, color: white(0.2), marginBottom: 28 }}>
               Your knowledge graph now reflects real relationships.
             </p>
             <button onClick={onComplete} style={{
-              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: "#08080C",
-              background: "linear-gradient(135deg, #A855F7, #7C3AED)", border: "none",
+              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: C.bg0,
+              background: `linear-gradient(135deg, ${C.purple}, ${C.purpleDeep})`, border: "none",
               borderRadius: 12, padding: "14px 40px", cursor: "pointer",
-              boxShadow: "0 4px 24px rgba(168,85,247,0.25)", transition: "all 0.25s",
+              boxShadow: `0 4px 24px ${alpha(C.purple, 0.25)}`, transition: "all 0.25s",
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(168,85,247,0.35)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(168,85,247,0.25)"; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${alpha(C.purple, 0.35)}`; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 24px ${alpha(C.purple, 0.25)}`; }}
             >
               Continue →
             </button>
@@ -179,8 +181,8 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
           <>
             {/* Mini connection graph */}
             <div style={{
-              background: "rgba(255,255,255,0.015)", borderRadius: 18,
-              border: "1px solid rgba(255,255,255,0.04)", padding: mobile ? "16px 12px" : "20px 16px",
+              background: white(0.015), borderRadius: 18,
+              border: `1px solid ${white(0.04)}`, padding: mobile ? "16px 12px" : "20px 16px",
               marginBottom: mobile ? 16 : 24, overflow: "hidden",
             }}>
               <div style={{ display: "flex", flexWrap: "wrap", gap: mobile ? 6 : 10, justifyContent: "center", alignItems: "center" }}>
@@ -214,7 +216,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                   <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: topicMap[active.from]?.color, fontWeight: 600 }}>
                     {topicMap[active.from]?.icon} {topicMap[active.from]?.name}
                   </span>
-                  <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(168,85,247,0.5)" }}>←→</span>
+                  <span style={{ fontFamily: MONO, fontSize: 11, color: alpha(C.purple, 0.5) }}>←→</span>
                   <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: topicMap[active.to]?.color, fontWeight: 600 }}>
                     {topicMap[active.to]?.icon} {topicMap[active.to]?.name}
                   </span>
@@ -233,8 +235,8 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
 
                 return (
                   <div key={conn.id} style={{
-                    background: isActive ? "rgba(255,255,255,0.04)" : isDone ? "rgba(255,255,255,0.01)" : "rgba(255,255,255,0.02)",
-                    border: `1px solid ${isActive ? "rgba(168,85,247,0.3)" : isDone ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.06)"}`,
+                    background: isActive ? white(0.04) : isDone ? white(0.01) : white(0.02),
+                    border: `1px solid ${isActive ? alpha(C.purple, 0.3) : isDone ? white(0.03) : white(0.06)}`,
                     borderRadius: 14, overflow: "hidden",
                     opacity: isDone && !isActive ? 0.4 : 1,
                     transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
@@ -253,25 +255,25 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                       >
                         <div style={{
                           width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-                          background: conn.status === "confirmed" ? "#10B981" : conn.status === "edited" ? "#3B82F6" : conn.status === "rejected" ? "#EF4444" : "rgba(255,255,255,0.1)",
+                          background: conn.status === "confirmed" ? C.green : conn.status === "edited" ? C.blue : conn.status === "rejected" ? C.red : white(0.1),
                         }} />
                         <span style={{ fontSize: 13, flexShrink: 0 }}>{fromT?.icon}</span>
-                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.4)", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.4), fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                           {fromT?.name}
                         </span>
-                        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.12)", flexShrink: 0 }}>↔</span>
+                        <span style={{ fontFamily: MONO, fontSize: 9, color: white(0.12), flexShrink: 0 }}>↔</span>
                         <span style={{ fontSize: 13, flexShrink: 0 }}>{toT?.icon}</span>
-                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.4)", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
+                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.4), fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
                           {toT?.name}
                         </span>
                         {/* Strength bar */}
-                        <div style={{ width: mobile ? 30 : 50, height: 4, background: "rgba(255,255,255,0.05)", borderRadius: 2, overflow: "hidden", flexShrink: 0 }}>
-                          <div style={{ width: `${conn.strength * 100}%`, height: "100%", background: "#A855F7", borderRadius: 2 }} />
+                        <div style={{ width: mobile ? 30 : 50, height: 4, background: white(0.05), borderRadius: 2, overflow: "hidden", flexShrink: 0 }}>
+                          <div style={{ width: `${conn.strength * 100}%`, height: "100%", background: C.purple, borderRadius: 2 }} />
                         </div>
                         {isDone && (
                           <span style={{
                             fontFamily: MONO, fontSize: 10, flexShrink: 0, textTransform: "uppercase",
-                            color: conn.status === "confirmed" ? "#10B981" : conn.status === "edited" ? "#3B82F6" : "#EF4444",
+                            color: conn.status === "confirmed" ? C.green : conn.status === "edited" ? C.blue : C.red,
                           }}>{conn.status}</span>
                         )}
                       </div>
@@ -286,7 +288,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                         }}>
                           {/* LEFT: Connection info */}
                           <div>
-                            <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
+                            <div style={eyebrow}>
                               Connection
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -294,7 +296,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                               <span style={{ fontFamily: BODY, fontSize: 14, color: fromT?.color, fontWeight: 600 }}>{fromT?.name}</span>
                             </div>
                             <div style={{
-                              fontFamily: MONO, fontSize: 11, color: "rgba(168,85,247,0.4)",
+                              fontFamily: MONO, fontSize: 11, color: alpha(C.purple, 0.4),
                               padding: "2px 0", marginBottom: 10, marginLeft: 4,
                             }}>↕ connects to</div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
@@ -302,18 +304,18 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                               <span style={{ fontFamily: BODY, fontSize: 14, color: toT?.color, fontWeight: 600 }}>{toT?.name}</span>
                             </div>
                             {/* Strength */}
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.2)" }}>Strength</span>
-                              <div style={{ width: 80, height: 6, background: "rgba(255,255,255,0.05)", borderRadius: 3, overflow: "hidden" }}>
-                                <div style={{ width: `${conn.strength * 100}%`, height: "100%", background: "linear-gradient(90deg, #A855F7, #7C3AED)", borderRadius: 3 }} />
+                            <div style={row}>
+                              <span style={mono}>Strength</span>
+                              <div style={{ width: 80, height: 6, background: white(0.05), borderRadius: 3, overflow: "hidden" }}>
+                                <div style={{ width: `${conn.strength * 100}%`, height: "100%", background: `linear-gradient(90deg, ${C.purple}, ${C.purpleDeep})`, borderRadius: 3 }} />
                               </div>
-                              <span style={{ fontFamily: MONO, fontSize: 10, color: "#A855F7" }}>{Math.round(conn.strength * 100)}%</span>
+                              <span style={{ fontFamily: MONO, fontSize: 10, color: C.purple }}>{Math.round(conn.strength * 100)}%</span>
                             </div>
                           </div>
 
                           {/* CENTER: Label */}
                           <div>
-                            <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
+                            <div style={eyebrow}>
                               AI-Generated Label
                             </div>
                             {isEditing ? (
@@ -325,21 +327,21 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                                   onKeyDown={e => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingIdx(null); }}
                                   autoFocus
                                   style={{
-                                    fontFamily: BODY, fontSize: 15, fontWeight: 500, color: "#fff",
-                                    background: "rgba(255,255,255,0.06)", border: "1px solid rgba(168,85,247,0.3)",
+                                    fontFamily: BODY, fontSize: 15, fontWeight: 500, color: C.white,
+                                    background: white(0.06), border: `1px solid ${alpha(C.purple, 0.3)}`,
                                     borderRadius: 8, padding: "8px 12px", width: "100%", outline: "none",
                                   }}
                                 />
-                                <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.15)", marginTop: 6 }}>
+                                <div style={{ fontFamily: MONO, fontSize: 9, color: white(0.15), marginTop: 6 }}>
                                   Enter to save · Escape to cancel
                                 </div>
                               </div>
                             ) : (
                               <div style={{
                                 fontFamily: BODY, fontSize: mobile ? 15 : 17, fontWeight: 500,
-                                color: "rgba(255,255,255,0.65)", lineHeight: 1.5,
+                                color: white(0.65), lineHeight: 1.5,
                                 padding: "8px 14px", borderRadius: 10,
-                                background: "rgba(168,85,247,0.04)", border: "1px solid rgba(168,85,247,0.1)",
+                                background: alpha(C.purple, 0.04), border: `1px solid ${alpha(C.purple, 0.1)}`,
                               }}>
                                 "{conn.label}"
                               </div>
@@ -348,21 +350,21 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
 
                           {/* RIGHT: Actions */}
                           <div>
-                            <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600 }}>
+                            <div style={eyebrow}>
                               Actions
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                            <div style={stackTight}>
                               {[
-                                { action: "confirmed", label: "Confirm", color: "#10B981", icon: "✓" },
-                                { action: "edit", label: "Edit Label", color: "#3B82F6", icon: "✎" },
-                                { action: "rejected", label: "Reject", color: "#EF4444", icon: "✕" },
+                                { action: "confirmed", label: "Confirm", color: C.green, icon: "✓" },
+                                { action: "edit", label: "Edit Label", color: C.blue, icon: "✎" },
+                                { action: "rejected", label: "Reject", color: C.red, icon: "✕" },
                               ].map(btn => (
                                 <button key={btn.action} onClick={() => btn.action === "edit" ? startEdit(idx) : handleAction(idx, btn.action)}
                                   style={{
                                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                                     width: "100%", padding: mobile ? "10px 14px" : "11px 16px",
                                     fontFamily: BODY, fontSize: 13, fontWeight: 600,
-                                    color: btn.action === "confirmed" ? "#08080C" : btn.color,
+                                    color: btn.action === "confirmed" ? C.bg0 : btn.color,
                                     background: btn.action === "confirmed" ? btn.color : `${btn.color}10`,
                                     border: `1px solid ${btn.action === "confirmed" ? btn.color : btn.color + "30"}`,
                                     borderRadius: 10, cursor: "pointer", transition: "all 0.2s",
@@ -376,7 +378,7 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                               ))}
                             </div>
                             {!mobile && (
-                              <div style={{ marginTop: 12, fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.12)", lineHeight: 1.8 }}>
+                              <div style={{ marginTop: 12, fontFamily: MONO, fontSize: 9, color: white(0.12), lineHeight: 1.8 }}>
                                 Enter confirm · E edit · X reject
                               </div>
                             )}
@@ -392,26 +394,26 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
             {/* Add new connection */}
             {adding ? (
               <div className="fade-up" style={{
-                background: "rgba(168,85,247,0.04)", border: "1px solid rgba(168,85,247,0.2)",
+                background: alpha(C.purple, 0.04), border: `1px solid ${alpha(C.purple, 0.2)}`,
                 borderRadius: 14, padding: mobile ? "16px 14px" : "20px 24px", marginBottom: 20,
               }}>
-                <div style={{ fontFamily: BODY, fontSize: 13, color: "#A855F7", fontWeight: 600, marginBottom: 12 }}>
+                <div style={{ fontFamily: BODY, fontSize: 13, color: C.purple, fontWeight: 600, marginBottom: 12 }}>
                   Add a Connection AI Missed
                 </div>
                 <div style={{ display: "flex", flexDirection: mobile ? "column" : "row", gap: 10, marginBottom: 12 }}>
                   <select value={newFrom} onChange={e => setNewFrom(e.target.value)} style={{
-                    fontFamily: BODY, fontSize: 13, color: "#fff", background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "8px 12px", flex: 1, outline: "none",
+                    fontFamily: BODY, fontSize: 13, color: C.white, background: white(0.06),
+                    border: `1px solid ${white(0.1)}`, borderRadius: 8, padding: "8px 12px", flex: 1, outline: "none",
                   }}>
-                    <option value="" style={{ background: "#1a1a2e" }}>From topic...</option>
-                    {TOPICS.map(t => <option key={t.id} value={t.id} style={{ background: "#1a1a2e" }}>{t.icon} {t.name}</option>)}
+                    <option value="" style={{ background: C.navy }}>From topic...</option>
+                    {TOPICS.map(t => <option key={t.id} value={t.id} style={{ background: C.navy }}>{t.icon} {t.name}</option>)}
                   </select>
                   <select value={newTo} onChange={e => setNewTo(e.target.value)} style={{
-                    fontFamily: BODY, fontSize: 13, color: "#fff", background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "8px 12px", flex: 1, outline: "none",
+                    fontFamily: BODY, fontSize: 13, color: C.white, background: white(0.06),
+                    border: `1px solid ${white(0.1)}`, borderRadius: 8, padding: "8px 12px", flex: 1, outline: "none",
                   }}>
-                    <option value="" style={{ background: "#1a1a2e" }}>To topic...</option>
-                    {TOPICS.filter(t => t.id !== newFrom).map(t => <option key={t.id} value={t.id} style={{ background: "#1a1a2e" }}>{t.icon} {t.name}</option>)}
+                    <option value="" style={{ background: C.navy }}>To topic...</option>
+                    {TOPICS.filter(t => t.id !== newFrom).map(t => <option key={t.id} value={t.id} style={{ background: C.navy }}>{t.icon} {t.name}</option>)}
                   </select>
                 </div>
                 <input
@@ -419,33 +421,33 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
                   placeholder="Connection label (e.g., 'Shared tech stack')"
                   onKeyDown={e => { if (e.key === "Enter") addConnection(); }}
                   style={{
-                    fontFamily: BODY, fontSize: 13, color: "#fff", background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "8px 12px",
+                    fontFamily: BODY, fontSize: 13, color: C.white, background: white(0.06),
+                    border: `1px solid ${white(0.1)}`, borderRadius: 8, padding: "8px 12px",
                     width: "100%", outline: "none", marginBottom: 12,
                   }}
                 />
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={addConnection} disabled={!newFrom || !newTo || !newLabel.trim()} style={{
-                    fontFamily: BODY, fontSize: 13, fontWeight: 600, color: newFrom && newTo && newLabel.trim() ? "#08080C" : "rgba(255,255,255,0.3)",
-                    background: newFrom && newTo && newLabel.trim() ? "#A855F7" : "rgba(255,255,255,0.04)",
+                    fontFamily: BODY, fontSize: 13, fontWeight: 600, color: newFrom && newTo && newLabel.trim() ? C.bg0 : white(0.3),
+                    background: newFrom && newTo && newLabel.trim() ? C.purple : white(0.04),
                     border: "none", borderRadius: 8, padding: "8px 20px", cursor: "pointer", transition: "all 0.2s",
                   }}>Add Connection</button>
                   <button onClick={() => setAdding(false)} style={{
-                    fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.3)",
-                    background: "none", border: "1px solid rgba(255,255,255,0.1)",
+                    fontFamily: BODY, fontSize: 13, color: white(0.3),
+                    background: "none", border: `1px solid ${white(0.1)}`,
                     borderRadius: 8, padding: "8px 16px", cursor: "pointer",
                   }}>Cancel</button>
                 </div>
               </div>
             ) : (
               <button onClick={() => setAdding(true)} style={{
-                fontFamily: BODY, fontSize: 12, fontWeight: 500, color: "rgba(168,85,247,0.6)",
-                background: "none", border: "1px dashed rgba(168,85,247,0.2)",
+                fontFamily: BODY, fontSize: 12, fontWeight: 500, color: alpha(C.purple, 0.6),
+                background: "none", border: `1px dashed ${alpha(C.purple, 0.2)}`,
                 borderRadius: 10, padding: "10px 18px", cursor: "pointer", width: "100%",
                 marginBottom: 20, transition: "all 0.2s",
               }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(168,85,247,0.4)"; e.currentTarget.style.color = "#A855F7"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(168,85,247,0.2)"; e.currentTarget.style.color = "rgba(168,85,247,0.6)"; }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = alpha(C.purple, 0.4); e.currentTarget.style.color = C.purple; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = alpha(C.purple, 0.2); e.currentTarget.style.color = alpha(C.purple, 0.6); }}
               >
                 + Add a connection AI missed
               </button>
@@ -455,20 +457,20 @@ const ConnectionValidation = ({ onComplete, mobile, w }) => {
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: mobile ? "14px 0" : "16px 0",
-              borderTop: "1px solid rgba(255,255,255,0.05)",
+              borderTop: `1px solid ${white(0.05)}`,
             }}>
-              <div style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.2)" }}>
+              <div style={{ fontFamily: MONO, fontSize: 11, color: white(0.2) }}>
                 {reviewed > 0 ? `${confirmed} confirmed · ${edited} edited · ${rejected} rejected` : "Review each connection"}
               </div>
               <button onClick={() => {
                 setConnections(prev => prev.map(c => c.status === "pending" ? { ...c, status: "confirmed" } : c));
               }} style={{
                 fontFamily: BODY, fontSize: 14, fontWeight: 600,
-                color: reviewed > 0 ? "#08080C" : "rgba(255,255,255,0.5)",
-                background: reviewed > 0 ? "linear-gradient(135deg, #A855F7, #7C3AED)" : "rgba(255,255,255,0.06)",
-                border: reviewed > 0 ? "none" : "1px solid rgba(255,255,255,0.1)",
+                color: reviewed > 0 ? C.bg0 : white(0.5),
+                background: reviewed > 0 ? `linear-gradient(135deg, ${C.purple}, ${C.purpleDeep})` : white(0.06),
+                border: reviewed > 0 ? "none" : `1px solid ${white(0.1)}`,
                 borderRadius: 10, padding: "10px 28px", cursor: "pointer",
-                boxShadow: reviewed > 0 ? "0 4px 20px rgba(168,85,247,0.25)" : "none",
+                boxShadow: reviewed > 0 ? `0 4px 20px ${alpha(C.purple, 0.25)}` : "none",
                 transition: "all 0.3s",
               }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}

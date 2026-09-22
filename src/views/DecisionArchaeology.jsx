@@ -2,6 +2,8 @@ import {
   TOPICS, ARCHAEOLOGY_CHAINS,
 } from '../data/constants';
 import { FONTS, BODY, MONO } from '../styles/base';
+import { C, white, black } from '../styles/tokens';
+import { row, rowTight, stack, container } from '../styles/shared';
 
 // ─── DECISION ARCHAEOLOGY VIEW ──────────────────────────────
 
@@ -10,32 +12,32 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
   if (!chain) return null;
 
   const ROLE_META = {
-    seed: { label: "Seed", color: "#FBBF24", icon: "🌱", desc: "Where this idea first appeared" },
-    supporting: { label: "Supporting", color: "#10B981", icon: "✅", desc: "Evidence that reinforced the decision" },
-    challenging: { label: "Challenging", color: "#EF4444", icon: "⚡", desc: "Moments where the idea was questioned" },
-    resolution: { label: "Resolution", color: "#3B82F6", icon: "🎯", desc: "Where the final decision crystallized" },
+    seed: { label: "Seed", color: C.gold, icon: "🌱", desc: "Where this idea first appeared" },
+    supporting: { label: "Supporting", color: C.green, icon: "✅", desc: "Evidence that reinforced the decision" },
+    challenging: { label: "Challenging", color: C.red, icon: "⚡", desc: "Moments where the idea was questioned" },
+    resolution: { label: "Resolution", color: C.blue, icon: "🎯", desc: "Where the final decision crystallized" },
   };
 
   const confidenceLabel = (c) => c >= 0.9 ? "Strong" : c >= 0.75 ? "Moderate" : "Weak";
-  const confidenceColor = (c) => c >= 0.9 ? "#10B981" : c >= 0.75 ? "#FBBF24" : "#EF4444";
+  const confidenceColor = (c) => c >= 0.9 ? C.green : c >= 0.75 ? C.gold : C.red;
 
   return (
-    <div style={{ maxWidth: 960, margin: "0 auto" }}>
+    <div style={container}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
         <button onClick={onBack} style={{
-          fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.4)",
-          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+          fontFamily: BODY, fontSize: 12, color: white(0.4),
+          background: white(0.04), border: `1px solid ${white(0.08)}`,
           borderRadius: 8, padding: "6px 12px", cursor: "pointer", transition: "all 0.2s",
         }}>← Back</button>
         <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={row}>
             <span style={{ fontSize: 22 }}>{chain.icon}</span>
-            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 26, color: "#fff", letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 26, color: C.white, letterSpacing: "-0.02em" }}>
               {chain.title}
             </h2>
           </div>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: "rgba(255,255,255,0.25)", marginTop: 2 }}>
+          <p style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: white(0.25), marginTop: 2 }}>
             Decision Archaeology — trace the chain of reasoning
           </p>
         </div>
@@ -46,7 +48,7 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
         background: `${chain.color}08`, border: `1px solid ${chain.color}20`,
         borderRadius: 12, padding: mobile ? "14px 16px" : "16px 20px", marginBottom: 24,
       }}>
-        <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.5, marginBottom: 10 }}>
+        <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.6), lineHeight: 1.5, marginBottom: 10 }}>
           {chain.summary}
         </div>
         <div style={{
@@ -65,7 +67,7 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
         {Object.entries(ROLE_META).map(([key, meta]) => (
           <div key={key} style={{
             display: "flex", alignItems: "center", gap: 5,
-            fontFamily: BODY, fontSize: mobile ? 9 : 10, color: "rgba(255,255,255,0.3)",
+            fontFamily: BODY, fontSize: mobile ? 9 : 10, color: white(0.3),
           }}>
             <span style={{ fontSize: 12 }}>{meta.icon}</span>
             <span style={{ color: meta.color, fontWeight: 600 }}>{meta.label}</span>
@@ -78,7 +80,7 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
         {/* Main trunk line */}
         <div style={{
           position: "absolute", left: mobile ? 8 : 14, top: 8, bottom: 8,
-          width: 2, background: "rgba(255,255,255,0.06)",
+          width: 2, background: white(0.06),
         }} />
 
         {chain.nodes.map((node, i) => {
@@ -97,7 +99,7 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
                 height: mobile ? 12 : 16,
                 borderRadius: "50%",
                 background: meta.color,
-                border: `2px solid #08080C`,
+                border: `2px solid ${C.bg0}`,
                 boxShadow: `0 0 8px ${meta.color}40`,
                 zIndex: 2,
               }} />
@@ -132,16 +134,16 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
               >
                 {/* Card header */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={rowTight}>
                     <span style={{ fontSize: 14 }}>{meta.icon}</span>
                     <span style={{
                       fontFamily: MONO, fontSize: mobile ? 8 : 9, color: meta.color,
                       textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600,
                     }}>{meta.label}</span>
-                    <span style={{ fontFamily: MONO, fontSize: mobile ? 8 : 9, color: "rgba(255,255,255,0.2)" }}>·</span>
-                    <span style={{ fontFamily: MONO, fontSize: mobile ? 8 : 9, color: "rgba(255,255,255,0.25)" }}>{node.date}</span>
+                    <span style={{ fontFamily: MONO, fontSize: mobile ? 8 : 9, color: white(0.2) }}>·</span>
+                    <span style={{ fontFamily: MONO, fontSize: mobile ? 8 : 9, color: white(0.25) }}>{node.date}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={row}>
                     {topic && (
                       <span style={{
                         fontFamily: BODY, fontSize: mobile ? 8 : 9, color: topic.color,
@@ -159,29 +161,29 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
                 </div>
 
                 {/* Card title & summary */}
-                <div style={{ fontFamily: FONTS, fontSize: mobile ? 14 : 16, color: "#fff", fontWeight: 600, marginBottom: 4, lineHeight: 1.3 }}>
+                <div style={{ fontFamily: FONTS, fontSize: mobile ? 14 : 16, color: C.white, fontWeight: 600, marginBottom: 4, lineHeight: 1.3 }}>
                   {node.title}
                 </div>
-                <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.5, marginBottom: 10 }}>
+                <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.4), lineHeight: 1.5, marginBottom: 10 }}>
                   {node.summary}
                 </div>
 
                 {/* Conversation snippet */}
                 {node.snippet && (
                   <div style={{
-                    background: "rgba(0,0,0,0.3)", borderRadius: 8,
+                    background: black(0.3), borderRadius: 8,
                     padding: mobile ? "10px 12px" : "12px 14px",
-                    border: "1px solid rgba(255,255,255,0.04)",
+                    border: `1px solid ${white(0.04)}`,
                   }}>
                     <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "#FBBF24", fontWeight: 600, flexShrink: 0, marginTop: 1 }}>YOU</span>
-                      <span style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.35)", lineHeight: 1.4, fontStyle: "italic" }}>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: C.gold, fontWeight: 600, flexShrink: 0, marginTop: 1 }}>YOU</span>
+                      <span style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.35), lineHeight: 1.4, fontStyle: "italic" }}>
                         "{node.snippet.user.length > 120 ? node.snippet.user.slice(0, 117) + "..." : node.snippet.user}"
                       </span>
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "#3B82F6", fontWeight: 600, flexShrink: 0, marginTop: 1 }}>AI</span>
-                      <span style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.35)", lineHeight: 1.4, fontStyle: "italic" }}>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: C.blue, fontWeight: 600, flexShrink: 0, marginTop: 1 }}>AI</span>
+                      <span style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.35), lineHeight: 1.4, fontStyle: "italic" }}>
                         "{node.snippet.ai.length > 120 ? node.snippet.ai.slice(0, 117) + "..." : node.snippet.ai}"
                       </span>
                     </div>
@@ -190,7 +192,7 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
 
                 {/* Footer */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
-                  <span style={{ fontFamily: MONO, fontSize: mobile ? 8 : 9, color: "rgba(255,255,255,0.15)" }}>
+                  <span style={{ fontFamily: MONO, fontSize: mobile ? 8 : 9, color: white(0.15) }}>
                     {node.messages} messages
                   </span>
                   <span style={{ fontFamily: BODY, fontSize: mobile ? 9 : 10, color: meta.color, opacity: 0.6 }}>
@@ -205,10 +207,10 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
 
       {/* Other archaeology chains */}
       <div style={{ marginTop: 40 }}>
-        <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 15 : 17, color: "#fff", marginBottom: 12 }}>
+        <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 15 : 17, color: C.white, marginBottom: 12 }}>
           Other Decision Chains
         </h3>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={stack}>
           {Object.values(ARCHAEOLOGY_CHAINS).filter(c => c.id !== chainId).map(c => (
             <button key={c.id} onClick={() => onBack("archaeology", c.id)} style={{
               background: `${c.color}06`, border: `1px solid ${c.color}15`,
@@ -221,8 +223,8 @@ const DecisionArchaeology = ({ chainId, onBack, onConversationClick, mobile }) =
             >
               <span style={{ fontSize: 18 }}>{c.icon}</span>
               <div>
-                <div style={{ fontFamily: FONTS, fontSize: mobile ? 13 : 14, color: "#fff", fontWeight: 600 }}>{c.title}</div>
-                <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>
+                <div style={{ fontFamily: FONTS, fontSize: mobile ? 13 : 14, color: C.white, fontWeight: 600 }}>{c.title}</div>
+                <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.3), marginTop: 2 }}>
                   {c.nodes.length} conversations · {c.nodes[0].date} → {c.nodes[c.nodes.length - 1].date}
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FONTS, BODY } from '../styles/base';
 import AnimatedNumber from './AnimatedNumber';
+import { C, white } from '../styles/tokens';
 
 const StatCard = ({ label, value, sub, delay, accent, mobile }) => {
   const [visible, setVisible] = useState(false);
@@ -10,16 +11,16 @@ const StatCard = ({ label, value, sub, delay, accent, mobile }) => {
     <div style={{
       opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(12px)",
       transition: "all 0.7s cubic-bezier(0.16,1,0.3,1)",
-      background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
+      background: white(0.025), border: `1px solid ${white(0.06)}`,
       borderRadius: 14, padding: mobile ? "18px 16px" : "22px 20px",
       position: "relative", overflow: "hidden",
     }}>
-      <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: accent || "#FBBF24", opacity: 0.5, borderRadius: "3px 0 0 3px" }} />
-      <div style={{ fontFamily: FONTS, fontSize: mobile ? 32 : 38, fontWeight: 700, color: accent || "#FBBF24", lineHeight: 1, letterSpacing: "-0.02em" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: accent || C.gold, opacity: 0.5, borderRadius: "3px 0 0 3px" }} />
+      <div style={{ fontFamily: FONTS, fontSize: mobile ? 32 : 38, fontWeight: 700, color: accent || C.gold, lineHeight: 1, letterSpacing: "-0.02em" }}>
         {isNum ? <AnimatedNumber value={value} delay={delay} /> : value}
       </div>
-      <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.4)", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>{label}</div>
-      {sub && <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.2)", marginTop: 3 }}>{sub}</div>}
+      <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.4), marginTop: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>{label}</div>
+      {sub && <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.2), marginTop: 3 }}>{sub}</div>}
     </div>
   );
 };

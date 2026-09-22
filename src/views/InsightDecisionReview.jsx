@@ -3,13 +3,15 @@ import {
   TOPICS, INSIGHT_DECISIONS, PAST_ANALOGIES,
 } from '../data/constants';
 import { FONTS, BODY, MONO, CSS } from '../styles/base';
+import { rowTight, stackTight, screen, display, lede, body, monoSmall, track } from '../styles/shared';
 import PastPerspectivePanel from '../components/PastPerspectivePanel';
+import { C, alpha, white } from '../styles/tokens';
 
 // ═══════════════════════════════════════════════════════════════
 // INSIGHT & DECISION REVIEW (v5 Curation Pipeline — Section 1D)
 // ═══════════════════════════════════════════════════════════════
 
-const InsightDecisionReview = ({ onComplete, mobile, w }) => {
+const InsightDecisionReview = ({ onComplete, mobile }) => {
   const [decisions, setDecisions] = useState(() =>
     INSIGHT_DECISIONS.map(d => ({ ...d, status: "pending", humanEdit: null }))
   );
@@ -38,9 +40,9 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
   const active = activeIdx !== null && activeIdx < total ? decisions[activeIdx] : null;
 
   const typeMeta = {
-    decision: { label: "Decision", color: "#EF4444", icon: "🎯" },
-    pivot: { label: "Pivot", color: "#A855F7", icon: "↩️" },
-    milestone: { label: "Milestone", color: "#EAB308", icon: "🏆" },
+    decision: { label: "Decision", color: C.red, icon: "🎯" },
+    pivot: { label: "Pivot", color: C.purple, icon: "↩️" },
+    milestone: { label: "Milestone", color: C.yellow, icon: "🏆" },
   };
 
   const moveNext = (fromIdx) => {
@@ -115,9 +117,9 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
   const promoted = correct + edited;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#08080C", display: "flex", flexDirection: "column", padding: mobile ? "24px 16px" : "32px 40px" }}>
+    <div style={screen(mobile)}>
       <style>{CSS}</style>
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at 50% 30%, rgba(234,179,8,0.04) 0%, transparent 50%)", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at 50% 30%, ${alpha(C.yellow, 0.04)} 0%, transparent 50%)`, pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 800, width: "100%", margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Header */}
@@ -125,15 +127,15 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "4px 14px", borderRadius: 20, marginBottom: 14,
-            background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.2)",
-            fontFamily: MONO, fontSize: 10, color: "#EAB308", fontWeight: 600, letterSpacing: "0.08em",
+            background: alpha(C.yellow, 0.08), border: `1px solid ${alpha(C.yellow, 0.2)}`,
+            fontFamily: MONO, fontSize: 10, color: C.yellow, fontWeight: 600, letterSpacing: "0.08em",
           }}>
             CURATION · STEP 4
           </div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 36, fontWeight: 800, color: "#fff", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            Review <span style={{ color: "#EAB308" }}>Decisions & Insights</span>
+          <h1 style={display(mobile)}>
+            Review <span style={{ color: C.yellow }}>Decisions & Insights</span>
           </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
+          <p style={{ ...lede(mobile), marginTop: 6 }}>
             AI extracted {total} key decisions, pivots, and milestones. Confirm accuracy before they join your timeline.
           </p>
         </div>
@@ -141,15 +143,15 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
         {/* Progress bar */}
         <div style={{ marginBottom: mobile ? 20 : 28 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{reviewed} / {total} reviewed</span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? "#10B981" : "rgba(234,179,8,0.5)" }}>{Math.round(progress)}%</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: white(0.3) }}>{reviewed} / {total} reviewed</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? C.green : alpha(C.yellow, 0.5) }}>{Math.round(progress)}%</span>
           </div>
-          <div style={{ width: "100%", height: 6, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+          <div style={track}>
             <div style={{
               width: `${progress}%`, height: "100%",
-              background: progress === 100 ? "linear-gradient(90deg, #10B981, #059669)" : "linear-gradient(90deg, #EAB308CC, #EAB308)",
+              background: progress === 100 ? `linear-gradient(90deg, ${C.green}, ${C.greenDeep})` : `linear-gradient(90deg, ${C.yellow}CC, ${C.yellow})`,
               borderRadius: 3, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)",
-              boxShadow: progress === 100 ? "0 0 16px rgba(16,185,129,0.4)" : "0 0 12px rgba(234,179,8,0.3)",
+              boxShadow: progress === 100 ? `0 0 16px ${alpha(C.green, 0.4)}` : `0 0 12px ${alpha(C.yellow, 0.3)}`,
             }} />
           </div>
         </div>
@@ -157,23 +159,23 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
         {done ? (
           <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "48px 20px" : "64px 40px" }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>🎯</div>
-            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: "#EAB308", marginBottom: 8 }}>
+            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: C.yellow, marginBottom: 8 }}>
               Insights Reviewed
             </h2>
-            <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: "rgba(255,255,255,0.4)", marginBottom: 6, lineHeight: 1.6 }}>
+            <p style={body(mobile)}>
               {correct} confirmed, {edited} edited, {rejected} rejected
             </p>
-            <p style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.2)", marginBottom: 28 }}>
+            <p style={{ fontFamily: BODY, fontSize: 12, color: white(0.2), marginBottom: 28 }}>
               {promoted} insight{promoted !== 1 ? "s" : ""} promoted to your Evolution timeline.
             </p>
             <button onClick={onComplete} style={{
-              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: "#08080C",
-              background: "linear-gradient(135deg, #EAB308, #CA8A04)", border: "none",
+              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: C.bg0,
+              background: `linear-gradient(135deg, ${C.yellow}, ${C.yellowDeep})`, border: "none",
               borderRadius: 12, padding: "14px 40px", cursor: "pointer",
-              boxShadow: "0 4px 24px rgba(234,179,8,0.25)", transition: "all 0.25s",
+              boxShadow: `0 4px 24px ${alpha(C.yellow, 0.25)}`, transition: "all 0.25s",
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(234,179,8,0.35)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(234,179,8,0.25)"; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${alpha(C.yellow, 0.35)}`; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 24px ${alpha(C.yellow, 0.25)}`; }}
             >
               Continue →
             </button>
@@ -186,8 +188,8 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                 key={active.id}
                 className="fade-up"
                 style={{
-                  background: "rgba(255,255,255,0.03)", borderRadius: 18,
-                  border: "1px solid rgba(234,179,8,0.2)", overflow: "hidden",
+                  background: white(0.03), borderRadius: 18,
+                  border: `1px solid ${alpha(C.yellow, 0.2)}`, overflow: "hidden",
                   marginBottom: 16, position: "relative",
                   animation: dismissAnim === "correct" ? "cardPromote 0.4s ease both"
                     : dismissAnim === "reject" ? "cardDismiss 0.4s ease both" : undefined,
@@ -197,7 +199,7 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: mobile ? "14px 16px 10px" : "16px 24px 12px",
-                  borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  borderBottom: `1px solid ${white(0.04)}`,
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{
@@ -216,14 +218,14 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                       </span>
                     </span>
                   </div>
-                  <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
+                  <span style={{ fontFamily: MONO, fontSize: 10, color: white(0.15) }}>
                     {activeIdx + 1} / {total}
                   </span>
                 </div>
 
                 {/* AI proposal */}
                 <div style={{ padding: mobile ? "16px 16px 12px" : "20px 24px 16px" }}>
-                  <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
+                  <div style={{ fontFamily: BODY, fontSize: 9, color: white(0.15), textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
                     AI-Extracted Insight
                   </div>
                   {editing ? (
@@ -234,8 +236,8 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                         autoFocus
                         rows={3}
                         style={{
-                          fontFamily: BODY, fontSize: mobile ? 15 : 17, fontWeight: 500, color: "#fff",
-                          background: "rgba(255,255,255,0.06)", border: "1px solid rgba(234,179,8,0.3)",
+                          fontFamily: BODY, fontSize: mobile ? 15 : 17, fontWeight: 500, color: C.white,
+                          background: white(0.06), border: `1px solid ${alpha(C.yellow, 0.3)}`,
                           borderRadius: 10, padding: "12px 14px", width: "100%", outline: "none",
                           lineHeight: 1.5, resize: "vertical",
                         }}
@@ -245,18 +247,18 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                         }}
                       />
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-                        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.15)" }}>
+                        <span style={monoSmall}>
                           Enter to save · Escape to cancel
                         </span>
                         <div style={{ display: "flex", gap: 8 }}>
                           <button onClick={() => { setEditing(false); setEditText(""); }} style={{
-                            fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.3)",
-                            background: "none", border: "1px solid rgba(255,255,255,0.1)",
+                            fontFamily: BODY, fontSize: 12, color: white(0.3),
+                            background: "none", border: `1px solid ${white(0.1)}`,
                             borderRadius: 8, padding: "6px 14px", cursor: "pointer",
                           }}>Cancel</button>
                           <button onClick={() => commitEdit(activeIdx)} style={{
-                            fontFamily: BODY, fontSize: 12, fontWeight: 600, color: "#08080C",
-                            background: "#EAB308", border: "none",
+                            fontFamily: BODY, fontSize: 12, fontWeight: 600, color: C.bg0,
+                            background: C.yellow, border: "none",
                             borderRadius: 8, padding: "6px 14px", cursor: "pointer",
                           }}>Save Edit</button>
                         </div>
@@ -265,9 +267,9 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                   ) : (
                     <div style={{
                       fontFamily: BODY, fontSize: mobile ? 16 : 19, fontWeight: 500,
-                      color: "rgba(255,255,255,0.75)", lineHeight: 1.5,
+                      color: white(0.75), lineHeight: 1.5,
                       padding: "12px 16px", borderRadius: 12,
-                      background: "rgba(234,179,8,0.04)", border: "1px solid rgba(234,179,8,0.1)",
+                      background: alpha(C.yellow, 0.04), border: `1px solid ${alpha(C.yellow, 0.1)}`,
                     }}>
                       {active.aiProposal}
                     </div>
@@ -276,26 +278,26 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
 
                 {/* Source conversation snippet */}
                 <div style={{ padding: mobile ? "0 16px 16px" : "0 24px 20px" }}>
-                  <div style={{ fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
+                  <div style={{ fontFamily: BODY, fontSize: 9, color: white(0.15), textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
                     Source Conversation
                   </div>
                   <div style={{
-                    background: "rgba(255,255,255,0.02)", borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.04)", padding: mobile ? "10px 12px" : "12px 16px",
+                    background: white(0.02), borderRadius: 10,
+                    border: `1px solid ${white(0.04)}`, padding: mobile ? "10px 12px" : "12px 16px",
                   }}>
                     <div style={{ marginBottom: 8 }}>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(251,191,36,0.35)", marginRight: 6 }}>YOU</span>
-                      <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.35)", lineHeight: 1.5 }}>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.gold, 0.35), marginRight: 6 }}>YOU</span>
+                      <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.35), lineHeight: 1.5 }}>
                         {active.sourceSnippet.user}
                       </span>
                     </div>
                     <div>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(168,85,247,0.4)", marginRight: 6 }}>AI</span>
-                      <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.25)", lineHeight: 1.5 }}>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.purple, 0.4), marginRight: 6 }}>AI</span>
+                      <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.25), lineHeight: 1.5 }}>
                         {active.sourceSnippet.ai}
                       </span>
                     </div>
-                    <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.1)", marginTop: 8 }}>
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: white(0.1), marginTop: 8 }}>
                       {active.sourceRef}
                     </div>
                   </div>
@@ -312,18 +314,18 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                       style={{
                         display: "flex", alignItems: "center", gap: 6, width: "100%",
                         fontFamily: BODY, fontSize: mobile ? 11 : 12, fontWeight: 500,
-                        color: showPastPerspective ? "#A855F7" : "rgba(168,85,247,0.6)",
-                        background: showPastPerspective ? "rgba(168,85,247,0.1)" : "rgba(168,85,247,0.04)",
-                        border: `1px solid ${showPastPerspective ? "rgba(168,85,247,0.3)" : "rgba(168,85,247,0.12)"}`,
+                        color: showPastPerspective ? C.purple : alpha(C.purple, 0.6),
+                        background: showPastPerspective ? alpha(C.purple, 0.1) : alpha(C.purple, 0.04),
+                        border: `1px solid ${showPastPerspective ? alpha(C.purple, 0.3) : alpha(C.purple, 0.12)}`,
                         borderRadius: 10, padding: mobile ? "8px 12px" : "9px 14px",
                         cursor: "pointer", transition: "all 0.25s",
                       }}
-                      onMouseEnter={e => { if (!showPastPerspective) { e.currentTarget.style.background = "rgba(168,85,247,0.08)"; e.currentTarget.style.borderColor = "rgba(168,85,247,0.2)"; } }}
-                      onMouseLeave={e => { if (!showPastPerspective) { e.currentTarget.style.background = "rgba(168,85,247,0.04)"; e.currentTarget.style.borderColor = "rgba(168,85,247,0.12)"; } }}
+                      onMouseEnter={e => { if (!showPastPerspective) { e.currentTarget.style.background = alpha(C.purple, 0.08); e.currentTarget.style.borderColor = alpha(C.purple, 0.2); } }}
+                      onMouseLeave={e => { if (!showPastPerspective) { e.currentTarget.style.background = alpha(C.purple, 0.04); e.currentTarget.style.borderColor = alpha(C.purple, 0.12); } }}
                     >
                       <span style={{ fontSize: 14 }}>🪞</span>
                       Past perspective
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(168,85,247,0.35)", marginLeft: "auto" }}>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.purple, 0.35), marginLeft: "auto" }}>
                         {showPastPerspective ? "hide" : "show"}
                       </span>
                     </button>
@@ -340,9 +342,9 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                     flexDirection: mobile ? "column" : "row",
                   }}>
                     {[
-                      { action: "correct", label: "Correct", color: "#10B981", icon: "✓", desc: "Promote to timeline" },
-                      { action: "edit", label: "Partially Correct", color: "#3B82F6", icon: "✎", desc: "Edit & promote" },
-                      { action: "reject", label: "Not a Real Decision", color: "#EF4444", icon: "✕", desc: "Dismiss" },
+                      { action: "correct", label: "Correct", color: C.green, icon: "✓", desc: "Promote to timeline" },
+                      { action: "edit", label: "Partially Correct", color: C.blue, icon: "✎", desc: "Edit & promote" },
+                      { action: "reject", label: "Not a Real Decision", color: C.red, icon: "✕", desc: "Dismiss" },
                     ].map(btn => (
                       <button key={btn.action}
                         onClick={() => {
@@ -354,7 +356,7 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                           flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
                           padding: mobile ? "12px 14px" : "14px 16px",
                           fontFamily: BODY, fontSize: 13, fontWeight: 600,
-                          color: btn.action === "correct" ? "#08080C" : btn.color,
+                          color: btn.action === "correct" ? C.bg0 : btn.color,
                           background: btn.action === "correct" ? btn.color : `${btn.color}10`,
                           border: `1px solid ${btn.action === "correct" ? btn.color : btn.color + "30"}`,
                           borderRadius: 12, cursor: "pointer", transition: "all 0.2s",
@@ -362,13 +364,13 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                         onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 4px 16px ${btn.color}25`; }}
                         onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
                       >
-                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={rowTight}>
                           <span style={{ fontSize: 14, lineHeight: 1 }}>{btn.icon}</span>
                           {btn.label}
                         </span>
                         <span style={{
                           fontSize: 9, fontWeight: 400, opacity: 0.7,
-                          color: btn.action === "correct" ? "#08080C" : btn.color,
+                          color: btn.action === "correct" ? C.bg0 : btn.color,
                         }}>{btn.desc}</span>
                       </button>
                     ))}
@@ -379,7 +381,7 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                 {!editing && !mobile && (
                   <div style={{
                     padding: "0 24px 14px", fontFamily: MONO, fontSize: 9,
-                    color: "rgba(255,255,255,0.1)", textAlign: "center",
+                    color: white(0.1), textAlign: "center",
                   }}>
                     Enter correct · E edit · X reject
                   </div>
@@ -397,8 +399,8 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                     <div key={offset} style={{
                       position: "absolute", left: offset * 6, right: offset * 6, top: -4 - offset * 4,
                       height: 8, borderRadius: "0 0 14px 14px",
-                      background: `rgba(255,255,255,${0.015 - offset * 0.005})`,
-                      border: "1px solid rgba(255,255,255,0.03)",
+                      background: white(0.015 - offset * 0.005),
+                      border: `1px solid ${white(0.03)}`,
                       borderTop: "none", zIndex: -offset,
                     }} />
                   );
@@ -410,24 +412,24 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
             {reviewed > 0 && (
               <div style={{ marginTop: 8 }}>
                 <div style={{
-                  fontFamily: BODY, fontSize: 9, color: "rgba(255,255,255,0.15)",
+                  fontFamily: BODY, fontSize: 9, color: white(0.15),
                   textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10, fontWeight: 600,
                   display: "flex", alignItems: "center", gap: 6,
                 }}>
                   <span>Edit Trail</span>
-                  <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.08)" }}>
+                  <span style={{ fontFamily: MONO, fontSize: 9, color: white(0.08) }}>
                     — AI proposed vs. human confirmed
                   </span>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={stackTight}>
                   {decisions.filter(d => d.status !== "pending").map(d => {
                     const topic = topicMap[d.topicId];
                     const meta = typeMeta[d.type];
                     const isTrailOpen = showTrail === d.id;
                     return (
                       <div key={d.id} style={{
-                        background: "rgba(255,255,255,0.015)", borderRadius: 12,
-                        border: `1px solid rgba(255,255,255,0.04)`,
+                        background: white(0.015), borderRadius: 12,
+                        border: `1px solid ${white(0.04)}`,
                         overflow: "hidden", transition: "all 0.3s",
                       }}>
                         <div
@@ -440,19 +442,19 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                         >
                           <div style={{
                             width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-                            background: d.status === "correct" ? "#10B981" : d.status === "edited" ? "#3B82F6" : "#EF4444",
+                            background: d.status === "correct" ? C.green : d.status === "edited" ? C.blue : C.red,
                           }} />
                           <span style={{ fontSize: 13, flexShrink: 0 }}>{meta.icon}</span>
                           <span style={{ fontSize: 12, flexShrink: 0 }}>{topic?.icon}</span>
                           <span style={{
-                            fontFamily: BODY, fontSize: mobile ? 11 : 12, color: "rgba(255,255,255,0.4)",
+                            fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.4),
                             fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                           }}>
                             {d.humanEdit || d.aiProposal}
                           </span>
                           <span style={{
                             fontFamily: MONO, fontSize: 10, flexShrink: 0, textTransform: "uppercase",
-                            color: d.status === "correct" ? "#10B981" : d.status === "edited" ? "#3B82F6" : "#EF4444",
+                            color: d.status === "correct" ? C.green : d.status === "edited" ? C.blue : C.red,
                           }}>
                             {d.status === "correct" ? "promoted" : d.status === "edited" ? "edited ▾" : "dismissed"}
                           </span>
@@ -464,20 +466,20 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
                             display: "flex", flexDirection: "column", gap: 8,
                           }}>
                             <div style={{
-                              background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.1)",
+                              background: alpha(C.red, 0.04), border: `1px solid ${alpha(C.red, 0.1)}`,
                               borderRadius: 8, padding: "8px 12px",
                             }}>
-                              <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(239,68,68,0.5)", display: "block", marginBottom: 4 }}>AI PROPOSED</span>
-                              <span style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.5, textDecoration: "line-through", textDecorationColor: "rgba(239,68,68,0.3)" }}>
+                              <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.red, 0.5), display: "block", marginBottom: 4 }}>AI PROPOSED</span>
+                              <span style={{ fontFamily: BODY, fontSize: 12, color: white(0.3), lineHeight: 1.5, textDecoration: "line-through", textDecorationColor: alpha(C.red, 0.3) }}>
                                 {d.aiProposal}
                               </span>
                             </div>
                             <div style={{
-                              background: "rgba(16,185,129,0.04)", border: "1px solid rgba(16,185,129,0.1)",
+                              background: alpha(C.green, 0.04), border: `1px solid ${alpha(C.green, 0.1)}`,
                               borderRadius: 8, padding: "8px 12px",
                             }}>
-                              <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(16,185,129,0.5)", display: "block", marginBottom: 4 }}>HUMAN CONFIRMED</span>
-                              <span style={{ fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>
+                              <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.green, 0.5), display: "block", marginBottom: 4 }}>HUMAN CONFIRMED</span>
+                              <span style={{ fontFamily: BODY, fontSize: 12, color: white(0.5), lineHeight: 1.5 }}>
                                 {d.humanEdit}
                               </span>
                             </div>
@@ -494,20 +496,20 @@ const InsightDecisionReview = ({ onComplete, mobile, w }) => {
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: mobile ? "14px 0" : "16px 0", marginTop: 12,
-              borderTop: "1px solid rgba(255,255,255,0.05)",
+              borderTop: `1px solid ${white(0.05)}`,
             }}>
-              <div style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.2)" }}>
+              <div style={{ fontFamily: MONO, fontSize: 11, color: white(0.2) }}>
                 {reviewed > 0 ? `${promoted} promoted · ${rejected} dismissed` : "Review each insight"}
               </div>
               <button onClick={() => {
                 setDecisions(prev => prev.map(d => d.status === "pending" ? { ...d, status: "correct" } : d));
               }} style={{
                 fontFamily: BODY, fontSize: 14, fontWeight: 600,
-                color: reviewed > 0 ? "#08080C" : "rgba(255,255,255,0.5)",
-                background: reviewed > 0 ? "linear-gradient(135deg, #EAB308, #CA8A04)" : "rgba(255,255,255,0.06)",
-                border: reviewed > 0 ? "none" : "1px solid rgba(255,255,255,0.1)",
+                color: reviewed > 0 ? C.bg0 : white(0.5),
+                background: reviewed > 0 ? `linear-gradient(135deg, ${C.yellow}, ${C.yellowDeep})` : white(0.06),
+                border: reviewed > 0 ? "none" : `1px solid ${white(0.1)}`,
                 borderRadius: 10, padding: "10px 28px", cursor: "pointer",
-                boxShadow: reviewed > 0 ? "0 4px 20px rgba(234,179,8,0.25)" : "none",
+                boxShadow: reviewed > 0 ? `0 4px 20px ${alpha(C.yellow, 0.25)}` : "none",
                 transition: "all 0.3s",
               }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}

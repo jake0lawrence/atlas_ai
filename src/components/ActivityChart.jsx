@@ -3,6 +3,7 @@ import {
   MONTHLY_ACTIVITY,
 } from '../data/constants';
 import { MONO } from '../styles/base';
+import { C, white } from '../styles/tokens';
 
 const ActivityChart = ({ mobile }) => {
   const [visible, setVisible] = useState(false);
@@ -15,15 +16,15 @@ const ActivityChart = ({ mobile }) => {
         {MONTHLY_ACTIVITY.map((m, i) => (
           <div key={i} style={{ display: "flex", flexDirection: "column", flex: 1 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <div style={{ height: (m.claude / maxVal) * (mobile ? 68 : 95), background: "linear-gradient(180deg, #FBBF24, #D97706)", borderRadius: "2px 2px 0 0", transition: "height 1s ease", transitionDelay: `${i * 20}ms` }} />
-              <div style={{ height: (m.gpt / maxVal) * (mobile ? 68 : 95), background: "linear-gradient(180deg, #3B82F6, #1D4ED8)", borderRadius: "0 0 2px 2px", transition: "height 1s ease", transitionDelay: `${i * 20}ms` }} />
+              <div style={{ height: (m.claude / maxVal) * (mobile ? 68 : 95), background: `linear-gradient(180deg, ${C.gold}, ${C.amberDeep})`, borderRadius: "2px 2px 0 0", transition: "height 1s ease", transitionDelay: `${i * 20}ms` }} />
+              <div style={{ height: (m.gpt / maxVal) * (mobile ? 68 : 95), background: `linear-gradient(180deg, ${C.blue}, ${C.blueDeeper})`, borderRadius: "0 0 2px 2px", transition: "height 1s ease", transitionDelay: `${i * 20}ms` }} />
             </div>
           </div>
         ))}
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, padding: "0 2px" }}>
         {MONTHLY_ACTIVITY.map((m, i) => (
-          <span key={i} style={{ fontFamily: MONO, fontSize: mobile ? 6 : 8, color: "rgba(255,255,255,0.12)", flex: 1, textAlign: "center" }}>
+          <span key={i} style={{ fontFamily: MONO, fontSize: mobile ? 6 : 8, color: white(0.12), flex: 1, textAlign: "center" }}>
             {labelMonths.includes(m.month) ? m.month : ""}
           </span>
         ))}

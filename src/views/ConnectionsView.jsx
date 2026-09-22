@@ -2,7 +2,9 @@ import { useState, useMemo } from "react";
 import {
   TOPICS, CONNECTIONS,
 } from '../data/constants';
-import { FONTS, BODY } from '../styles/base';
+import { BODY } from '../styles/base';
+import { C, white } from '../styles/tokens';
+import { stack, title, lede } from '../styles/shared';
 
 const ConnectionsView = ({ onTopicClick, mobile }) => {
   const [selected, setSelected] = useState(null);
@@ -25,10 +27,10 @@ const ConnectionsView = ({ onTopicClick, mobile }) => {
   return (
     <div>
       <div style={{ textAlign: "center", marginBottom: 28 }}>
-        <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 28, color: "#fff", marginBottom: 6, fontWeight: 700 }}>How Your Ideas Connect</h2>
-        <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "rgba(255,255,255,0.3)" }}>{mobile ? "Tap" : "Hover"} topics to see relationships.</p>
+        <h2 style={title(mobile)}>How Your Ideas Connect</h2>
+        <p style={lede(mobile)}>{mobile ? "Tap" : "Hover"} topics to see relationships.</p>
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: mobile ? 8 : 12, justifyContent: "center", padding: mobile ? "20px 12px" : "24px 16px", background: "rgba(255,255,255,0.015)", borderRadius: 18, border: "1px solid rgba(255,255,255,0.04)", marginBottom: 20 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: mobile ? 8 : 12, justifyContent: "center", padding: mobile ? "20px 12px" : "24px 16px", background: white(0.015), borderRadius: 18, border: `1px solid ${white(0.04)}`, marginBottom: 20 }}>
         {TOPICS.map(topic => {
           const isHighlighted = !selected || highlighted.has(topic.id);
           const isSource = selected === topic.id;
@@ -50,27 +52,27 @@ const ConnectionsView = ({ onTopicClick, mobile }) => {
                 boxShadow: isSource ? `0 0 24px ${topic.color}25` : "none", flexShrink: 0,
               }}>
               <span style={{ fontSize: size > 70 ? 18 : size > 50 ? 14 : 11 }}>{topic.icon}</span>
-              {size > (mobile ? 55 : 65) && <span style={{ fontFamily: BODY, fontSize: mobile ? 6 : 8, color: `rgba(255,255,255,${isHighlighted ? 0.55 : 0.15})`, marginTop: 1, textAlign: "center", fontWeight: 500 }}>{topic.name.slice(0, 10)}</span>}
+              {size > (mobile ? 55 : 65) && <span style={{ fontFamily: BODY, fontSize: mobile ? 6 : 8, color: white(isHighlighted ? 0.55 : 0.15), marginTop: 1, textAlign: "center", fontWeight: 500 }}>{topic.name.slice(0, 10)}</span>}
             </div>
           );
         })}
       </div>
       {selected && adjacency[selected] ? (
-        <div className="fade-up" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: mobile ? "16px 18px" : "20px 24px" }}>
-          <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: "#fff", fontWeight: 600, marginBottom: 12 }}>{topicMap[selected]?.icon} {topicMap[selected]?.name} connects to:</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="fade-up" style={{ background: white(0.025), border: `1px solid ${white(0.08)}`, borderRadius: 14, padding: mobile ? "16px 18px" : "20px 24px" }}>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: C.white, fontWeight: 600, marginBottom: 12 }}>{topicMap[selected]?.icon} {topicMap[selected]?.name} connects to:</div>
+          <div style={stack}>
             {adjacency[selected].sort((a, b) => b.strength - a.strength).map((conn, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <div style={{ width: mobile ? 50 : 80, height: 4, background: "rgba(255,255,255,0.05)", borderRadius: 2, overflow: "hidden", flexShrink: 0 }}><div style={{ width: `${conn.strength * 100}%`, height: "100%", background: topicMap[conn.target]?.color || "#666", borderRadius: 2 }} /></div>
-                <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: topicMap[conn.target]?.color || "#666", fontWeight: 500 }}>{topicMap[conn.target]?.icon} {topicMap[conn.target]?.name}</span>
-                <span style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: "rgba(255,255,255,0.25)" }}>— {conn.label}</span>
+                <div style={{ width: mobile ? 50 : 80, height: 4, background: white(0.05), borderRadius: 2, overflow: "hidden", flexShrink: 0 }}><div style={{ width: `${conn.strength * 100}%`, height: "100%", background: topicMap[conn.target]?.color || C.gray, borderRadius: 2 }} /></div>
+                <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: topicMap[conn.target]?.color || C.gray, fontWeight: 500 }}>{topicMap[conn.target]?.icon} {topicMap[conn.target]?.name}</span>
+                <span style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.25) }}>— {conn.label}</span>
               </div>
             ))}
           </div>
         </div>
       ) : (
-        <div style={{ background: "rgba(255,255,255,0.015)", borderRadius: 14, padding: "18px 22px", border: "1px dashed rgba(255,255,255,0.06)", textAlign: "center" }}>
-          <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: "rgba(255,255,255,0.25)" }}>{CONNECTIONS.length} connections across {TOPICS.length} clusters.</div>
+        <div style={{ background: white(0.015), borderRadius: 14, padding: "18px 22px", border: `1px dashed ${white(0.06)}`, textAlign: "center" }}>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.25) }}>{CONNECTIONS.length} connections across {TOPICS.length} clusters.</div>
         </div>
       )}
     </div>

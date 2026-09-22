@@ -3,6 +3,7 @@ import {
   TOPICS, CONNECTIONS, TIMELINE_DATA, MONTHLY_ACTIVITY,
 } from '../data/constants';
 import { FONTS, BODY, MONO } from '../styles/base';
+import { C, alpha, white, black } from '../styles/tokens';
 
 // ═══════════════════════════════════════════════════════════════
 // REWIND MODE — Animated Knowledge Graph Timeline
@@ -44,12 +45,12 @@ const RewindMode = ({ onClose, mobile }) => {
     let convos = 0;
     for (let i = 0; i <= step; i++) convos += MONTHLY_ACTIVITY[i].gpt + MONTHLY_ACTIVITY[i].claude;
     const phases = [
-      { max: 6, name: "Genesis", color: "#3B82F6", desc: "First explorations" },
-      { max: 12, name: "Exploration", color: "#10B981", desc: "Topics multiply" },
-      { max: 18, name: "Connection", color: "#F59E0B", desc: "Links forming" },
-      { max: 24, name: "Deepening", color: "#EF4444", desc: "Core topics grow" },
-      { max: 30, name: "Synthesis", color: "#A855F7", desc: "Dense network" },
-      { max: 39, name: "Mastery", color: "#EC4899", desc: "Expertise zones" },
+      { max: 6, name: "Genesis", color: C.blue, desc: "First explorations" },
+      { max: 12, name: "Exploration", color: C.green, desc: "Topics multiply" },
+      { max: 18, name: "Connection", color: C.amber, desc: "Links forming" },
+      { max: 24, name: "Deepening", color: C.red, desc: "Core topics grow" },
+      { max: 30, name: "Synthesis", color: C.purple, desc: "Dense network" },
+      { max: 39, name: "Mastery", color: C.pink, desc: "Expertise zones" },
     ];
     const phase = phases.find(p => step < p.max) || phases[phases.length - 1];
     return { counts, visible, conns, convos, events, phase, month: MONTHLY_ACTIVITY[step].month };
@@ -83,7 +84,7 @@ const RewindMode = ({ onClose, mobile }) => {
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 9990,
-      background: "rgba(8,8,12,0.97)", backdropFilter: "blur(12px)",
+      background: alpha(C.bg0, 0.97), backdropFilter: "blur(12px)",
       display: "flex", flexDirection: "column",
       animation: "rewindFadeIn 0.4s ease both",
     }}>
@@ -93,17 +94,17 @@ const RewindMode = ({ onClose, mobile }) => {
         padding: mobile ? "16px 16px 8px" : "20px 32px 8px",
       }}>
         <div>
-          <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 26, color: "#fff", fontWeight: 700, margin: 0 }}>
+          <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 20 : 26, color: C.white, fontWeight: 700, margin: 0 }}>
             Rewind Mode
           </h2>
-          <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: white(0.3), marginTop: 2 }}>
             Watch your knowledge graph build itself
           </div>
         </div>
         <button onClick={onClose} style={{
-          background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+          background: white(0.06), border: `1px solid ${white(0.1)}`,
           borderRadius: 8, padding: "8px 14px", cursor: "pointer",
-          fontFamily: BODY, fontSize: 12, color: "rgba(255,255,255,0.5)",
+          fontFamily: BODY, fontSize: 12, color: white(0.5),
         }}>
           ✕ Close
         </button>
@@ -177,7 +178,7 @@ const RewindMode = ({ onClose, mobile }) => {
                   position: "absolute", top: "100%", marginTop: 4,
                   fontFamily: BODY, fontSize: mobile ? 8 : 10, color: topic.color,
                   whiteSpace: "nowrap", fontWeight: 600, pointerEvents: "none",
-                  textShadow: "0 1px 4px rgba(0,0,0,0.8)",
+                  textShadow: `0 1px 4px ${black(0.8)}`,
                 }}>
                   {topic.name}
                 </div>
@@ -190,13 +191,13 @@ const RewindMode = ({ onClose, mobile }) => {
         {ht && !playing && (
           <div style={{
             position: "absolute", bottom: mobile ? 8 : 16, left: "50%", transform: "translateX(-50%)",
-            background: "rgba(20,20,28,0.95)", border: `1px solid ${ht.color}30`,
+            background: alpha(C.ink, 0.95), border: `1px solid ${ht.color}30`,
             borderRadius: 10, padding: mobile ? "10px 14px" : "12px 18px",
             minWidth: mobile ? 200 : 240, textAlign: "center",
             animation: "fadeUp 0.2s ease both",
           }}>
-            <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: "#fff", fontWeight: 600 }}>{ht.icon} {ht.name}</div>
-            <div style={{ fontFamily: MONO, fontSize: mobile ? 9 : 10, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>
+            <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: C.white, fontWeight: 600 }}>{ht.icon} {ht.name}</div>
+            <div style={{ fontFamily: MONO, fontSize: mobile ? 9 : 10, color: white(0.3), marginTop: 4 }}>
               {graphState.counts[ht.id] || 0} events by {graphState.month} · Depth: {ht.depth}
             </div>
           </div>
@@ -216,7 +217,7 @@ const RewindMode = ({ onClose, mobile }) => {
         ].map((s, i) => (
           <div key={i} style={{ textAlign: "center" }}>
             <div style={{ fontFamily: MONO, fontSize: mobile ? 14 : 18, color: graphState.phase.color, fontWeight: 700 }}>{s.value}</div>
-            <div style={{ fontFamily: BODY, fontSize: mobile ? 8 : 10, color: "rgba(255,255,255,0.25)", marginTop: 1 }}>{s.label}</div>
+            <div style={{ fontFamily: BODY, fontSize: mobile ? 8 : 10, color: white(0.25), marginTop: 1 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -230,7 +231,7 @@ const RewindMode = ({ onClose, mobile }) => {
           width: mobile ? 36 : 40, height: mobile ? 36 : 40, borderRadius: "50%",
           background: graphState.phase.color, border: "none",
           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: mobile ? 14 : 16, color: "#fff", flexShrink: 0,
+          fontSize: mobile ? 14 : 16, color: C.white, flexShrink: 0,
           boxShadow: `0 0 16px ${graphState.phase.color}40`,
         }}>
           {playing ? "⏸" : step >= totalSteps - 1 ? "⟳" : "▶"}
@@ -243,7 +244,7 @@ const RewindMode = ({ onClose, mobile }) => {
             style={{
               width: "100%", height: 6,
               WebkitAppearance: "none", appearance: "none",
-              background: `linear-gradient(90deg, ${graphState.phase.color} ${(step / (totalSteps - 1)) * 100}%, rgba(255,255,255,0.08) ${(step / (totalSteps - 1)) * 100}%)`,
+              background: `linear-gradient(90deg, ${graphState.phase.color} ${(step / (totalSteps - 1)) * 100}%, ${white(0.08)} ${(step / (totalSteps - 1)) * 100}%)`,
               borderRadius: 3, outline: "none", cursor: "pointer",
             }}
           />
@@ -252,9 +253,9 @@ const RewindMode = ({ onClose, mobile }) => {
           {[1, 2, 5].map(s => (
             <button key={s} onClick={() => setSpeed(s)} style={{
               fontFamily: MONO, fontSize: mobile ? 9 : 10, fontWeight: speed === s ? 700 : 400,
-              color: speed === s ? graphState.phase.color : "rgba(255,255,255,0.3)",
+              color: speed === s ? graphState.phase.color : white(0.3),
               background: speed === s ? `${graphState.phase.color}15` : "transparent",
-              border: `1px solid ${speed === s ? `${graphState.phase.color}30` : "rgba(255,255,255,0.08)"}`,
+              border: `1px solid ${speed === s ? `${graphState.phase.color}30` : white(0.08)}`,
               borderRadius: 6, padding: mobile ? "4px 8px" : "5px 10px",
               cursor: "pointer", transition: "all 0.2s",
             }}>

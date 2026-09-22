@@ -3,6 +3,8 @@ import {
   TOPICS,
 } from '../data/constants';
 import { BODY, MONO } from '../styles/base';
+import { C, alpha, white, black } from '../styles/tokens';
+import { grow } from '../styles/shared';
 
 // ─── COMMAND PALETTE ─────────────────────────────────────────
 const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => {
@@ -54,15 +56,15 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Command palette" style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: mobile ? 60 : 120 }} onClick={onClose}>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
+      <div style={{ position: "fixed", inset: 0, background: black(0.6), backdropFilter: "blur(4px)" }} />
       <div onClick={e => e.stopPropagation()} style={{
         position: "relative", width: mobile ? "92%" : 480, maxHeight: "60vh",
-        background: "#131318", border: "1px solid rgba(251,191,36,0.15)",
-        borderRadius: 14, boxShadow: "0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+        background: C.bg2, border: `1px solid ${alpha(C.gold, 0.15)}`,
+        borderRadius: 14, boxShadow: `0 24px 80px ${black(0.5)}, 0 0 0 1px ${white(0.05)}`,
         overflow: "hidden", animation: "fadeUp 0.15s ease both",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: mobile ? "12px 14px" : "14px 18px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <span style={{ fontFamily: MONO, fontSize: 13, color: "rgba(251,191,36,0.5)" }}>⌕</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: mobile ? "12px 14px" : "14px 18px", borderBottom: `1px solid ${white(0.06)}` }}>
+          <span style={{ fontFamily: MONO, fontSize: 13, color: alpha(C.gold, 0.5) }}>⌕</span>
           <input
             ref={inputRef}
             value={query}
@@ -71,14 +73,14 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
             placeholder="Jump to topic, view, or action..."
             style={{
               flex: 1, background: "transparent", border: "none", outline: "none",
-              fontFamily: BODY, fontSize: mobile ? 14 : 15, color: "#fff",
+              fontFamily: BODY, fontSize: mobile ? 14 : 15, color: C.white,
             }}
           />
-          <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.2)", padding: "3px 7px", borderRadius: 5, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}>ESC</span>
+          <span style={{ fontFamily: MONO, fontSize: 10, color: white(0.2), padding: "3px 7px", borderRadius: 5, border: `1px solid ${white(0.08)}`, background: white(0.03) }}>ESC</span>
         </div>
         <div style={{ maxHeight: "calc(60vh - 54px)", overflowY: "auto" }}>
           {filtered.length === 0 && (
-            <div style={{ padding: "24px 18px", textAlign: "center", fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.25)" }}>No results found</div>
+            <div style={{ padding: "24px 18px", textAlign: "center", fontFamily: BODY, fontSize: 13, color: white(0.25) }}>No results found</div>
           )}
           {filtered.map((item, i) => (
             <div
@@ -89,19 +91,19 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
                 display: "flex", alignItems: "center", gap: 12,
                 padding: mobile ? "10px 14px" : "10px 18px",
                 cursor: "pointer", transition: "background 0.1s",
-                background: i === selectedIdx ? "rgba(251,191,36,0.08)" : "transparent",
-                borderLeft: i === selectedIdx ? "2px solid #FBBF24" : "2px solid transparent",
+                background: i === selectedIdx ? alpha(C.gold, 0.08) : "transparent",
+                borderLeft: i === selectedIdx ? `2px solid ${C.gold}` : "2px solid transparent",
               }}
             >
               <span style={{ fontSize: 16, width: 24, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: BODY, fontSize: 13, fontWeight: 500, color: i === selectedIdx ? "#fff" : "rgba(255,255,255,0.7)" }}>{item.label}</div>
-                <div style={{ fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 1 }}>{item.sub}</div>
+              <div style={grow}>
+                <div style={{ fontFamily: BODY, fontSize: 13, fontWeight: 500, color: i === selectedIdx ? C.white : white(0.7) }}>{item.label}</div>
+                <div style={{ fontFamily: BODY, fontSize: 11, color: white(0.25), marginTop: 1 }}>{item.sub}</div>
               </div>
               <span style={{
-                fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.2)",
+                fontFamily: MONO, fontSize: 9, color: white(0.2),
                 padding: "2px 7px", borderRadius: 4,
-                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                background: white(0.03), border: `1px solid ${white(0.06)}`,
                 textTransform: "capitalize",
               }}>{item.type}</span>
             </div>

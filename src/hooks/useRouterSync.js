@@ -2,30 +2,9 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useStore from '../store';
 import { TOPICS } from '../data/constants';
+import { PATH_TO_VIEW, VIEW_TO_PATH } from '../routes';
 
 // ─── Route Mapping ──────────────────────────────────────────
-
-const PATH_TO_VIEW = {
-  '/': 'onboarding',
-  '/loading': 'loading',
-  '/curation': 'curation',
-  '/curation/topics': 'topicCuration',
-  '/curation/connections': 'connectionValidation',
-  '/curation/insights': 'insightReview',
-  '/curation/summary': 'curationSummary',
-  '/dashboard': 'dashboard',
-  '/companion': 'companion',
-  '/companion/diff': 'beliefDiffs',
-  '/companion/digest': 'digest',
-  '/evolution': 'evolution',
-  '/connections': 'connections',
-  '/search': 'search',
-  '/export': 'export',
-};
-
-const VIEW_TO_PATH = Object.fromEntries(
-  Object.entries(PATH_TO_VIEW).map(([path, view]) => [view, path]),
-);
 
 function locationToState(pathname) {
   const convMatch = pathname.match(/^\/topic\/([^/]+)\/conversation\/(\d+)$/);
@@ -123,6 +102,5 @@ export default function useRouterSync() {
     store.setSelectedEvent(state.selectedEvent || null);
     store.setSelectedChain(state.selectedChain || null);
     store.setShowRewind(!!state.showRewind);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 }

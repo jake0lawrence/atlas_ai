@@ -12,24 +12,34 @@ and there is no backend. `src/main.jsx` is the Vite entry point.
 | `src/App.jsx` | The shell: reads the Zustand store, owns keyboard shortcuts + the sync cascade, and switches between views. Nothing else. |
 | `src/views/` | One file per full-screen view (`OnboardingView`, `LoadingView`, the five curation screens, `DashboardView`, `AskAtlas`, `RewindMode`, ...). Each exports a default component. |
 | `src/components/` | Shared pieces used by more than one view (`Nav`, `CommandPalette`, `CompanionSidebar`, `GuidedTour`, `StatCard`, badges, sparklines, `ErrorBoundary`). |
-| `src/styles/base.js` | `FONTS` / `BODY` / `MONO` font stacks and the global `CSS` string every view injects via `<style>`. The token module of the restructure lands here. |
+| `src/styles/tokens.js` | **The only file allowed to spell a color.** `C.gold`, `alpha(C.red, 0.1)`, `white(0.3)`, `black(0.5)`, plus the `FONTS` / `BODY` / `MONO` stacks. ESLint (`no-restricted-syntax`) fails on a hex or `rgba(` literal anywhere else. |
+| `src/styles/shared.js` | Inline-style objects shared across views (`row`, `stack`, `grow`, `screen(mobile)`, `eyebrow`, `display(mobile)`, `title`, `lede`, `body`, `mono`, `track`). Extend with a spread: `{ ...lede(mobile), marginTop: 6 }`. |
+| `src/styles/base.js` | The global `CSS` string (keyframes, scrollbar, font import) every view injects via `<style>`; re-exports the font stacks. |
+| `src/routes.js` | The route table (`PATH_TO_VIEW`, `DEEP_LINKS`, `SWEEP_ROUTES`), shared by the router hook, the render tests, the sweep and the screenshot baseline. |
+| `scripts/sweep.mjs` | Route sweep over a built `dist/` (see Build & Run). |
+| `tests/e2e/` | Playwright screenshot baseline of the route table. |
 | `src/data/constants.js` | All demo fixtures (`TOPICS`, `CONNECTIONS`, tour steps, companion responses, ...). |
 | `src/store.js` | Zustand store: navigation, knowledge-base, sync, curation and companion slices. |
-| `src/hooks/` | `useWindowSize`, `useSound`, `useRouterSync` (URL <-> store view mapping; the route table lives there). |
+| `src/hooks/` | `useWindowSize`, `useSound`, `useRouterSync` (URL <-> store sync over the table in `src/routes.js`). |
 
 Adding a view: create `src/views/<Name>.jsx`, add its route to `PATH_TO_VIEW` in
-`src/hooks/useRouterSync.js`, and wire it into the switch in `App.jsx`.
+`src/routes.js`, wire it into the switch in `App.jsx`, add its case to
+`src/views/__tests__/views.test.jsx` (the suite fails without it), and run
+`npm run test:e2e:update` to capture its baseline.
 
 ## Build & Run
 - **Dev server:** `npm run dev`
 - **Production build:** `npm run build` (Vite)
-- **No tests** — no test framework is installed
-- **No linter** — no ESLint/Prettier config
+- **Lint:** `npm run lint` (ESLint 9 flat config, `eslint.config.js`). Zero errors is the bar; React Compiler lints are warnings.
+- **Tests:** `npm run test` (Vitest + jsdom). `src/views/__tests__/views.test.jsx` mounts every view and every route; a view without a case there fails the suite.
+- **Screenshots:** `npm run test:e2e` (Playwright, Chromium, 1280x900, web fonts blocked) diffs every route in `src/routes.js` against `tests/e2e/__screenshots__/`. Change a view on purpose → `npm run test:e2e:update` and commit the PNGs.
+- **Sweep:** `npm run sweep -- --dist dist --out after.json`, then `npm run sweep -- --compare before.json after.json`: renders every route from a built `dist/` and diffs text + markup between two builds. Use it to prove a refactor changed nothing.
+- **All of it:** `npm run check` (lint, test, build). CI runs check + screenshots on every PR (`.github/workflows/ci.yml`).
 - **No TypeScript** — plain JSX
 
 ## Architecture
 - **State:** Cross-view state lives in the Zustand store (`src/store.js`); per-view UI state stays local (`useState`).
-- **Styling:** Inline styles throughout, with the shared font stacks + global stylesheet in `src/styles/base.js`. No CSS files, no CSS-in-JS library.
+- **Styling:** Inline styles throughout. Colors come only from `src/styles/tokens.js`, repeated style objects from `src/styles/shared.js`, keyframes from `src/styles/base.js`. No CSS files, no CSS-in-JS library, no color literals in views.
 - **Routing:** React Router, synced to the store's `view` by `useRouterSync`. Views never call the router directly; they call store actions or the callbacks App passes them.
 - **Data:** Simulated fixtures in `src/data/constants.js`.
 
@@ -45,6 +55,8 @@ Adding a view: create `src/views/<Name>.jsx`, add its route to `PATH_TO_VIEW` in
 - **setState coupling:** Never call `setState` for one piece of state inside the updater function of another. Use `useEffect` to derive dependent state.
 - **Error handling:** Never use empty `catch {}` blocks. At minimum: `catch (e) { console.warn('context:', e); }`
 - **Accessibility:** Interactive divs need `role="button"`, `tabIndex={0}`, and keyboard event handlers.
+- **Shadowed imports:** `no-shadow` is an error. A local `const meta = ...` next to `import { meta } from '../styles/shared'` compiled fine and silently dropped a font from a timeline stamp; the sweep caught it, the lint now catches it first.
+- **Verifying a refactor:** build `main` and the branch, sweep both, compare. Identical markup on every route is the standard for a no-behavior-change PR (`/curation/topics` is the known exception: its confidence values are `Math.random()`).
 
 ## Self-Update Policy
 If Claude encounters an issue during development where having a note in this file would have prevented the problem, Claude should update this file as part of the fix. Examples:
