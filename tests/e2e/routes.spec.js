@@ -1,5 +1,6 @@
-// Screenshot baseline of the route table. Grown from scripts/sweep.mjs: same
-// routes, same viewport, same font blocking, but the oracle is a pixel diff
+// Screenshot baseline of the route table, at 1280 (chromium) and 390 (mobile,
+// whose PNGs Playwright names `<route>-mobile.png`).
+// Grown from scripts/sweep.mjs: same routes, same font blocking, but the oracle is a pixel diff
 // against tests/e2e/__screenshots__ instead of a markup diff between builds.
 //
 // Update on purpose: `npx playwright test --update-snapshots`, then review the
@@ -30,7 +31,8 @@ for (const route of SWEEP_ROUTES) {
   const id = route.id || route.path;
   const name = id === '/' ? 'root' : id.replace(/^\//, '').replace(/\//g, '--');
 
-  test(`${id} matches its baseline`, async ({ page }) => {
+  test(`${id} matches its baseline`, async ({ page }, testInfo) => {
+    const suffix = testInfo.project.name === 'chromium' ? '' : `.${testInfo.project.name}`;
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error' && !/^Failed to load resource/.test(m.text())) errors.push(m.text()); });
@@ -40,6 +42,6 @@ for (const route of SWEEP_ROUTES) {
     await page.clock.runFor(SETTLE_MS);
 
     expect(errors, 'no page or console errors').toEqual([]);
-    await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
+    await expect(page).toHaveScreenshot(`${name}${suffix}.png`, { fullPage: true });
   });
 }

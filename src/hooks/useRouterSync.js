@@ -57,9 +57,24 @@ export default function useRouterSync() {
   const selectedChain = useStore(s => s.selectedChain);
   const showRewind = useStore(s => s.showRewind);
 
+  // The path the store currently describes. Pure, so it is derived in render;
+  // the State → URL effect below keys on it instead of on the five state
+  // fields it is built from.
+  const expectedPath = stateToPath({ view, selectedTopic, selectedEvent, selectedChain, showRewind });
+
+  // The latest location and navigate, readable from mount-only effects
+  // without listing them as dependencies (they change on every navigation,
+  // which is exactly when those effects must not re-run).
+  const locationRef = useRef(location.pathname);
+  const navigateRef = useRef(navigate);
+  useEffect(() => {
+    locationRef.current = location.pathname;
+    navigateRef.current = navigate;
+  }, [location.pathname, navigate]);
+
   // Deep-link: sync URL → Zustand before first paint
   useLayoutEffect(() => {
-    const state = locationToState(location.pathname);
+    const state = locationToState(locationRef.current);
     const store = useStore.getState();
     if (state.view && state.view !== store.view) store.setView(state.view);
     if (state.selectedTopic) store.setSelectedTopic(state.selectedTopic);
@@ -67,21 +82,18 @@ export default function useRouterSync() {
     if (state.selectedChain) store.setSelectedChain(state.selectedChain);
     if (state.showRewind) store.setShowRewind(true);
     skipNextUrlSync.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // State → URL: push history entry when navigation state changes
+  // State → URL: push a history entry when the store's path changes
   useEffect(() => {
     if (skipNextUrlSync.current) {
       skipNextUrlSync.current = false;
       return;
     }
-    const expectedPath = stateToPath({ view, selectedTopic, selectedEvent, selectedChain, showRewind });
-    if (expectedPath !== location.pathname) {
-      navigate(expectedPath);
+    if (expectedPath !== locationRef.current) {
+      navigateRef.current(expectedPath);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, selectedTopic?.id, selectedEvent?.topicId, selectedEvent?.eventIndex, selectedChain, showRewind]);
+  }, [expectedPath]);
 
   // URL → State: browser back / forward
   useEffect(() => {

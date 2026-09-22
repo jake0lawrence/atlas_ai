@@ -1274,33 +1274,23 @@ export const EXPORT_FORMATS = [
 ];
 
 export const TOUR_STEPS = [
-  { title: "Welcome to Atlas", description: "Let's take a quick tour of your AI Knowledge Atlas. We'll highlight the key features that make this platform unique.", icon: "🗺️" },
-  { title: "Navigation", description: "Switch between views: Overview for your dashboard, Connections for your knowledge graph, Evolution for decisions & milestones, Search, and Export.", icon: "◈", target: "[data-tour='nav']" },
-  { title: "Knowledge Map", description: "Your topics are visualized as interactive bubbles — sized by conversation count. Click any topic to dive into its timeline.", icon: "🧠", target: "[data-tour='knowledge-map']" },
-  { title: "AI Journey", description: "Track your activity over time and see the shift between AI platforms. The heatmap reveals your thinking patterns across months.", icon: "📊", target: "[data-tour='ai-journey']" },
-  { title: "Human-Curated Pipeline", description: "This is what makes Atlas different. Every insight passes through your curation — the AI proposes, you decide. Your knowledge base is human-verified, not just AI-generated.", icon: "⚖️", highlight: true },
-  { title: "Quick Navigation", description: "Press ⌘K (or Ctrl+K) anytime to open the command palette. Jump to any topic or view instantly.", icon: "⌕", target: "[data-tour='cmd-k']" },
-  { title: "Incremental Sync", description: "Atlas isn't a one-time tool. Hit Sync to pull in new conversations and keep your knowledge base current.", icon: "⟳", target: "[data-tour='sync']" },
-  { title: "Ask Atlas", description: "Your knowledge has a voice now. Open the Companion tab to ask Atlas anything about your conversations — it queries across all your curated insights.", icon: "◆", target: "[data-tour='companion-tab']" },
-  { title: "Belief Diffs", description: "See how your thinking evolved. Belief Diffs show side-by-side comparisons of your past and present positions on any topic.", icon: "⇄", target: "[data-tour='belief-diffs-tab']" },
-  { title: "Monthly Digest", description: "Your knowledge, summarized. The Digest generates a monthly recap of conversations, new connections, and thinking shifts — like Spotify Wrapped for your mind.", icon: "📅", target: "[data-tour='digest-tab']" },
-  { title: "Rewind Mode", description: "Watch your knowledge graph grow over time. Rewind replays how topics and connections formed across months of conversations.", icon: "⏪", target: "[data-tour='rewind-btn']" },
-  { title: "You're All Set!", description: "Explore your 3 years of AI conversations, mapped and curated. Your mind, your atlas.", icon: "✨" },
+  { title: "Welcome to Atlas", description: "Three years of your ChatGPT and Claude conversations, mapped and curated. This tour walks the three stations the app is built around.", icon: "🗺️" },
+  { title: "Three stations", description: "Curate what the AI proposed, explore your Atlas, and ask the Companion. Every screen lives under one of these three. Overview, Connections and Evolution sit under Atlas; Ask Atlas, Belief Diffs and the Digest under Companion.", icon: "◈", target: "[data-tour='nav']" },
+  { title: "Knowledge Map", description: "Your topics as bubbles, sized by conversation count. Click any topic to open its timeline.", icon: "🧠", target: "[data-tour='knowledge-map']" },
+  { title: "AI Journey", description: "Your activity month by month, and the shift from ChatGPT to Claude.", icon: "📊", target: "[data-tour='ai-journey']" },
+  { title: "Human-Curated Pipeline", description: "This is what makes Atlas different. Every insight passed through your review: the AI proposed, you decided. Re-run the review any time from Curate.", icon: "⚖️", highlight: true, target: "[data-tour='curate-tab']" },
+  { title: "Quick Navigation", description: "Press ⌘K (or Ctrl+K) anywhere to jump to a topic or a view. Search lives here.", icon: "⌕", target: "[data-tour='cmd-k']" },
+  { title: "Incremental Sync", description: "Atlas is not a one-time import. Sync pulls in new conversations and flags the topics they touch.", icon: "⟳", target: "[data-tour='sync']" },
+  { title: "Ask Atlas", description: "Your knowledge has a voice. Open Companion to ask anything about your conversations; it answers from your own curated insights, with citations.", icon: "◆", target: "[data-tour='companion-tab']" },
+  { title: "Your thinking, diffed", description: "Also under Companion: Belief Diffs put your past and present position on a topic side by side, and the monthly Digest recaps what changed.", icon: "⇄" },
+  { title: "Companion Sidebar", description: "Contextual suggestions follow you from view to view. Open the sidebar any time with ⌘/ (Ctrl+/).", icon: "💡", target: "[data-tour='companion-sidebar']" },
+  { title: "Rewind", description: "Watch your knowledge graph grow. Rewind replays how topics and connections formed across months of conversations.", icon: "⏪", target: "[data-tour='rewind-btn']" },
+  { title: "Take it with you", description: "Export to Obsidian, Markdown, JSON or CSV from the header.", icon: "↗", target: "[data-tour='export']" },
+  { title: "You're all set", description: "Explore your 3 years of AI conversations, mapped and curated. Your mind, your atlas.", icon: "✨" },
 ];
 
-export const TOUR_STORAGE_KEY = "atlas_tour_completed";
-
-// ─── V6 "WHAT'S NEW" MINI-TOUR (for returning users) ────
-export const V6_TOUR_STEPS = [
-  { title: "What's New in v6", description: "Welcome back! Atlas v6 turns your curated knowledge into an active companion. Here's what's new.", icon: "🆕", highlight: true },
-  { title: "Ask Atlas", description: "Query your entire knowledge base in natural language. Atlas answers using only your curated, human-verified insights.", icon: "◆", target: "[data-tour='companion-tab']" },
-  { title: "Belief Diffs", description: "Compare how your thinking on any topic has shifted over time with side-by-side diffs.", icon: "⇄", target: "[data-tour='belief-diffs-tab']" },
-  { title: "Monthly Digest", description: "Auto-generated monthly summaries of your conversations, new connections, and thinking shifts.", icon: "📅", target: "[data-tour='digest-tab']" },
-  { title: "Companion Sidebar", description: "A persistent sidebar that offers contextual suggestions as you navigate. Open it anytime with ⌘/ (Ctrl+/).", icon: "💡", target: "[data-tour='companion-sidebar']" },
-  { title: "You're Caught Up!", description: "That's everything new in v6. Your knowledge now compounds — Atlas remembers so you don't have to.", icon: "✨" },
-];
-
-export const V6_TOUR_STORAGE_KEY = "atlas_v6_tour_completed";
+// Bumped for the v7 shell so returning visitors see the new stations once.
+export const TOUR_STORAGE_KEY = "atlas_tour_v7_completed";
 
 // ─── PAST ANALOGIES DATA (for "What Would Past-Me Say?") ──
 export const PAST_ANALOGIES = [

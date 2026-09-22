@@ -85,6 +85,13 @@ export const white = (a) => alpha(C.white, a);
 /** Translucent black, for scrims and shadows. */
 export const black = (a) => alpha(C.black, a);
 
+// Spacing scale (principle 3). Gaps, padding and margins pick from here.
+export const SPACE = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 };
+
+// Type scale (principle 2). Font sizes pick from here; a view steps down one
+// notch on mobile instead of inventing a size: `mobile ? TEXT.sm : TEXT.md`.
+export const TEXT = { xs: 10, sm: 11, md: 13, lg: 15, xl: 18, xxl: 24, xxxl: 32, display: 48 };
+
 // Typography stacks
 export const FONTS = `'Playfair Display', 'Georgia', serif`;
 export const BODY = `'Libre Franklin', 'Helvetica Neue', sans-serif`;

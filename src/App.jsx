@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import {
-  TOPICS, TOUR_STORAGE_KEY, V6_TOUR_STEPS, V6_TOUR_STORAGE_KEY,
+  TOPICS, TOUR_STORAGE_KEY,
 } from './data/constants';
 import useWindowSize from './hooks/useWindowSize';
 import useRouterSync from './hooks/useRouterSync';
@@ -8,6 +8,7 @@ import useStore from './store';
 import ErrorBoundary from './components/ErrorBoundary';
 import { FONTS, BODY, CSS } from './styles/base';
 import { container } from './styles/shared';
+import { SPACE, TEXT } from './styles/tokens';
 import CommandPalette from './components/CommandPalette';
 import Nav from './components/Nav';
 import SyncOverlay from './components/SyncOverlay';
@@ -75,8 +76,6 @@ export default function App() {
   const setBriefingTopic = useStore(s => s.setBriefingTopic);
   const tourActive = useStore(s => s.tourActive);
   const setTourActive = useStore(s => s.setTourActive);
-  const v6TourActive = useStore(s => s.v6TourActive);
-  const setV6TourActive = useStore(s => s.setV6TourActive);
   const handleTopicClick = useStore(s => s.handleTopicClick);
   const storeHandleEventClick = useStore(s => s.handleEventClick);
   const navigateTo = useStore(s => s.navigateTo);
@@ -86,23 +85,21 @@ export default function App() {
   const appTimersRef = useRef([]);
 
   useEffect(() => {
-    return () => appTimersRef.current.forEach(clearTimeout);
+    const timers = appTimersRef.current;
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   useEffect(() => {
     if (view === "dashboard" && !tourLaunched.current) {
       tourLaunched.current = true;
       try {
+        // First visit: open the tour once the dashboard has painted
         if (!localStorage.getItem(TOUR_STORAGE_KEY)) {
-          // New user: show full tour
           appTimersRef.current.push(setTimeout(() => setTourActive(true), 600));
-        } else if (!localStorage.getItem(V6_TOUR_STORAGE_KEY)) {
-          // Returning v5 user: show "What's New in v6" mini-tour
-          appTimersRef.current.push(setTimeout(() => setV6TourActive(true), 600));
         }
       } catch (e) { console.warn('tour activation:', e); }
     }
-  }, [view]);
+  }, [view, setTourActive]);
 
   useEffect(() => {
     const handleGlobalKey = (e) => {
@@ -259,22 +256,27 @@ export default function App() {
     );
   }
 
-  // ─── MAIN LAYOUT ────────────────────────────────
+  // ─── THE SHELL ──────────────────────────────────
+  // Header (brand, three stations, utilities) on top; the dashboard's hero
+  // under it on the dashboard only (it moves into DashboardView in PR 4);
+  // the station's view; the footer.
 
   return (
     <ErrorBoundary>
-    <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "24px 16px 60px" : tablet ? "28px 24px 80px" : "32px 40px 80px" }}>
+    <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? `${SPACE.lg}px ${SPACE.lg}px 60px` : tablet ? `${SPACE.xl}px ${SPACE.xl}px 80px` : `${SPACE.xl}px 40px 80px` }}>
       <style>{CSS}</style>
       <div style={container}>
-        <div style={{ textAlign: "center", marginBottom: mobile ? 24 : 32 }}>
-          <div style={{ fontSize: mobile ? 10 : 12, fontFamily: BODY, color: alpha(C.gold, 0.35), textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: mobile ? 10 : 14, fontWeight: 600 }}>Your AI Knowledge Atlas</div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 32 : tablet ? 40 : 48, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            3 Years of Thinking,{mobile ? <br /> : " "}<span style={{ color: C.gold }}>Mapped</span>
-          </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: white(0.25), marginTop: 6 }}>Jan 2023 — Feb 2026 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
-        </div>
+        <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onTour={() => setTourActive(true)} />
 
-        <Nav view={view === "timeline" ? "dashboard" : view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} />
+        {view === "dashboard" && (
+          <div style={{ textAlign: "center", marginBottom: mobile ? SPACE.xl : SPACE.xxl }}>
+            <div style={{ fontSize: mobile ? TEXT.xs : 12, fontFamily: BODY, color: alpha(C.gold, 0.35), textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: mobile ? 10 : 14, fontWeight: 600 }}>Your AI Knowledge Atlas</div>
+            <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TEXT.xxxl : tablet ? 40 : TEXT.display, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+              3 Years of Thinking,{mobile ? <br /> : " "}<span style={{ color: C.gold }}>Mapped</span>
+            </h1>
+            <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: white(0.25), marginTop: 6 }}>Jan 2023 — Feb 2026 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
+          </div>
+        )}
 
         {view === "dashboard" && (
           <DashboardView
@@ -292,35 +294,14 @@ export default function App() {
         {view === "search" && <SearchView mobile={mobile} />}
         {view === "export" && <ExportPreview mobile={mobile} w={w} />}
 
-        <div style={{ textAlign: "center", marginTop: mobile ? 40 : 60, padding: "18px 0", borderTop: `1px solid ${white(0.04)}` }}>
+        <footer style={{ textAlign: "center", marginTop: mobile ? 40 : 60, padding: `${SPACE.lg + 2}px 0`, borderTop: `1px solid ${white(0.04)}` }}>
           <div style={{ fontFamily: FONTS, fontSize: mobile ? 14 : 16, color: white(0.18) }}>This is your mind, mapped.</div>
-          <div style={{ fontFamily: BODY, fontSize: mobile ? 9 : 11, color: white(0.08), marginTop: 5 }}>Atlas · v5 · Data simulated from real conversation patterns</div>
-        </div>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 9 : TEXT.sm, color: white(0.12), marginTop: 5 }}>Atlas · A demo: every figure is simulated from real conversation patterns</div>
+        </footer>
       </div>
-      {!mobile && (
-        <div style={{ position: "fixed", bottom: 24, left: 24, zIndex: 1000, display: "flex", gap: 6 }}>
-          <button onClick={() => setTourActive(true)} title="Take the full guided tour" style={{
-            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: white(0.35),
-            background: white(0.04), border: `1px solid ${white(0.08)}`,
-            borderRadius: 8, padding: "7px 12px", cursor: "pointer", transition: "all 0.25s",
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
-            <span style={{ fontSize: 13 }}>🗺️</span> Tour
-          </button>
-          <button onClick={() => setV6TourActive(true)} title="See what's new in v6" style={{
-            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: alpha(C.gold, 0.5),
-            background: alpha(C.gold, 0.04), border: `1px solid ${alpha(C.gold, 0.12)}`,
-            borderRadius: 8, padding: "7px 12px", cursor: "pointer", transition: "all 0.25s",
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
-            <span style={{ fontSize: 13 }}>🆕</span> v6
-          </button>
-        </div>
-      )}
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
       <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
-      <GuidedTour active={v6TourActive} onClose={() => setV6TourActive(false)} mobile={mobile} steps={V6_TOUR_STEPS} storageKey={V6_TOUR_STORAGE_KEY} />
       {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} mobile={mobile} />}
       {showRewind && <RewindMode onClose={() => setShowRewind(false)} mobile={mobile} />}
       <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view={view} onNavigate={handleNavigate} mobile={mobile} />

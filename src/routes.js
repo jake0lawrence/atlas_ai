@@ -19,6 +19,33 @@ export const PATH_TO_VIEW = {
   '/export': 'export',
 };
 
+// The information architecture (principle 5): three stations, and which view
+// lives under which. The Nav renders this; nothing else hard-codes the tabs.
+// Curate has no sub-views in the shell because the curation run is a
+// full-screen flow; its station button starts the run. Search is ⌘K and
+// Export is a header action, so neither is a station.
+export const STATIONS = [
+  { id: 'curate', label: 'Curate', icon: '◇', hint: 'Review what the AI proposed', view: 'curation', tour: 'curate-tab',
+    views: ['curation', 'topicCuration', 'connectionValidation', 'insightReview', 'curationSummary'], tabs: [] },
+  { id: 'atlas', label: 'Atlas', icon: '◈', hint: 'Your knowledge, mapped', view: 'dashboard', tour: 'atlas-tab',
+    views: ['dashboard', 'connections', 'evolution', 'timeline', 'conversation'],
+    tabs: [
+      { view: 'dashboard', label: 'Overview' },
+      { view: 'connections', label: 'Connections' },
+      { view: 'evolution', label: 'Evolution' },
+    ] },
+  { id: 'companion', label: 'Companion', icon: '◆', hint: 'Ask, diff, digest', view: 'companion', tour: 'companion-tab',
+    views: ['companion', 'beliefDiffs', 'digest', 'archaeology'],
+    tabs: [
+      { view: 'companion', label: 'Ask Atlas' },
+      { view: 'beliefDiffs', label: 'Belief Diffs', tour: 'belief-diffs-tab' },
+      { view: 'digest', label: 'Digest', tour: 'digest-tab' },
+    ] },
+];
+
+/** The station a view belongs to, or null for the utility views (search, export) and the front door. */
+export const stationFor = (view) => STATIONS.find(s => s.views.includes(view)) || null;
+
 export const VIEW_TO_PATH = Object.fromEntries(
   Object.entries(PATH_TO_VIEW).map(([path, view]) => [view, path]),
 );

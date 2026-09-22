@@ -26,5 +26,11 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },
+    // Principle 7: mobile is a first-class viewport. Same routes at 390 wide;
+    // the PNGs carry a `-mobile` suffix (see routes.spec.js).
+    // Chromium, not the device preset's WebKit: CI installs only Chromium.
+    { name: 'mobile', use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true } },
+  ],
 });

@@ -22,9 +22,9 @@ three prerequisites that are now done or in flight:
 
 | Prereq | PR | State |
 |---|---|---|
-| Split `App.jsx` into `src/views`, `src/components`, `src/styles` | #66 | open, draft |
-| Token module (`src/styles/tokens.js`, `shared.js`); no color literal outside it (lint-enforced) | this branch | done |
-| Safety net: ESLint, a render test per view and per route, a Playwright screenshot baseline of the route table, CI | this branch | done |
+| Split `App.jsx` into `src/views`, `src/components`, `src/styles` | #66 | merged |
+| Token module (`src/styles/tokens.js`, `shared.js`); no color literal outside it (lint-enforced) | #67 | merged |
+| Safety net: ESLint, a render test per view and per route, a Playwright screenshot baseline of the route table, CI | #67 | merged |
 
 The prerequisites are what make one-view-per-PR safe: a redesign PR touches one file
 in `src/views/`, the render test proves it still mounts on every route, the screenshot
@@ -33,7 +33,11 @@ diff shows exactly what changed and nothing else, and the lint refuses a new hex
 ## Design principles (proposed, decide before PR 1)
 
 These are the calls that shape every view PR. They are proposals; the owner ratifies
-or amends them in the first PR of the sequence, after which they are the standard.
+or amends them by merging the first PR of the sequence (the shell PR), whose body
+records each one as accepted or amended. After that they are the standard. The shell
+PR also lands the concrete pieces the principles name: `STATIONS` in `src/routes.js`
+(5), `SPACE` and `TEXT` in `src/styles/tokens.js` (2, 3), and the 390-wide `mobile`
+Playwright project (7).
 
 1. **One palette.** The token module names 35 colors because that is how many the code
    used. The redesign should need about a third of that: a background ramp (`bg0`..`bg3`),
@@ -125,7 +129,8 @@ Every view PR carries the same body, so review is the same every time:
   differently every load and cannot hold a baseline. → PR 8.
 - `useRouterSync` still carries two `eslint-disable-next-line react-hooks/exhaustive-deps`
   comments (the third was unused and is removed). CLAUDE.md says never suppress that
-  rule. → PR 1, when the shell is open anyway.
+  rule. → PR 1, when the shell is open anyway. **Done in PR 1**: the State → URL effect
+  keys on the derived path and reads location/navigate through refs.
 - The footer says "Atlas · v5." → PR 21.
 
 ## What v7 does NOT include
