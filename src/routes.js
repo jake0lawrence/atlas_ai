@@ -27,7 +27,8 @@ export const VIEW_TO_PATH = Object.fromEntries(
 // against the fixtures, plus the overlays the dashboard can open.
 export const DEEP_LINKS = [
   { path: '/topic/courtcollect', view: 'timeline' },
-  { path: '/topic/courtcollect/conversation/4', view: 'conversation' }, // event 4 has a preview; events without one render nothing
+  { path: '/topic/courtcollect/conversation/4', view: 'conversation' },
+  { path: '/topic/courtcollect/conversation/0', view: 'conversation', note: 'event without a transcript: the summary-only page' },
   { path: '/archaeology/why-typescript', view: 'archaeology' },
   { path: '/companion/rewind', view: 'dashboard', overlay: 'rewind' },
   { path: '/nope', view: 'dashboard', note: 'unknown path falls back to the dashboard' },
@@ -37,7 +38,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/dashboard', '/companion', '/connections', '/companion/diff', '/topic/courtcollect']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/dashboard', '/companion', '/connections', '/companion/diff', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),

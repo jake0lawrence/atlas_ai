@@ -228,7 +228,7 @@ export default function App() {
         <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 960, margin: "0 auto" }}>
           <style>{CSS}</style>
           <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
-          <ConversationDrilldown topicId={selectedEvent.topicId} eventIndex={selectedEvent.eventIndex} onBack={() => { setView("timeline"); setSelectedEvent(null); }} mobile={mobile} />
+          <ConversationDrilldown topicId={selectedEvent.topicId} eventIndex={selectedEvent.eventIndex} onBack={() => { const t = TOPICS.find(x => x.id === selectedEvent.topicId); if (t) setSelectedTopic(t); setView("timeline"); setSelectedEvent(null); }} onHome={() => { setView("dashboard"); setSelectedEvent(null); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} />
         </div>
         <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
         <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="conversation" onNavigate={handleNavigate} mobile={mobile} />
@@ -240,7 +240,7 @@ export default function App() {
   if (view === "timeline" && selectedTopic) {
     return (
       <>
-        <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 820, margin: "0 auto" }}>
+        <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 960, margin: "0 auto" }}>
           <style>{CSS}</style>
           <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
           <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} newEvents={syncedNewEvents} />
