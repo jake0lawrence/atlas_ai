@@ -1,143 +1,143 @@
 import { useState } from "react";
-import {
-  DEMO_PERSONAS,
-} from '../data/constants';
-import { FONTS, BODY, MONO, CSS } from '../styles/base';
+import { DEMO_PERSONAS, TOPICS, CONNECTIONS } from '../data/constants';
+import { CSS } from '../styles/base';
 import DropZone from '../components/DropZone';
-import { C, alpha, white } from '../styles/tokens';
+import { C, alpha, white, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
+
+// The front door. One screen, one action: pick a demo atlas (the default) or,
+// behind a disclosure, drop your own exports; either way the single CTA builds.
+// V7_PLAN.md row 2.
+
+const PERSONAS = DEMO_PERSONAS.filter(p => p.enabled);
+const COMING = DEMO_PERSONAS.filter(p => !p.enabled);
+
+const FACTS = [
+  { value: "3,847", label: "conversations" },
+  { value: String(TOPICS.length), label: "topic clusters" },
+  { value: String(CONNECTIONS.length), label: "connections" },
+  { value: "3 yrs", label: "Jan 2023 – Feb 2026" },
+];
 
 const OnboardingView = ({ onStart, mobile }) => {
+  const [persona, setPersona] = useState(PERSONAS[0]?.id ?? null);
+  const [showExports, setShowExports] = useState(false);
   const [gptFile, setGptFile] = useState(null);
   const [claudeFile, setClaudeFile] = useState(null);
-  const [selectedPersona, setSelectedPersona] = useState(null);
 
-  const hasAnyFile = gptFile || claudeFile;
+  const hasFiles = Boolean(gptFile || claudeFile);
+  const source = hasFiles ? "files" : "demo";
+  const active = PERSONAS.find(p => p.id === persona) || PERSONAS[0];
+  const canBuild = hasFiles || Boolean(active);
 
-  const handleDemo = (personaId) => {
-    setSelectedPersona(personaId);
-    setGptFile("conversations.json");
-    setClaudeFile(personaId === "new" ? null : "claude-export-2026-02.zip");
-    setTimeout(() => onStart(), 800);
-  };
+  const pickPersona = (id) => { setPersona(id); setGptFile(null); setClaudeFile(null); };
+  const build = () => { if (canBuild) onStart(); };
 
-  const handleBuild = () => { if (hasAnyFile) onStart(); };
+  const ctaLabel = source === "files"
+    ? (gptFile && claudeFile ? "Build from both exports →" : gptFile ? "Build from ChatGPT →" : "Build from Claude →")
+    : `Build the ${active?.label ?? "demo"} atlas →`;
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: mobile ? "32px 16px" : "48px 32px" }}>
+    <div style={{ minHeight: "100vh", background: C.bg0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: mobile ? `${SPACE.xxl}px ${SPACE.lg}px` : `${SPACE.xxxl}px ${SPACE.xxl}px` }}>
       <style>{CSS}</style>
+      <div aria-hidden style={{ position: "fixed", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "140%", height: "50%", background: `radial-gradient(ellipse at center, ${alpha(C.gold, 0.05)} 0%, transparent 60%)`, pointerEvents: "none" }} />
 
-      {/* Background glow */}
-      <div style={{ position: "fixed", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "140%", height: "50%", background: `radial-gradient(ellipse at center, ${alpha(C.gold, 0.04)} 0%, transparent 60%)`, pointerEvents: "none" }} />
-
-      <div style={{ maxWidth: 720, width: "100%", position: "relative", zIndex: 1 }}>
-        {/* Logo & Hero */}
-        <div style={{ textAlign: "center", marginBottom: mobile ? 36 : 48 }}>
-          <div style={{ fontSize: mobile ? 48 : 64, marginBottom: 16, animation: "glow 3s infinite ease-in-out" }}>🧠</div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 36 : 52, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.03em", marginBottom: 8 }}>
-            <span style={{ color: C.gold }}>Atlas</span>
+      <main style={{ maxWidth: 680, width: "100%", position: "relative", zIndex: 1 }}>
+        {/* Pitch */}
+        <div style={{ textAlign: "center", marginBottom: mobile ? SPACE.xl : SPACE.xxl }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: SPACE.sm, marginBottom: SPACE.lg }}>
+            <span style={{ fontSize: mobile ? 28 : 32, lineHeight: 1 }}>🧠</span>
+            <span style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xl : TYPE.xxl, fontWeight: 700, color: C.white }}>Atlas</span>
+          </div>
+          <div style={{ fontFamily: BODY, fontSize: TYPE.xs, color: alpha(C.gold, 0.6), textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 600, marginBottom: SPACE.md }}>Your mind, mapped</div>
+          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xxl : TYPE.display, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: SPACE.md }}>
+            Three years of AI conversations.<br />
+            <span style={{ color: C.gold }}>One map.</span>
           </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 14 : 17, color: white(0.4), lineHeight: 1.6, maxWidth: 500, margin: "0 auto" }}>
-            Transform your AI conversation history into a structured, searchable knowledge base.
+          <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.base : TYPE.md, color: white(0.5), lineHeight: 1.6, maxWidth: 520, margin: "0 auto" }}>
+            Atlas reads your ChatGPT and Claude exports and turns them into the topics you keep returning to, the decisions you made, and the connections between them.
           </p>
         </div>
 
-        {/* How it works — tiny steps */}
-        <div style={{ display: "flex", justifyContent: "center", gap: mobile ? 16 : 32, marginBottom: mobile ? 28 : 40, flexWrap: "wrap" }}>
-          {[
-            { n: "1", label: "Export your data", sub: "from ChatGPT & Claude" },
-            { n: "2", label: "Drop files here", sub: "we parse & normalize" },
-            { n: "3", label: "Explore your atlas", sub: "topics, connections, insights" },
-          ].map((step, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", background: i === 1 ? alpha(C.gold, 0.15) : white(0.04), border: `1px solid ${i === 1 ? alpha(C.gold, 0.3) : white(0.08)}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: 11, color: i === 1 ? C.gold : white(0.3), fontWeight: 600, flexShrink: 0 }}>{step.n}</div>
-              <div>
-                <div style={{ fontFamily: BODY, fontSize: 12, color: C.white, fontWeight: 500 }}>{step.label}</div>
-                <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.2) }}>{step.sub}</div>
-              </div>
+        {/* What an atlas holds */}
+        <dl style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: SPACE.sm, margin: `0 0 ${SPACE.xl}px` }}>
+          {FACTS.map(f => (
+            <div key={f.label} style={{ textAlign: "center", padding: `${SPACE.md}px ${SPACE.sm}px`, background: white(0.02), border: `1px solid ${white(0.05)}`, borderRadius: 10 }}>
+              <dt style={{ fontFamily: FONTS, fontSize: TYPE.xl, fontWeight: 700, color: C.gold, lineHeight: 1 }}>{f.value}</dt>
+              <dd style={{ fontFamily: BODY, fontSize: TYPE.xs, color: white(0.35), marginTop: SPACE.xs, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</dd>
             </div>
           ))}
-        </div>
+        </dl>
 
-        {/* Drop Zones */}
-        <div style={{ display: "flex", gap: mobile ? 12 : 16, flexDirection: mobile ? "column" : "row", marginBottom: 20 }}>
-          <DropZone
-            platform="ChatGPT" icon="💬" color={C.green}
-            subtitle="Settings → Data controls → Export → Download conversations.json"
-            accepted={gptFile} onFile={setGptFile} mobile={mobile}
-          />
-          <DropZone
-            platform="Claude" icon="🟠" color={C.gold}
-            subtitle="Settings → Account → Export data → Download ZIP file"
-            accepted={claudeFile} onFile={setClaudeFile} mobile={mobile}
-          />
-        </div>
+        {/* The one card */}
+        <section aria-label="Start" style={{ background: white(0.025), border: `1px solid ${white(0.07)}`, borderRadius: 16, padding: mobile ? SPACE.lg : SPACE.xl }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: SPACE.md, marginBottom: SPACE.md, flexWrap: "wrap" }}>
+            <h2 style={{ fontFamily: FONTS, fontSize: TYPE.lg, color: C.white, fontWeight: 600 }}>Start with a demo atlas</h2>
+            <span style={{ fontFamily: BODY, fontSize: TYPE.xs, color: white(0.3) }}>Built from real conversation patterns, no upload needed</span>
+          </div>
 
-        {/* Build button */}
-        {hasAnyFile && (
-          <div className="fade-up" style={{ textAlign: "center", marginBottom: 20 }}>
-            <button onClick={handleBuild} style={{
-              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: C.bg0,
-              background: `linear-gradient(135deg, ${C.gold}, ${C.amber})`, border: "none",
-              borderRadius: 12, padding: "14px 40px", cursor: "pointer",
-              boxShadow: `0 4px 24px ${alpha(C.gold, 0.25)}, 0 0 0 1px ${alpha(C.gold, 0.3)}`,
-              transition: "all 0.25s",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${alpha(C.gold, 0.35)}, 0 0 0 1px ${alpha(C.gold, 0.4)}`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 24px ${alpha(C.gold, 0.25)}, 0 0 0 1px ${alpha(C.gold, 0.3)}`; }}
-            >
-              Build My Atlas →
+          <div role="radiogroup" aria-label="Demo persona" style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : `repeat(${PERSONAS.length}, 1fr)`, gap: SPACE.sm }}>
+            {PERSONAS.map(p => {
+              const selected = source === "demo" && p.id === persona;
+              return (
+                <button key={p.id} role="radio" aria-checked={selected} onClick={() => pickPersona(p.id)} style={{
+                  display: "flex", alignItems: "center", gap: SPACE.md, textAlign: "left",
+                  background: selected ? alpha(C.gold, 0.08) : white(0.02),
+                  border: `1px solid ${selected ? alpha(C.gold, 0.5) : white(0.08)}`,
+                  borderRadius: 12, padding: `${SPACE.md}px ${SPACE.lg}px`, cursor: "pointer", transition: "border-color 0.2s, background 0.2s",
+                }}>
+                  <span style={{ fontSize: 22, width: 32, textAlign: "center", flexShrink: 0 }}>{p.icon}</span>
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.md, fontWeight: 600, color: selected ? C.gold : C.white }}>{p.label}</span>
+                    <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.sm, color: white(0.4), marginTop: 2 }}>{p.convos} conversations · {p.detail}</span>
+                  </span>
+                  <span aria-hidden style={{ marginLeft: "auto", width: 16, height: 16, borderRadius: "50%", flexShrink: 0, border: `2px solid ${selected ? C.gold : white(0.2)}`, background: selected ? C.gold : "transparent", boxShadow: selected ? `inset 0 0 0 3px ${C.bg0}` : "none" }} />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Own exports, behind a disclosure */}
+          <div style={{ marginTop: SPACE.lg, borderTop: `1px solid ${white(0.06)}`, paddingTop: SPACE.md }}>
+            <button onClick={() => setShowExports(o => !o)} aria-expanded={showExports} style={{
+              fontFamily: BODY, fontSize: TYPE.base, color: showExports ? C.white : white(0.5), background: "none", border: "none",
+              padding: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: SPACE.sm,
+            }}>
+              <span style={{ display: "inline-block", transition: "transform 0.2s", transform: showExports ? "rotate(90deg)" : "none", fontSize: TYPE.xs }}>▶</span>
+              I have my own exports
+              {hasFiles && <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: C.green, marginLeft: SPACE.xs }}>· {[gptFile, claudeFile].filter(Boolean).length} ready</span>}
             </button>
-            <div style={{ fontFamily: BODY, fontSize: 11, color: white(0.2), marginTop: 10 }}>
-              {gptFile && claudeFile ? "Both sources ready" : gptFile ? "ChatGPT only — Claude is optional" : "Claude only — ChatGPT is optional"}
-            </div>
+            {showExports && (
+              <div className="fade-up" style={{ marginTop: SPACE.md }}>
+                <p style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.35), marginBottom: SPACE.md, lineHeight: 1.5 }}>
+                  Drop either file, or both. Atlas reads the export formats ChatGPT and Claude produce today; nothing leaves your browser.
+                </p>
+                <div style={{ display: "flex", gap: SPACE.md, flexDirection: mobile ? "column" : "row" }}>
+                  <DropZone platform="ChatGPT" icon="💬" color={C.green} subtitle="Settings → Data controls → Export → conversations.json" accepted={gptFile} onFile={setGptFile} mobile={mobile} />
+                  <DropZone platform="Claude" icon="🟠" color={C.gold} subtitle="Settings → Account → Export data → ZIP" accepted={claudeFile} onFile={setClaudeFile} mobile={mobile} />
+                </div>
+              </div>
+            )}
           </div>
-        )}
 
-        {/* Divider */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, margin: `${hasAnyFile ? 12 : 24}px 0` }}>
-          <div style={{ flex: 1, height: 1, background: white(0.06) }} />
-          <span style={{ fontFamily: BODY, fontSize: 11, color: white(0.15), textTransform: "uppercase", letterSpacing: "0.1em" }}>or</span>
-          <div style={{ flex: 1, height: 1, background: white(0.06) }} />
-        </div>
+          {/* The one action */}
+          <div style={{ marginTop: SPACE.xl, display: "flex", flexDirection: mobile ? "column" : "row", alignItems: mobile ? "stretch" : "center", justifyContent: "space-between", gap: SPACE.md }}>
+            <button onClick={build} disabled={!canBuild} style={{
+              fontFamily: BODY, fontSize: TYPE.md, fontWeight: 600, color: C.bg0,
+              background: `linear-gradient(135deg, ${C.gold}, ${C.amber})`, border: "none", borderRadius: 12,
+              padding: `${SPACE.md + 2}px ${SPACE.xxl}px`, cursor: canBuild ? "pointer" : "default",
+              boxShadow: `0 4px 24px ${alpha(C.gold, 0.25)}, 0 0 0 1px ${alpha(C.gold, 0.3)}`, transition: "transform 0.2s, box-shadow 0.2s",
+            }}>{ctaLabel}</button>
+            <span style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.3), textAlign: mobile ? "center" : "right" }}>
+              {source === "files" ? "Parsed and mapped in your browser." : "Takes about ten seconds."}
+            </span>
+          </div>
+        </section>
 
-        {/* Demo persona selector */}
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontFamily: BODY, fontSize: 12, color: white(0.3), marginBottom: 12, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-            ✨ Try a demo persona
-          </div>
-          <div style={{ display: "flex", gap: mobile ? 8 : 12, justifyContent: "center", flexWrap: "wrap" }}>
-            {DEMO_PERSONAS.map(p => (
-              <button key={p.id} disabled={!p.enabled || selectedPersona !== null}
-                onClick={() => p.enabled && handleDemo(p.id)}
-                onMouseEnter={e => { if (p.enabled && !selectedPersona) { e.currentTarget.style.background = `${p.color}11`; e.currentTarget.style.borderColor = `${p.color}55`; } }}
-                onMouseLeave={e => { if (p.enabled && selectedPersona !== p.id) { e.currentTarget.style.background = white(0.02); e.currentTarget.style.borderColor = white(0.08); } }}
-                style={{
-                  fontFamily: BODY, fontSize: 13, color: !p.enabled ? white(0.2) : selectedPersona === p.id ? p.color : white(0.6),
-                  background: selectedPersona === p.id ? `${p.color}11` : white(0.02),
-                  border: `1px solid ${selectedPersona === p.id ? `${p.color}55` : white(0.08)}`,
-                  borderRadius: 10, padding: mobile ? "10px 14px" : "12px 20px", cursor: p.enabled ? "pointer" : "default",
-                  transition: "all 0.25s", opacity: !p.enabled ? 0.5 : 1, minWidth: mobile ? 0 : 160,
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                }}
-              >
-                <span style={{ fontSize: 18 }}>{p.icon}</span>
-                <span style={{ fontWeight: 600 }}>{p.label}</span>
-                <span style={{ fontSize: 11, color: white(0.3), fontWeight: 400 }}>
-                  {p.convos !== "—" ? `${p.convos} convos` : "Preview"}
-                </span>
-                <span style={{ fontSize: 10, color: white(0.15), fontWeight: 400 }}>{p.detail}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div style={{ textAlign: "center", marginTop: mobile ? 40 : 56 }}>
-          <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.08) }}>
-            Your data never leaves your browser. Atlas processes everything locally.
-          </div>
-        </div>
-      </div>
+        <p style={{ textAlign: "center", fontFamily: BODY, fontSize: TYPE.sm, color: white(0.25), marginTop: mobile ? SPACE.xl : SPACE.xxl, lineHeight: 1.6 }}>
+          Your data never leaves your browser.
+          {COMING.length > 0 && <> {COMING.map(p => `${p.label} atlases (${p.detail.replace(" · Coming soon", "")}) are coming.`).join(" ")}</>}
+        </p>
+      </main>
     </div>
   );
 };
