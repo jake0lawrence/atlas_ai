@@ -45,6 +45,8 @@ for (const route of SWEEP_ROUTES) {
     await page.clock.runFor(SETTLE_MS);
 
     expect(errors, 'no page or console errors').toEqual([]);
-    await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
+    await page.mouse.move(0, 0);
+    const mask = (route.mask || []).map(sel => page.locator(sel));
+    await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true, mask });
   });
 }
