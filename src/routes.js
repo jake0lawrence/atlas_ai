@@ -38,7 +38,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/dashboard', '/companion', '/connections', '/companion/diff', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/dashboard', '/companion', '/connections', '/companion/diff', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -57,6 +57,11 @@ export const SWEEP_ROUTES = [
     // The citation scrolls its source into view; reset so fixed elements
     // (the companion tab) sit in the same place in every full-page capture.
     await page.evaluate(() => window.scrollTo(0, 0));
+  } },
+  // The review queue mid-run: one decision made, the move picker open.
+  { path: '/curation', id: 'curation-move', setup: async (page) => {
+    await page.getByRole('button', { name: /Approve/ }).click();
+    await page.getByRole('button', { name: /Move/ }).click();
   } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },

@@ -1,386 +1,374 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import {
-  TOPICS, REVIEW_QUEUE_DATA,
-} from '../data/constants';
+import { useState, useEffect, useRef, useReducer } from "react";
+import { TOPICS, REVIEW_QUEUE_DATA } from '../data/constants';
 import useSound from '../hooks/useSound';
-import { FONTS, BODY, MONO, CSS } from '../styles/base';
-import { stack, stackTight, screen, eyebrow, display, lede, body, track } from '../styles/shared';
+import { CSS } from '../styles/base';
+import { screen } from '../styles/shared';
+import { C, alpha, white, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
 import ConfidenceBadge from '../components/ConfidenceBadge';
-import { C, alpha, white } from '../styles/tokens';
+import { CurationHeader, KeyHints } from '../components/CurationChrome';
 
-const ReviewQueue = ({ onComplete, mobile, w }) => {
-  const [items, setItems] = useState(() => REVIEW_QUEUE_DATA.map(item => ({ ...item, status: "pending" })));
-  const [activeIdx, setActiveIdx] = useState(null);
-  const [autoApproving, setAutoApproving] = useState(new Set());
-  const [started, setStarted] = useState(false);
-  const [allDone, setAllDone] = useState(false);
-  const [hapticId, setHapticId] = useState(null);
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const sound = useSound();
-  const reviewTimersRef = useRef([]);
+// ─── The queue, as data ─────────────────────────────────────────
+// Classifications at or above this confidence are approved without asking;
+// they stay listed (and undoable) under "Approved automatically".
+export const AUTO_APPROVE_AT = 90;
 
-  useEffect(() => {
-    return () => reviewTimersRef.current.forEach(clearTimeout);
-  }, []);
+const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
 
-  // Derive activeIdx from items — moves to first pending whenever items change
-  useEffect(() => {
-    const firstPending = items.findIndex(i => i.status === "pending");
-    if (firstPending >= 0) setActiveIdx(firstPending);
-  }, [items]);
+export const initialQueue = (data = REVIEW_QUEUE_DATA) => data.map(item => ({
+  ...item,
+  originalTopicId: item.topicId,
+  status: item.confidence >= AUTO_APPROVE_AT ? "auto" : "pending",
+}));
 
-  const topicMap = useMemo(() => {
-    const map = {};
-    TOPICS.forEach(t => { map[t.id] = t; });
-    return map;
-  }, []);
-
-  const reviewed = items.filter(i => i.status !== "pending").length;
-  const total = items.length;
-  const progress = total > 0 ? (reviewed / total) * 100 : 0;
-
-  // Auto-approve high-confidence items sequentially after start
-  useEffect(() => {
-    if (started) return;
-    setStarted(true);
-    const highConfItems = items
-      .map((item, idx) => ({ ...item, idx }))
-      .filter(i => i.confidence >= 90);
-
-    let delay = 800;
-    highConfItems.forEach((item) => {
-      reviewTimersRef.current.push(setTimeout(() => {
-        setAutoApproving(prev => new Set([...prev, item.id]));
-      }, delay));
-      reviewTimersRef.current.push(setTimeout(() => {
-        setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: "approved" } : i));
-        setAutoApproving(prev => { const next = new Set(prev); next.delete(item.id); return next; });
-      }, delay + 700));
-      delay += 900;
-    });
-    // Active index is now derived via useEffect on items
-  }, []);
-
-  // Check if all done — play chime + trigger celebration
-  useEffect(() => {
-    if (reviewed === total && total > 0 && started) {
-      reviewTimersRef.current.push(setTimeout(() => { setAllDone(true); sound.play("chime"); }, 400));
-    }
-  }, [reviewed, total, started, sound]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKey = (e) => {
-      if (!activeItem) return;
-      if (e.key === "Enter") { e.preventDefault(); handleAction(activeItem.id, "approved"); }
-      else if (e.key === "e" || e.key === "E") { e.preventDefault(); handleAction(activeItem.id, "edited"); }
-      else if (e.key === "x" || e.key === "X") { e.preventDefault(); handleAction(activeItem.id, "rejected"); }
-      else if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); handleAction(activeItem.id, "skipped"); }
-      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        e.preventDefault();
-        const pendingBefore = [];
-        items.forEach((item, i) => { if (i < activeIdx && item.status === "pending") pendingBefore.push(i); });
-        if (pendingBefore.length > 0) setActiveIdx(pendingBefore[pendingBefore.length - 1]);
-      }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, []); // keyboard navigation
-
-  const handleAction = (id, action) => {
-    // Haptic-style bounce feedback on approve/edit actions
-    if (action === "approved" || action === "edited") {
-      setHapticId(id);
-      reviewTimersRef.current.push(setTimeout(() => setHapticId(null), 350));
-    }
-    setItems(prev => prev.map(i => i.id === id ? { ...i, status: action } : i));
-    // activeIdx is derived via useEffect on items
+export const summarize = (items) => {
+  const count = (s) => items.filter(i => i.status === s).length;
+  const pending = count("pending");
+  return {
+    total: items.length, pending, decided: items.length - pending,
+    auto: count("auto"), approved: count("approved"), edited: count("edited"), rejected: count("rejected"),
   };
+};
 
-  const activeItem = activeIdx !== null ? items[activeIdx] : null;
-  const activeTopic = activeItem ? topicMap[activeItem.topicId] : null;
+// The pending item after (dir 1) or before (dir -1) `fromId`, wrapping; the
+// first pending item when `fromId` is not pending; null when none are.
+export const nextPending = (items, fromId, dir = 1) => {
+  const pending = items.filter(i => i.status === "pending");
+  if (pending.length === 0) return null;
+  const at = pending.findIndex(i => i.id === fromId);
+  if (at < 0) return pending[0];
+  return pending[(at + dir + pending.length) % pending.length];
+};
 
-  const tablet = w >= 640 && w < 1024;
+// The item on screen: the chosen one while it is still pending, else the first pending.
+export const activeItem = ({ items, activeId }) => {
+  const pending = items.filter(i => i.status === "pending");
+  return pending.find(i => i.id === activeId) || pending[0] || null;
+};
+
+export const initialState = () => ({ items: initialQueue(), activeId: null, moving: false });
+
+// Every change to the queue goes through here, so the keyboard and the
+// buttons cannot disagree about which item they act on.
+export const queueReducer = (state, action) => {
+  const active = activeItem(state);
+  switch (action.type) {
+    case "decide": {
+      if (!active) return state;
+      const next = nextPending(state.items, active.id);
+      return {
+        items: state.items.map(i => i.id === active.id ? { ...i, status: action.status, topicId: action.topicId ?? i.topicId } : i),
+        activeId: next && next.id !== active.id ? next.id : null,
+        moving: false,
+      };
+    }
+    case "step":
+      return active ? { ...state, activeId: nextPending(state.items, active.id, action.dir)?.id ?? null, moving: false } : state;
+    case "open":
+      return { ...state, activeId: action.id, moving: false };
+    case "undo":
+      return { items: state.items.map(i => i.id === action.id ? { ...i, status: "pending", topicId: i.originalTopicId } : i), activeId: action.id, moving: false };
+    case "toggleMove":
+      return active ? { ...state, moving: !state.moving } : state;
+    case "closeMove":
+      return state.moving ? { ...state, moving: false } : state;
+    default:
+      return state;
+  }
+};
+
+const KEY_ACTIONS = {
+  a: { type: "decide", status: "approved" },
+  x: { type: "decide", status: "rejected" },
+  e: { type: "toggleMove" },
+  s: { type: "step", dir: 1 },
+  arrowdown: { type: "step", dir: 1 },
+  arrowup: { type: "step", dir: -1 },
+  escape: { type: "closeMove" },
+};
+
+const STATUS = {
+  auto: { label: "Auto-approved", color: C.green },
+  approved: { label: "Approved", color: C.green },
+  edited: { label: "Moved", color: C.blue },
+  rejected: { label: "Rejected", color: C.red },
+};
+
+const SHORTCUTS = [["A", "approve"], ["E", "move"], ["X", "reject"], ["S", "later"], ["↑ ↓", "previous / next"]];
+
+// ─── Pieces ─────────────────────────────────────────────────────
+const sectionTitle = { fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 600, color: white(0.55), textTransform: "uppercase", letterSpacing: "0.08em", margin: `0 0 ${SPACE.md}px` };
+const label = { fontFamily: BODY, fontSize: TYPE.xs, fontWeight: 600, color: white(0.45), textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: SPACE.sm };
+const list = { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: SPACE.sm };
+
+const TopicName = ({ topic, size = TYPE.base, color }) => (
+  <span style={{ display: "inline-flex", alignItems: "center", gap: SPACE.sm, minWidth: 0 }}>
+    <span aria-hidden="true" style={{ fontSize: size + 1, flexShrink: 0 }}>{topic?.icon}</span>
+    <span style={{ fontFamily: BODY, fontSize: size, fontWeight: 600, color: color || white(0.75), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{topic?.name}</span>
+  </span>
+);
+
+const Bubble = ({ who, text, color, mobile }) => (
+  <div style={{ background: alpha(color, 0.06), border: `1px solid ${alpha(color, 0.15)}`, borderRadius: 12, padding: mobile ? `${SPACE.sm + 2}px ${SPACE.md}px` : `${SPACE.md}px ${SPACE.lg}px` }}>
+    <div style={{ fontFamily: MONO, fontSize: TYPE.xs, fontWeight: 600, color, marginBottom: SPACE.xs }}>{who}</div>
+    <div style={{ fontFamily: BODY, fontSize: mobile ? TYPE.base : 14, color: white(0.75), lineHeight: 1.55 }}>{text}</div>
+  </div>
+);
+
+const ActionButton = ({ onClick, color, icon, children, primary, pressed, keyHint }) => (
+  <button onClick={onClick} aria-pressed={pressed} aria-keyshortcuts={keyHint} style={{
+    display: "flex", alignItems: "center", justifyContent: "center", gap: SPACE.sm, width: "100%",
+    padding: `${SPACE.sm + 3}px ${SPACE.lg}px`, fontFamily: BODY, fontSize: TYPE.base, fontWeight: 600,
+    color: primary ? C.bg0 : color, background: primary ? color : alpha(color, pressed ? 0.16 : 0.07),
+    border: `1px solid ${primary ? color : alpha(color, 0.3)}`, borderRadius: 10, cursor: "pointer",
+  }}>
+    <span aria-hidden="true" style={{ fontSize: 14, lineHeight: 1 }}>{icon}</span>
+    {children}
+  </button>
+);
+
+const MovePicker = ({ item, onMove, onCancel }) => (
+  <div role="group" aria-label="Move to another topic" style={{ marginTop: SPACE.lg, paddingTop: SPACE.lg, borderTop: `1px solid ${white(0.06)}` }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: SPACE.md }}>
+      <div style={label}>Move this conversation to</div>
+      <button onClick={onCancel} style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.5), background: "none", border: "none", cursor: "pointer", padding: 0 }}>Cancel</button>
+    </div>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: SPACE.sm }}>
+      {TOPICS.filter(t => t.id !== item.topicId).map(t => (
+        <button key={t.id} onClick={() => onMove(t.id)} style={{
+          display: "inline-flex", alignItems: "center", gap: SPACE.xs + 2, fontFamily: BODY, fontSize: TYPE.sm, color: white(0.75),
+          background: white(0.03), border: `1px solid ${white(0.1)}`, borderRadius: 16, padding: `${SPACE.xs + 1}px ${SPACE.md}px`, cursor: "pointer",
+        }}>
+          <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: "50%", background: t.color }} />
+          {t.name}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+const ActiveCard = ({ item, position, pendingCount, moving, onAction, onMoveToggle, onMove, mobile, tablet }) => {
+  const topic = TOPIC_BY_ID[item.topicId];
+  return (
+    <article aria-label={`Reviewing: ${topic?.name}`} style={{
+      background: white(0.035), border: `1px solid ${alpha(C.gold, 0.35)}`, borderRadius: 14,
+      padding: mobile ? SPACE.lg : SPACE.xl,
+    }}>
+      <div style={{ fontFamily: MONO, fontSize: TYPE.xs, color: white(0.45), marginBottom: SPACE.md }}>
+        {position} of {pendingCount} waiting
+      </div>
+      <div style={{
+        display: mobile ? "flex" : "grid", flexDirection: "column",
+        gridTemplateColumns: tablet ? "1fr 1.4fr" : "240px 1fr 180px",
+        gap: mobile ? SPACE.lg : SPACE.xl,
+      }}>
+        <section aria-label="What Atlas decided">
+          <div style={label}>Atlas filed it under</div>
+          <div style={{ marginBottom: SPACE.xs }}><TopicName topic={topic} size={15} color={topic?.color} /></div>
+          <div style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.45), marginBottom: SPACE.md }}>{topic?.count} conversations in this topic</div>
+          <div style={{ marginBottom: SPACE.md }}><ConfidenceBadge confidence={item.confidence} /></div>
+          <div style={label}>Entities it found</div>
+          <ul aria-label="Entities" style={{ listStyle: "none", margin: `0 0 ${SPACE.md}px`, padding: 0, display: "flex", flexWrap: "wrap", gap: SPACE.xs }}>
+            {item.entities.map(e => (
+              <li key={e} style={{ fontFamily: MONO, fontSize: TYPE.xs, padding: "3px 8px", borderRadius: 6, background: white(0.04), border: `1px solid ${white(0.1)}`, color: white(0.65) }}>{e}</li>
+            ))}
+          </ul>
+          {item.decisionFlag && (
+            <div style={{ padding: `${SPACE.sm}px ${SPACE.md}px`, borderRadius: 8, background: alpha(C.red, 0.06), border: `1px solid ${alpha(C.red, 0.2)}` }}>
+              <div style={{ fontFamily: BODY, fontSize: TYPE.xs, color: C.red, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Decision detected</div>
+              <div style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.7), marginTop: 2 }}>{item.decisionText}</div>
+            </div>
+          )}
+        </section>
+
+        <section aria-label="Conversation excerpt">
+          <div style={label}>From the conversation</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: SPACE.sm }}>
+            <Bubble who="YOU" text={item.snippet.user} color={C.blue} mobile={mobile} />
+            <Bubble who="AI" text={item.snippet.ai} color={C.gold} mobile={mobile} />
+          </div>
+        </section>
+
+        <section aria-label="Your call" style={tablet ? { gridColumn: "1 / -1" } : undefined}>
+          <div style={label}>Your call</div>
+          <div style={{ display: tablet ? "grid" : "flex", gridTemplateColumns: "repeat(4, 1fr)", flexDirection: "column", gap: SPACE.sm }}>
+            <ActionButton primary color={C.green} icon="✓" keyHint="A" onClick={() => onAction("approved")}>Approve</ActionButton>
+            <ActionButton color={C.blue} icon="↪" keyHint="E" pressed={moving} onClick={onMoveToggle}>Move…</ActionButton>
+            <ActionButton color={C.red} icon="✕" keyHint="X" onClick={() => onAction("rejected")}>Reject</ActionButton>
+            <ActionButton color={C.white} icon="→" keyHint="S" onClick={() => onAction("later")}>Later</ActionButton>
+          </div>
+        </section>
+      </div>
+      {moving && <MovePicker item={item} onMove={onMove} onCancel={onMoveToggle} />}
+    </article>
+  );
+};
+
+const PendingRow = ({ item, onOpen, mobile }) => {
+  const topic = TOPIC_BY_ID[item.topicId];
+  return (
+    <button onClick={onOpen} aria-label={`Review ${topic?.name}, ${item.confidence}% confidence`} style={{
+      display: "flex", alignItems: "center", gap: SPACE.md, width: "100%", textAlign: "left",
+      background: white(0.02), border: `1px solid ${white(0.07)}`, borderRadius: 12,
+      padding: mobile ? `${SPACE.sm + 2}px ${SPACE.md}px` : `${SPACE.md}px ${SPACE.lg + 2}px`, cursor: "pointer",
+    }}>
+      <span style={{ flex: 1, minWidth: 0, display: "flex" }}><TopicName topic={topic} /></span>
+      <ConfidenceBadge confidence={item.confidence} />
+    </button>
+  );
+};
+
+const DecidedRow = ({ item, onUndo, mobile }) => {
+  const topic = TOPIC_BY_ID[item.topicId];
+  const was = item.topicId !== item.originalTopicId ? TOPIC_BY_ID[item.originalTopicId] : null;
+  const s = STATUS[item.status];
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: SPACE.md, flexWrap: mobile ? "wrap" : "nowrap",
+      background: white(0.015), border: `1px solid ${white(0.05)}`, borderRadius: 12,
+      padding: mobile ? `${SPACE.sm + 2}px ${SPACE.md}px` : `${SPACE.sm + 2}px ${SPACE.lg + 2}px`,
+    }}>
+      <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, flexShrink: 0 }} />
+      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+        <TopicName topic={topic} color={item.status === "rejected" ? white(0.45) : undefined} />
+        {was && <span style={{ fontFamily: BODY, fontSize: TYPE.xs, color: white(0.45) }}>was {was.name}</span>}
+      </span>
+      <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: s.color, textTransform: "uppercase", flexShrink: 0 }}>{s.label} · {item.confidence}%</span>
+      <button onClick={onUndo} aria-label={`Undo: review ${topic?.name} again`} style={{
+        fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6), background: "none", border: `1px solid ${white(0.12)}`,
+        borderRadius: 8, padding: `${SPACE.xs}px ${SPACE.md}px`, cursor: "pointer", flexShrink: 0,
+      }}>Undo</button>
+    </div>
+  );
+};
+
+const nextButton = (primary) => ({
+  fontFamily: BODY, fontSize: primary ? 15 : TYPE.base, fontWeight: 600,
+  color: primary ? C.bg0 : white(0.75), background: primary ? C.gold : white(0.04),
+  border: `1px solid ${primary ? C.gold : white(0.12)}`, borderRadius: 10,
+  padding: primary ? `${SPACE.md + 2}px ${SPACE.xxl}px` : `${SPACE.sm + 2}px ${SPACE.xl}px`, cursor: "pointer",
+});
+
+// ─── The view ───────────────────────────────────────────────────
+const ReviewQueue = ({ onComplete, onNavigate, mobile, w }) => {
+  const [state, dispatch] = useReducer(queueReducer, undefined, initialState);
+  const [soundOn, setSoundOn] = useState(false);
+  const sound = useSound();
+  const wasPending = useRef(null);
+
+  const { items, moving } = state;
+  const tablet = !mobile && w < 1024;
+  const stats = summarize(items);
+  const pending = items.filter(i => i.status === "pending");
+  const active = activeItem(state);
+  const decided = items.filter(i => ["approved", "edited", "rejected"].includes(i.status));
+  const autos = items.filter(i => i.status === "auto");
+  const hasPending = stats.pending > 0;
+
+  // One chime when the last pending item gets a decision (not on mount).
+  useEffect(() => {
+    if (wasPending.current > 0 && stats.pending === 0) sound.play("chime");
+    wasPending.current = stats.pending;
+  }, [stats.pending, sound]);
+
+  // Shortcuts act on whatever the reducer considers active. With nothing
+  // pending they are unbound, so the arrow keys scroll the page again.
+  useEffect(() => {
+    if (!hasPending) return undefined;
+    const onKey = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = e.target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      const action = KEY_ACTIONS[e.key.toLowerCase()];
+      if (!action) return;
+      e.preventDefault();
+      dispatch(action);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hasPending]);
+
+  const act = (status, topicId) => dispatch(status === "later" ? { type: "step", dir: 1 } : { type: "decide", status, topicId });
+  const onUndo = (id) => dispatch({ type: "undo", id });
+
+  const pct = Math.round((stats.decided / stats.total) * 100);
+  const lede = `Atlas sorted ${stats.total} conversations into topics. ${stats.auto} were ${AUTO_APPROVE_AT}% certain or better and are approved already; the other ${stats.total - stats.auto} are yours to check.`;
 
   return (
     <div style={screen(mobile)}>
       <style>{CSS}</style>
+      <main style={{ maxWidth: 1100, width: "100%", margin: "0 auto" }}>
+        <CurationHeader view="curation" title="Review" accent="the sorting" lede={lede} onNavigate={onNavigate} mobile={mobile} />
 
-      {/* Ambient glow */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at 50% 30%, ${alpha(C.gold, 0.04)} 0%, transparent 50%)`, pointerEvents: "none" }} />
-
-      <div style={{ maxWidth: 1100, width: "100%", margin: "0 auto", position: "relative", zIndex: 1 }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: mobile ? 20 : 28 }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "4px 14px", borderRadius: 20, marginBottom: 14,
-            background: alpha(C.gold, 0.08), border: `1px solid ${alpha(C.gold, 0.2)}`,
-            fontFamily: MONO, fontSize: 10, color: C.gold, fontWeight: 600,
-            letterSpacing: "0.08em",
-          }}>
-            CURATION
+        <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Conversations with a decision" style={{ marginBottom: SPACE.xl }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: SPACE.sm, fontFamily: MONO, fontSize: TYPE.xs }}>
+            <span style={{ color: white(0.55) }}>{stats.decided} of {stats.total} decided · {stats.pending} waiting</span>
+            <span style={{ color: stats.pending === 0 ? C.green : C.gold }}>{pct}%</span>
           </div>
-          <h1 style={display(mobile)}>
-            Review <span style={{ color: C.gold }}>Queue</span>
-          </h1>
-          <p style={{ ...lede(mobile), marginTop: 6 }}>
-            AI classified your conversations. Verify, edit, or reject each one.
-          </p>
-          <button onClick={() => { const on = sound.toggle(); setSoundEnabled(on); }} style={{
-            marginTop: 8, fontFamily: MONO, fontSize: 10, color: soundEnabled ? C.gold : white(0.2),
-            background: "transparent", border: `1px solid ${soundEnabled ? alpha(C.gold, 0.3) : white(0.08)}`,
-            borderRadius: 12, padding: "3px 10px", cursor: "pointer", transition: "all 0.2s",
-          }}>
-            {soundEnabled ? "♪ Sound On" : "♪ Sound Off"}
-          </button>
-        </div>
-
-        {/* Progress bar */}
-        <div style={{ marginBottom: mobile ? 20 : 28 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: white(0.3) }}>
-              {reviewed} / {total} reviewed
-            </span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? C.green : alpha(C.gold, 0.5) }}>
-              {Math.round(progress)}%
-            </span>
-          </div>
-          <div style={track}>
-            <div style={{
-              width: `${progress}%`, height: "100%",
-              background: progress === 100 ? `linear-gradient(90deg, ${C.green}, ${C.greenDeep})` : `linear-gradient(90deg, ${C.gold}CC, ${C.gold})`,
-              borderRadius: 3, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)",
-              boxShadow: progress === 100 ? `0 0 16px ${alpha(C.green, 0.4)}` : `0 0 12px ${alpha(C.gold, 0.3)}`,
-            }} />
+          <div style={{ width: "100%", height: 6, background: white(0.05), borderRadius: 3, overflow: "hidden" }}>
+            <div style={{ width: `${pct}%`, height: "100%", background: stats.pending === 0 ? C.green : C.gold, borderRadius: 3, transition: "width 0.4s ease" }} />
           </div>
         </div>
 
-        {/* All done state */}
-        {allDone ? (
-          <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "48px 20px" : "64px 40px", position: "relative", overflow: "hidden" }}>
-            {/* Confetti burst */}
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", overflow: "hidden" }}>
-              {Array.from({ length: 24 }, (_, i) => (
-                <div key={i} style={{
-                  position: "absolute",
-                  left: `${10 + Math.random() * 80}%`,
-                  top: "50%",
-                  width: Math.random() > 0.5 ? 6 : 4,
-                  height: Math.random() > 0.5 ? 6 : 10,
-                  borderRadius: Math.random() > 0.5 ? "50%" : 2,
-                  background: [C.gold, C.green, C.blue, C.red, C.violet, C.pink][i % 6],
-                  animation: `confettiBurst ${0.8 + Math.random() * 0.6}s ease-out ${i * 40}ms both`,
-                  transform: `rotate(${Math.random() * 360}deg)`,
-                  opacity: 0.9,
-                }} />
+        <section aria-labelledby="rq-waiting" style={{ marginBottom: SPACE.xxl }}>
+          <h2 id="rq-waiting" style={sectionTitle}>Waiting for you ({stats.pending})</h2>
+          {active ? (
+            <ol aria-label="Waiting for review" style={list}>
+              {pending.map(item => (
+                <li key={item.id}>
+                  {item.id === active.id
+                    ? <ActiveCard item={item} position={pending.indexOf(item) + 1} pendingCount={pending.length} moving={moving}
+                        onAction={act} onMoveToggle={() => dispatch({ type: "toggleMove" })} onMove={(topicId) => act("edited", topicId)} mobile={mobile} tablet={tablet} />
+                    : <PendingRow item={item} onOpen={() => dispatch({ type: "open", id: item.id })} mobile={mobile} />}
+                </li>
               ))}
+            </ol>
+          ) : (
+            <div role="status" style={{ textAlign: "center", padding: mobile ? `${SPACE.xl}px ${SPACE.lg}px` : `${SPACE.xxl}px`, background: alpha(C.green, 0.05), border: `1px solid ${alpha(C.green, 0.2)}`, borderRadius: 14 }}>
+              <div style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xl : TYPE.xxl, fontWeight: 700, color: C.green, marginBottom: SPACE.sm }}>The queue is clear</div>
+              <p style={{ fontFamily: BODY, fontSize: 14, color: white(0.65), margin: `0 0 ${SPACE.xl}px` }}>
+                {stats.approved} approved, {stats.edited} moved, {stats.rejected} rejected, and {stats.auto} approved automatically.
+              </p>
+              <button onClick={onComplete} style={nextButton(true)}>Next: curate topics →</button>
             </div>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>✓</div>
-            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: C.green, marginBottom: 8 }}>
-              Queue Complete
-            </h2>
-            <p style={body(mobile)}>
-              {items.filter(i => i.status === "approved").length} approved, {items.filter(i => i.status === "edited").length} edited, {items.filter(i => i.status === "rejected").length} rejected, {items.filter(i => i.status === "skipped").length} skipped
-            </p>
-            <p style={{ fontFamily: BODY, fontSize: 12, color: white(0.2), marginBottom: 28 }}>
-              Your atlas is now human-verified.
-            </p>
-            <button onClick={onComplete} style={{
-              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: C.bg0,
-              background: `linear-gradient(135deg, ${C.gold}, ${C.amber})`, border: "none",
-              borderRadius: 12, padding: "14px 40px", cursor: "pointer",
-              boxShadow: `0 4px 24px ${alpha(C.gold, 0.25)}`,
-              transition: "all 0.25s",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${alpha(C.gold, 0.35)}`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 24px ${alpha(C.gold, 0.25)}`; }}
-            >
-              Enter Your Atlas →
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Item list / queue */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-              {items.map((item, idx) => {
-                const topic = topicMap[item.topicId];
-                const isActive = idx === activeIdx;
-                const isAutoApproving = autoApproving.has(item.id);
-                const isDone = item.status !== "pending";
-                const isHaptic = hapticId === item.id;
+          )}
+        </section>
 
-                return (
-                  <div key={item.id} style={{
-                    background: isActive ? white(0.04) : isDone ? white(0.01) : white(0.02),
-                    border: `1px solid ${isActive ? alpha(C.gold, 0.3) : isDone ? white(0.03) : white(0.06)}`,
-                    borderRadius: 14, overflow: "hidden",
-                    opacity: isDone && !isAutoApproving ? 0.4 : 1,
-                    transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
-                    animation: isHaptic ? "hapticBounce 0.35s ease" : isAutoApproving ? "autoApprove 0.7s ease forwards" : "queueSlideUp 0.5s ease both",
-                    animationDelay: isAutoApproving ? "0s" : isHaptic ? "0s" : `${idx * 60}ms`,
-                  }}>
-                    {/* Compact row for non-active items */}
-                    {!isActive ? (
-                      <div style={{
-                        display: "flex", alignItems: "center", gap: mobile ? 8 : 14,
-                        padding: mobile ? "10px 12px" : "12px 18px",
-                        cursor: item.status === "pending" ? "pointer" : "default",
-                      }}
-                        onClick={() => { if (item.status === "pending") setActiveIdx(idx); }}
-                        role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (item.status === "pending") setActiveIdx(idx); }}}
-                      >
-                        {/* Status indicator */}
-                        <div style={{
-                          width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-                          background: item.status === "approved" ? C.green : item.status === "edited" ? C.blue : item.status === "rejected" ? C.red : item.status === "skipped" ? white(0.15) : white(0.1),
-                        }} />
-                        {/* Topic icon + name */}
-                        <span style={{ fontSize: 14, flexShrink: 0 }}>{topic?.icon}</span>
-                        <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.5), fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {topic?.name}
-                        </span>
-                        <ConfidenceBadge confidence={item.confidence} />
-                        {isDone && (
-                          <span style={{ fontFamily: MONO, fontSize: 10, color: item.status === "approved" ? C.green : item.status === "edited" ? C.blue : item.status === "rejected" ? C.red : white(0.2), textTransform: "uppercase", flexShrink: 0 }}>
-                            {item.status}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      /* Expanded active item — three-column layout */
-                      <div style={{ padding: mobile ? "16px 14px" : "20px 24px" }}>
-                        {/* Three-column layout (stacks on mobile) */}
-                        <div style={{
-                          display: mobile ? "flex" : "grid",
-                          gridTemplateColumns: tablet ? "1fr 1.5fr auto" : "280px 1fr 200px",
-                          flexDirection: mobile ? "column" : undefined,
-                          gap: mobile ? 16 : 20,
-                        }}>
-                          {/* LEFT: AI Classification */}
-                          <div>
-                            <div style={eyebrow}>
-                              AI Classification
-                            </div>
-                            {/* Topic */}
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                              <span style={{ fontSize: 20 }}>{activeTopic?.icon}</span>
-                              <div>
-                                <div style={{ fontFamily: BODY, fontSize: 14, color: activeTopic?.color, fontWeight: 600 }}>{activeTopic?.name}</div>
-                                <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.2) }}>{activeTopic?.count} conversations in topic</div>
-                              </div>
-                            </div>
-                            {/* Confidence */}
-                            <div style={{ marginBottom: 10 }}>
-                              <ConfidenceBadge confidence={activeItem.confidence} />
-                            </div>
-                            {/* Entities */}
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
-                              {activeItem.entities.map((entity, ei) => (
-                                <span key={ei} style={{
-                                  fontFamily: MONO, fontSize: 10, padding: "3px 8px", borderRadius: 6,
-                                  background: white(0.04), border: `1px solid ${white(0.08)}`,
-                                  color: white(0.45),
-                                }}>{entity}</span>
-                              ))}
-                            </div>
-                            {/* Decision flag */}
-                            {activeItem.decisionFlag && (
-                              <div style={{
-                                display: "flex", alignItems: "center", gap: 6,
-                                padding: "6px 10px", borderRadius: 8,
-                                background: alpha(C.red, 0.06), border: `1px solid ${alpha(C.red, 0.15)}`,
-                              }}>
-                                <span style={{ fontSize: 12 }}>🎯</span>
-                                <div>
-                                  <div style={{ fontFamily: BODY, fontSize: 9, color: C.red, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Decision Detected</div>
-                                  <div style={{ fontFamily: BODY, fontSize: 11, color: white(0.35), marginTop: 1 }}>{activeItem.decisionText}</div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* CENTER: Source Conversation */}
-                          <div>
-                            <div style={eyebrow}>
-                              Conversation Snippet
-                            </div>
-                            <div style={stack}>
-                              {/* User message */}
-                              <div style={{
-                                background: alpha(C.blue, 0.06), border: `1px solid ${alpha(C.blue, 0.12)}`,
-                                borderRadius: "12px 12px 12px 4px", padding: mobile ? "10px 12px" : "12px 16px",
-                              }}>
-                                <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.blue, 0.5), marginBottom: 4, fontWeight: 600 }}>YOU</div>
-                                <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.6), lineHeight: 1.55 }}>{activeItem.snippet.user}</div>
-                              </div>
-                              {/* AI message */}
-                              <div style={{
-                                background: alpha(C.gold, 0.04), border: `1px solid ${alpha(C.gold, 0.1)}`,
-                                borderRadius: "12px 12px 4px 12px", padding: mobile ? "10px 12px" : "12px 16px",
-                              }}>
-                                <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.gold, 0.5), marginBottom: 4, fontWeight: 600 }}>AI</div>
-                                <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.6), lineHeight: 1.55 }}>{activeItem.snippet.ai}</div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* RIGHT: Action Panel */}
-                          <div>
-                            <div style={eyebrow}>
-                              Actions
-                            </div>
-                            <div style={stackTight}>
-                              {[
-                                { action: "approved", label: "Approve", color: C.green, icon: "✓" },
-                                { action: "edited", label: "Edit", color: C.blue, icon: "✎" },
-                                { action: "rejected", label: "Reject", color: C.red, icon: "✕" },
-                                { action: "skipped", label: "Skip", color: white(0.3), icon: "→" },
-                              ].map(btn => (
-                                <button key={btn.action} onClick={() => handleAction(activeItem.id, btn.action)}
-                                  style={{
-                                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                                    width: "100%", padding: mobile ? "10px 14px" : "11px 16px",
-                                    fontFamily: BODY, fontSize: 13, fontWeight: 600,
-                                    color: btn.action === "approved" ? C.bg0 : btn.color,
-                                    background: btn.action === "approved" ? btn.color : `${btn.color}10`,
-                                    border: `1px solid ${btn.action === "approved" ? btn.color : btn.color + "30"}`,
-                                    borderRadius: 10, cursor: "pointer", transition: "all 0.2s",
-                                  }}
-                                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 4px 16px ${btn.color}25`; }}
-                                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-                                >
-                                  <span style={{ fontSize: 14, lineHeight: 1 }}>{btn.icon}</span>
-                                  {btn.label}
-                                </button>
-                              ))}
-                            </div>
-                            {/* Keyboard hint */}
-                            {!mobile && (
-                              <div style={{ marginTop: 12, fontFamily: MONO, fontSize: 9, color: white(0.12), lineHeight: 1.8 }}>
-                                Enter approve · E edit · X reject · ↑↓ navigate · → skip
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Skip all / proceed button when no active item but not all done */}
-            {activeIdx === null && !allDone && reviewed < total && (
-              <div className="fade-up" style={{ textAlign: "center", padding: "20px 0" }}>
-                <div style={{ fontFamily: BODY, fontSize: 12, color: white(0.2), marginBottom: 12 }}>
-                  Auto-approving high-confidence items...
-                </div>
-              </div>
-            )}
-          </>
+        {decided.length > 0 && (
+          <section aria-labelledby="rq-decided" style={{ marginBottom: SPACE.xxl }}>
+            <h2 id="rq-decided" style={sectionTitle}>Your decisions ({decided.length})</h2>
+            <ol aria-label="Your decisions" style={list}>
+              {decided.map(item => <li key={item.id}><DecidedRow item={item} mobile={mobile} onUndo={() => onUndo(item.id)} /></li>)}
+            </ol>
+          </section>
         )}
-      </div>
+
+        {autos.length > 0 && (
+          <section aria-labelledby="rq-auto" style={{ marginBottom: SPACE.xxl }}>
+            <h2 id="rq-auto" style={sectionTitle}>Approved automatically ({autos.length})</h2>
+            <p style={{ fontFamily: BODY, fontSize: TYPE.base, color: white(0.5), margin: `-${SPACE.xs}px 0 ${SPACE.md}px` }}>
+              {AUTO_APPROVE_AT}% confidence or higher. Undo one to review it yourself.
+            </p>
+            <ol aria-label="Approved automatically" style={list}>
+              {autos.map(item => <li key={item.id}><DecidedRow item={item} mobile={mobile} onUndo={() => onUndo(item.id)} /></li>)}
+            </ol>
+          </section>
+        )}
+
+        <footer style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: SPACE.lg, flexWrap: "wrap", paddingTop: SPACE.xl, borderTop: `1px solid ${white(0.06)}` }}>
+          <KeyHints keys={SHORTCUTS} mobile={mobile}>
+            <button onClick={() => setSoundOn(sound.toggle())} aria-pressed={soundOn} style={{
+              fontFamily: BODY, fontSize: TYPE.xs, color: soundOn ? C.gold : white(0.5), background: "none",
+              border: `1px solid ${soundOn ? alpha(C.gold, 0.35) : white(0.12)}`, borderRadius: 12, padding: `2px ${SPACE.sm + 2}px`, cursor: "pointer",
+            }}>♪ Sound {soundOn ? "on" : "off"}</button>
+          </KeyHints>
+          {stats.pending > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: SPACE.md, flexWrap: "wrap" }}>
+              <span style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.45) }}>Undecided ones keep Atlas's topic.</span>
+              <button onClick={onComplete} style={nextButton(false)}>Continue to topics →</button>
+            </div>
+          )}
+        </footer>
+      </main>
     </div>
   );
 };
