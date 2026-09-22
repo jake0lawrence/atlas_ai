@@ -33,7 +33,7 @@ import DigestView from './views/DigestView';
 import DecisionArchaeology from './views/DecisionArchaeology';
 import RewindMode from './views/RewindMode';
 import DashboardView from './views/DashboardView';
-import { C, alpha, white } from './styles/tokens';
+import { C, alpha, white, SPACE, TYPE } from './styles/tokens';
 
 // ─── MAIN APP ───────────────────────────────────────────────
 
@@ -204,6 +204,7 @@ export default function App() {
       <>
         <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 960, margin: "0 auto" }}>
           <style>{CSS}</style>
+          <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
           <DecisionArchaeology
             chainId={selectedChain}
             onBack={(targetView, targetChain) => {
@@ -237,6 +238,7 @@ export default function App() {
       <>
         <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 960, margin: "0 auto" }}>
           <style>{CSS}</style>
+          <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
           <ConversationDrilldown topicId={selectedEvent.topicId} eventIndex={selectedEvent.eventIndex} onBack={() => { setView("timeline"); setSelectedEvent(null); }} mobile={mobile} />
         </div>
         <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
@@ -251,6 +253,7 @@ export default function App() {
       <>
         <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "20px 16px" : "28px 40px", maxWidth: 820, margin: "0 auto" }}>
           <style>{CSS}</style>
+          <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
           <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} newEvents={syncedNewEvents} />
         </div>
         <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
@@ -266,15 +269,17 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "24px 16px 60px" : tablet ? "28px 24px 80px" : "32px 40px 80px" }}>
       <style>{CSS}</style>
       <div style={container}>
-        <div style={{ textAlign: "center", marginBottom: mobile ? 24 : 32 }}>
-          <div style={{ fontSize: mobile ? 10 : 12, fontFamily: BODY, color: alpha(C.gold, 0.35), textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: mobile ? 10 : 14, fontWeight: 600 }}>Your AI Knowledge Atlas</div>
-          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? 32 : tablet ? 40 : 48, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            3 Years of Thinking,{mobile ? <br /> : " "}<span style={{ color: C.gold }}>Mapped</span>
-          </h1>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 14, color: white(0.25), marginTop: 6 }}>Jan 2023 — Feb 2026 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
-        </div>
+        <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
 
-        <Nav view={view === "timeline" ? "dashboard" : view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} />
+        {view === "dashboard" && (
+          <div style={{ textAlign: "center", marginBottom: mobile ? SPACE.xl : SPACE.xxl }}>
+            <div style={{ fontSize: TYPE.xs, fontFamily: BODY, color: alpha(C.gold, 0.35), textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: SPACE.md, fontWeight: 600 }}>Your AI Knowledge Atlas</div>
+            <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xxl : TYPE.display, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+              3 Years of Thinking,{mobile ? <br /> : " "}<span style={{ color: C.gold }}>Mapped</span>
+            </h1>
+            <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.sm : TYPE.base, color: white(0.3), marginTop: SPACE.sm }}>Jan 2023 — Feb 2026 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
+          </div>
+        )}
 
         {view === "dashboard" && (
           <DashboardView
@@ -294,29 +299,9 @@ export default function App() {
 
         <div style={{ textAlign: "center", marginTop: mobile ? 40 : 60, padding: "18px 0", borderTop: `1px solid ${white(0.04)}` }}>
           <div style={{ fontFamily: FONTS, fontSize: mobile ? 14 : 16, color: white(0.18) }}>This is your mind, mapped.</div>
-          <div style={{ fontFamily: BODY, fontSize: mobile ? 9 : 11, color: white(0.08), marginTop: 5 }}>Atlas · v5 · Data simulated from real conversation patterns</div>
+          <div style={{ fontFamily: BODY, fontSize: mobile ? 9 : 11, color: white(0.08), marginTop: 5 }}>Atlas · v7 · Data simulated from real conversation patterns</div>
         </div>
       </div>
-      {!mobile && (
-        <div style={{ position: "fixed", bottom: 24, left: 24, zIndex: 1000, display: "flex", gap: 6 }}>
-          <button onClick={() => setTourActive(true)} title="Take the full guided tour" style={{
-            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: white(0.35),
-            background: white(0.04), border: `1px solid ${white(0.08)}`,
-            borderRadius: 8, padding: "7px 12px", cursor: "pointer", transition: "all 0.25s",
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
-            <span style={{ fontSize: 13 }}>🗺️</span> Tour
-          </button>
-          <button onClick={() => setV6TourActive(true)} title="See what's new in v6" style={{
-            fontFamily: BODY, fontSize: 11, fontWeight: 500, color: alpha(C.gold, 0.5),
-            background: alpha(C.gold, 0.04), border: `1px solid ${alpha(C.gold, 0.12)}`,
-            borderRadius: 8, padding: "7px 12px", cursor: "pointer", transition: "all 0.25s",
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
-            <span style={{ fontSize: 13 }}>🆕</span> v6
-          </button>
-        </div>
-      )}
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
       <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />

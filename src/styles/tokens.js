@@ -89,3 +89,9 @@ export const black = (a) => alpha(C.black, a);
 export const FONTS = `'Playfair Display', 'Georgia', serif`;
 export const BODY = `'Libre Franklin', 'Helvetica Neue', sans-serif`;
 export const MONO = `'JetBrains Mono', 'Fira Code', monospace`;
+
+// Spacing scale (px). Views pick from here, not from arbitrary numbers.
+export const SPACE = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 };
+
+// Type scale (px). `shared.js` builds its text styles on it.
+export const TYPE = { xs: 10, sm: 11, base: 13, md: 15, lg: 18, xl: 22, xxl: 28, display: 40 };

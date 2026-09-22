@@ -23,8 +23,8 @@ three prerequisites that are now done or in flight:
 | Prereq | PR | State |
 |---|---|---|
 | Split `App.jsx` into `src/views`, `src/components`, `src/styles` | #66 | open, draft |
-| Token module (`src/styles/tokens.js`, `shared.js`); no color literal outside it (lint-enforced) | this branch | done |
-| Safety net: ESLint, a render test per view and per route, a Playwright screenshot baseline of the route table, CI | this branch | done |
+| Token module (`src/styles/tokens.js`, `shared.js`); no color literal outside it (lint-enforced) | #67 | merged |
+| Safety net: ESLint, a render test per view and per route, a Playwright screenshot baseline of the route table, CI | #67 | merged |
 
 The prerequisites are what make one-view-per-PR safe: a redesign PR touches one file
 in `src/views/`, the render test proves it still mounts on every route, the screenshot
@@ -59,7 +59,16 @@ or amends them in the first PR of the sequence, after which they are the standar
    without a preview; the router sends unknown paths to the dashboard silently. Every
    view gets a designed empty state in its PR.
 7. **Mobile is a first-class viewport.** Every view PR adds the 390-wide screenshot
-   for its route to the baseline.
+   for its route to the baseline: flag the route `mobile` in `src/routes.js`
+   (`MOBILE_ROUTES`) and run `npm run test:e2e:update`. PR 1 seeds it with the
+   onboarding, dashboard, connections, belief-diffs and timeline routes.
+
+**Status after PR 1:** principles 3 (spacing scale) and 5 (three stations) are
+implemented in the shell; 2 (type scale) exists in `tokens.js` and is used by the
+shell, views adopt it as their PR comes up; 1, 4 and 6 are applied view by view and
+closed out in PR 21. Two tour steps (Belief Diffs, Digest) spotlight page tabs that
+are only visible when the Companion station is active, so from the dashboard they
+fall back to the centered tooltip; PR 20 rewrites the tour to the new IA.
 
 ## The sequence
 
@@ -70,7 +79,7 @@ its route's baseline PNGs; no PR touches two views.
 
 | # | PR | Route | File | What changes | Done when |
 |---|---|---|---|---|---|
-| 1 | Shell + Nav | all | `App.jsx`, `components/Nav.jsx` | The three-station nav, header with sync + export, footer fixed, single tour entry point. Ratifies the principles above. | Render + route tests green; baseline updated for every route (the shell is in all of them); PR text records each principle as accepted or amended. |
+| 1 | Shell + Nav **(PR open)** | all | `App.jsx`, `components/Nav.jsx` | The three-station nav (Atlas / Curate / Companion) with page tabs under the active station, wordmark, actions row (⌘K, sync, Export, Tour), hero only on the dashboard, footer fixed, one tour button. Adds the `SPACE` and `TYPE` scales to `tokens.js`, the `mobile` screenshot project, and removes the last `exhaustive-deps` suppressions. | Render + route tests green; baseline updated for every route (the shell is in all of them); PR text records each principle as accepted or amended. |
 | 2 | Onboarding | `/` | `views/OnboardingView.jsx` | The drop zones and persona picker become the pitch: one screen, one action. | Baseline for `/` at 1280 and 390. |
 | 3 | Loading | `/loading` | `views/LoadingView.jsx` | The five-phase pipeline as the story of what Atlas does, on the motion budget. | Same. |
 | 4 | Dashboard | `/dashboard` | `views/DashboardView.jsx` | Stat band, journey chart, knowledge map, staleness alerts on the type and spacing scales; empty state for a fresh atlas. | Same, plus palette/sidebar baselines. |
@@ -123,10 +132,9 @@ Every view PR carries the same body, so review is the same every time:
   reachable only by URL, but a shared link to it is a blank page. → PR 6.
 - `/curation/topics` uses `Math.random()` for confidence values, so it renders
   differently every load and cannot hold a baseline. → PR 8.
-- `useRouterSync` still carries two `eslint-disable-next-line react-hooks/exhaustive-deps`
-  comments (the third was unused and is removed). CLAUDE.md says never suppress that
-  rule. → PR 1, when the shell is open anyway.
-- The footer says "Atlas · v5." → PR 21.
+- ~~`useRouterSync` still carries two `exhaustive-deps` suppressions~~ → fixed in PR 1
+  (router values read through a ref that a layout effect keeps current).
+- ~~The footer says "Atlas · v5."~~ → fixed in PR 1.
 
 ## What v7 does NOT include
 

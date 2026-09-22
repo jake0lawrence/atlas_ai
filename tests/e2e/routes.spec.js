@@ -30,7 +30,8 @@ for (const route of SWEEP_ROUTES) {
   const id = route.id || route.path;
   const name = id === '/' ? 'root' : id.replace(/^\//, '').replace(/\//g, '--');
 
-  test(`${id} matches its baseline`, async ({ page }) => {
+  test(`${id} matches its baseline`, async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile' && !route.mobile, 'not in the mobile baseline yet');
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error' && !/^Failed to load resource/.test(m.text())) errors.push(m.text()); });
