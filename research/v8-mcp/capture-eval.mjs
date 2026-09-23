@@ -86,8 +86,15 @@ const once = async ({ model, variant, scenario, rep }) => {
   return record;
 };
 
+// Resumable: a conversation already recorded in OUT (same model, condition,
+// scenario and repeat) is not run again.
+const doneKeys = new Set(existsSync(OUT)
+  ? readFileSync(OUT, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l)).map(r => `${r.model}|${r.variant}|${r.scenario}|${r.rep}`)
+  : []);
 const jobs = [];
-for (const model of MODELS) for (const variant of VARIANTS) for (const scenario of chosen) for (let rep = 1; rep <= REPS; rep++) jobs.push({ model, variant, scenario, rep });
+for (const model of MODELS) for (const variant of VARIANTS) for (const scenario of chosen) for (let rep = 1; rep <= REPS; rep++) {
+  if (!doneKeys.has(`${model}|${variant}|${scenario.id}|${rep}`)) jobs.push({ model, variant, scenario, rep });
+}
 
 let done = 0, spent = 0;
 const worker = async () => {
