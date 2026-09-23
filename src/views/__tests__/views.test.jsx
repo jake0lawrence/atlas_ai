@@ -27,6 +27,7 @@ import ConversationDrilldown from '../ConversationDrilldown';
 import AskAtlas from '../AskAtlas';
 import BeliefDiffsView from '../BeliefDiffsView';
 import DigestView from '../DigestView';
+import LiveCaptureView from '../LiveCaptureView';
 import DecisionArchaeology from '../DecisionArchaeology';
 import RewindMode from '../RewindMode';
 import EvolutionView from '../EvolutionView';
@@ -53,6 +54,7 @@ const VIEWS = [
   ['AskAtlas', AskAtlas, { onBack: noop, onConversationClick: noop, onResolveContradiction: noop }],
   ['BeliefDiffsView', BeliefDiffsView, { onBack: noop, onArchaeologyClick: noop }],
   ['DigestView', DigestView, { onBack: noop, onArchaeologyClick: noop }],
+  ['LiveCaptureView', LiveCaptureView, { onTopicClick: noop }],
   ['DecisionArchaeology', DecisionArchaeology, { chainId: 'why-typescript', onBack: noop, onConversationClick: noop }],
   ['RewindMode', RewindMode, { onClose: noop }],
   ['EvolutionView', EvolutionView, { onRewind: noop }],

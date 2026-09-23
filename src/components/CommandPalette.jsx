@@ -18,6 +18,7 @@ const CommandPalette = ({ open, onClose, onNavigate, onTopicClick, mobile }) => 
     { type: "view", id: "evolution", label: "Evolution", icon: "◇", sub: "Decisions & milestones" },
     { type: "view", id: "beliefDiffs", label: "Belief Diffs", icon: "⇄", sub: "How your thinking evolved" },
     { type: "view", id: "digest", label: "Thinking Digest", icon: "📅", sub: "Monthly knowledge evolution" },
+    { type: "view", id: "liveCapture", label: "Live Capture", icon: "●", sub: "What the model logged today (MCP)" },
     { type: "view", id: "search", label: "Search", icon: "⌕", sub: "Search conversations" },
     { type: "view", id: "export", label: "Export", icon: "↗", sub: "Export & share" },
     { type: "view", id: "rewind", label: "Rewind Mode", icon: "⏪", sub: "Animated knowledge graph timeline" },
