@@ -38,7 +38,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/dashboard', '/companion', '/connections', '/companion/diff', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/dashboard', '/companion', '/connections', '/companion/diff', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -46,10 +46,11 @@ export const SWEEP_ROUTES = [
   // "tour seen" flags for every route except this one, which captures the tour.
   { path: '/dashboard', id: 'dashboard-tour', tour: true },
   // Ask Atlas with an answer on screen and its second citation opened.
-  // `mask` hides elements that are not the subject of the shot and move with
-  // the scroll offset (the fixed companion tab rounds differently after a
-  // scroll). Every other route still captures that tab.
-  { path: '/companion', id: 'companion-answer', mask: ['[title^="Open companion"]'], setup: async (page) => {
+  // The fixed companion tab is not the subject and rounds a pixel differently
+  // after the scroll, so it is hidden here (a `mask` follows the same box and
+  // flickers with it). Every other route still captures that tab.
+  { path: '/companion', id: 'companion-answer', setup: async (page) => {
+    await page.addStyleTag({ content: '[title^="Open companion"] { visibility: hidden !important; }' });
     await page.getByRole('button', { name: /current thinking on serverless/ }).click();
     await page.clock.runFor(1600).catch(() => page.waitForTimeout(1600)); // fake clock in the baseline, real in the sweep
     await page.getByRole('button', { name: 'Source 2' }).click();
@@ -62,6 +63,11 @@ export const SWEEP_ROUTES = [
   { path: '/curation', id: 'curation-move', setup: async (page) => {
     await page.getByRole('button', { name: /Approve/ }).click();
     await page.getByRole('button', { name: /Move/ }).click();
+  } },
+  // Topic curation after a suggested merge, with a card's color picker open.
+  { path: '/curation/topics', id: 'curation-topics-edit', setup: async (page) => {
+    await page.getByRole('region', { name: /Atlas suggests/ }).getByRole('button', { name: 'Merge', exact: true }).first().click();
+    await page.getByRole('article', { name: 'Keymaster' }).getByRole('button', { name: 'Color' }).click();
   } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },

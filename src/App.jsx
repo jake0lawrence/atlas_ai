@@ -180,7 +180,7 @@ export default function App() {
 
   // ─── TOPIC CURATION ────────────────────────────
   if (view === "topicCuration") {
-    return <div key="topicCuration" className="view-transition"><TopicCurationPanel onComplete={handleTopicCurationComplete} mobile={mobile} w={w} /></div>;
+    return <div key="topicCuration" className="view-transition"><TopicCurationPanel onComplete={handleTopicCurationComplete} onNavigate={handleNavigate} mobile={mobile} w={w} /></div>;
   }
 
   // ─── CONNECTION VALIDATION ─────────────────────

@@ -1183,6 +1183,14 @@ export const CURATED_PALETTE = [
   C.sky, C.fuchsia, C.greenBright,
 ];
 
+// How sure Atlas is of each topic's boundaries (Curation step 2). Fixed values,
+// so the topic cards read the same on every run and in the screenshot baseline.
+export const TOPIC_CONFIDENCE = {
+  courtcollect: 91, hmprg: 86, jobsearch: 74, gamedev: 83, keymaster: 76,
+  automation: 85, resumes: 91, tyler: 81, obsidian: 76, finance: 92,
+  n8n: 88, webdev: 77, writing: 74, govtech: 82,
+};
+
 // Mini-sparkline activity data per topic (last 6 months relative values)
 export const TOPIC_SPARKLINES = {
   courtcollect: [3, 5, 8, 6, 9, 7],
