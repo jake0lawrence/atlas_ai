@@ -41,6 +41,12 @@ export const openSuggestions = ({ topics, dismissed }) => [
     .map(([id, s]) => ({ key: `split:${id}`, kind: "split", topic: byId(topics, id), into: s.into })),
 ].filter(s => !dismissed.includes(s.key));
 
+// The step's tally, handed to the Summary when you move on.
+export const summarize = ({ topics, log }) => ({
+  total: TOPICS.length, now: topics.length, changes: log.length, log,
+  starred: topics.filter(t => t.starred).length,
+});
+
 // Record a change: the previous topics go on the undo stack, the entry on the log.
 const commit = (state, topics, entry) => ({
   ...state, topics,
@@ -289,7 +295,7 @@ const TopicCurationPanel = ({ onComplete, onNavigate, mobile, w }) => {
                   <button onClick={() => act({ type: "undo" })} style={smallButton()}>Undo</button>
                 </>}
           </div>
-          <button onClick={onComplete} style={{
+          <button onClick={() => onComplete(summarize(state))} style={{
             fontFamily: BODY, fontSize: 15, fontWeight: 600, color: C.bg0, background: C.gold,
             border: `1px solid ${C.gold}`, borderRadius: 10, padding: `${SPACE.md}px ${SPACE.xxl}px`, cursor: "pointer",
           }}>Next: check connections →</button>

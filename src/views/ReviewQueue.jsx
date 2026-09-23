@@ -328,7 +328,7 @@ const ReviewQueue = ({ onComplete, onNavigate, mobile, w }) => {
               <p style={{ fontFamily: BODY, fontSize: 14, color: white(0.65), margin: `0 0 ${SPACE.xl}px` }}>
                 {stats.approved} approved, {stats.edited} moved, {stats.rejected} rejected, and {stats.auto} approved automatically.
               </p>
-              <button onClick={onComplete} style={nextButton(true)}>Next: curate topics →</button>
+              <button onClick={() => onComplete(stats)} style={nextButton(true)}>Next: curate topics →</button>
             </div>
           )}
         </section>
@@ -364,7 +364,7 @@ const ReviewQueue = ({ onComplete, onNavigate, mobile, w }) => {
           {stats.pending > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: SPACE.md, flexWrap: "wrap" }}>
               <span style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.45) }}>Undecided ones keep Atlas's topic.</span>
-              <button onClick={onComplete} style={nextButton(false)}>Continue to topics →</button>
+              <button onClick={() => onComplete(stats)} style={nextButton(false)}>Continue to topics →</button>
             </div>
           )}
         </footer>

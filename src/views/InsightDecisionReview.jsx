@@ -330,7 +330,7 @@ const InsightDecisionReview = ({ onComplete, onNavigate, mobile, w }) => {
                 <p style={{ margin: `0 0 ${SPACE.lg}px`, fontFamily: BODY, fontSize: 15, color: white(0.8), lineHeight: 1.5 }}>
                   {stats.kept} {stats.kept === 1 ? "turning point goes" : "turning points go"} on your timeline ({stats.edited} in your words), and {stats.rejected} {stats.rejected === 1 ? "was" : "were"} dismissed.
                 </p>
-                <button onClick={onComplete} style={{ ...button(C.gold, true), display: "inline-flex", fontSize: 15 }}>Next: see the summary →</button>
+                <button onClick={() => onComplete(stats)} style={{ ...button(C.gold, true), display: "inline-flex", fontSize: 15 }}>Next: see the summary →</button>
               </div>
             )}
         </section>
@@ -349,7 +349,7 @@ const InsightDecisionReview = ({ onComplete, onNavigate, mobile, w }) => {
           {hasPending && (
             <div style={{ display: "flex", alignItems: "center", gap: SPACE.md, flexWrap: "wrap" }}>
               <button onClick={() => dispatch({ type: "keepRest" })} style={button(C.green)}>Keep the {stats.pending} waiting</button>
-              <button onClick={onComplete} style={button(C.white)}>Continue to the summary →</button>
+              <button onClick={() => onComplete(stats)} style={button(C.white)}>Continue to the summary →</button>
             </div>
           )}
         </footer>

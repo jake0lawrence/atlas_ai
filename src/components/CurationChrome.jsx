@@ -49,8 +49,10 @@ const StepButton = ({ step, n, state, onClick, mobile }) => {
 };
 
 // The rail, title and lede. `view` is the current step; `onNavigate(view)`
-// moves to another step or, with "dashboard", leaves the run.
-export const CurationHeader = ({ view, title, accent, lede, onNavigate, mobile }) => {
+// moves to another step or, with "dashboard", leaves the run. `done` lists the
+// steps to tick when the caller knows (the Summary does); otherwise every step
+// before the current one is ticked.
+export const CurationHeader = ({ view, title, accent, lede, onNavigate, mobile, done }) => {
   const current = stepIndex(view);
   const step = CURATION_STEPS[current];
   return (
@@ -62,7 +64,7 @@ export const CurationHeader = ({ view, title, accent, lede, onNavigate, mobile }
               <li key={s.view}>
                 <StepButton
                   step={s} n={i + 1} mobile={mobile}
-                  state={i === current ? "current" : i < current ? "done" : "todo"}
+                  state={i === current ? "current" : (done ? done.includes(s.view) : i < current) ? "done" : "todo"}
                   onClick={() => { if (i !== current) onNavigate?.(s.view); }}
                 />
               </li>

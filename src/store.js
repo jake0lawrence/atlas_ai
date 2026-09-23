@@ -85,10 +85,10 @@ const useStore = create((set, get) => ({
   }),
 
   // ─── CURATION SLICE ───────────────────────────────────────
-  // Foundation for tracking curation progress across views.
-  // Individual curation UI state (ReviewQueue items, etc.) stays component-local.
-  curationComplete: false,
-  setCurationComplete: (v) => set({ curationComplete: v }),
+  // Each curation step keeps its own UI state; when you finish a step it hands
+  // its tally here (keyed by the step's view), and the Summary reads them.
+  curationResults: {},
+  recordCuration: (step, result) => set((s) => ({ curationResults: { ...s.curationResults, [step]: result } })),
 
   startProcessing: () => set({ view: 'loading' }),
   advanceCuration: (nextView) => set({ view: nextView }),
