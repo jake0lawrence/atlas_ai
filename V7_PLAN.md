@@ -143,7 +143,9 @@ Every view PR carries the same body, so review is the same every time:
 
 - New views or new fixtures. If a redesign needs a fixture field, add the field; do not
   add a feature.
-- A backend, real ingestion, or real LLM calls (Step 0).
+- A backend, real ingestion, or real LLM calls (Step 0). What comes after, if anything, is proposed in
+  [`V8_PLAN.md`](V8_PLAN.md): Atlas as a local MCP server, so conversations reach it
+  without repeated exports.
 - TypeScript, CSS files, Tailwind or a component library. The conventions in CLAUDE.md
   hold; the redesign is done with the token module and inline styles.
 
