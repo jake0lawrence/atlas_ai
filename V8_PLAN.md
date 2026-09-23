@@ -131,7 +131,7 @@ The three questions this section used to ask are measured in
   messier scripts before PR 3 relies on unprompted capture.
 - **Enrichment quality.** Haiku's JSON always parsed and it found every stated
   decision. But its self-reported confidence sat at 90–98 for everything, so it cannot
-  drive auto-approve. Needs a scored comparison on real exports before PR 5.
+  drive auto-approve (Sonnet 5 and Opus 5.5 were no better). Needs a scored comparison on real exports before PR 5.
 - **Hosted or relay.** The PR 0 decision above.
 - **tinyclaw.** Its agents are Claude CLI sessions, so they could use the same MCP
   server: the `atlas` team could read the decision log while it builds Atlas.
