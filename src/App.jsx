@@ -30,6 +30,7 @@ import CurationSummary from './views/CurationSummary';
 import ExportPreview from './views/ExportPreview';
 import BeliefDiffsView from './views/BeliefDiffsView';
 import DigestView from './views/DigestView';
+import LiveCaptureView from './views/LiveCaptureView';
 import DecisionArchaeology from './views/DecisionArchaeology';
 import RewindMode from './views/RewindMode';
 import DashboardView from './views/DashboardView';
@@ -127,6 +128,7 @@ export default function App() {
         if (view === "timeline") { setView("dashboard"); setSelectedTopic(null); return; }
         if (view === "companion") { setView("dashboard"); return; }
         if (view === "digest") { setView("dashboard"); return; }
+        if (view === "liveCapture") { setView("dashboard"); return; }
         if (view === "archaeology") { setView("dashboard"); setSelectedChain(null); return; }
       }
     };
@@ -274,6 +276,7 @@ export default function App() {
         {view === "evolution" && <EvolutionView mobile={mobile} onRewind={() => setShowRewind(true)} />}
         {view === "beliefDiffs" && <BeliefDiffsView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}
         {view === "digest" && <DigestView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}
+        {view === "liveCapture" && <LiveCaptureView mobile={mobile} onTopicClick={handleTopicClick} />}
         {view === "search" && <SearchView mobile={mobile} />}
         {view === "export" && <ExportPreview mobile={mobile} w={w} />}
 

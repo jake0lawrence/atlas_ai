@@ -22,6 +22,7 @@ export const STATIONS = [
       { id: "companion", label: "Ask" },
       { id: "beliefDiffs", label: "Belief Diffs", tour: "belief-diffs-tab" },
       { id: "digest", label: "Digest", tour: "digest-tab" },
+      { id: "liveCapture", label: "Live" },
     ],
   },
 ];
@@ -30,7 +31,7 @@ const STATION_OF_VIEW = {
   dashboard: "atlas", connections: "atlas", evolution: "atlas",
   timeline: "atlas", conversation: "atlas", archaeology: "atlas", search: "atlas", export: "atlas",
   curation: "curate", topicCuration: "curate", connectionValidation: "curate", insightReview: "curate", curationSummary: "curate",
-  companion: "companion", beliefDiffs: "companion", digest: "companion",
+  companion: "companion", beliefDiffs: "companion", digest: "companion", liveCapture: "companion",
 };
 
 export const stationFor = (view) => STATIONS.find(s => s.id === STATION_OF_VIEW[view]) || STATIONS[0];

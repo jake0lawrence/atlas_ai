@@ -37,7 +37,7 @@ describe('Nav', () => {
     render(<Nav {...props} mobile view="dashboard" onNavigate={onNavigate} />);
     fireEvent.click(screen.getByRole('button', { name: 'Navigation menu' }));
     expect(screen.getAllByRole('menuitem').map(el => el.textContent)).toEqual([
-      '◈Atlas', 'Overview', 'Connections', 'Evolution', '◇Curate', '◆Companion', 'Ask', 'Belief Diffs', 'Digest', '⌕Search', '↗Export',
+      '◈Atlas', 'Overview', 'Connections', 'Evolution', '◇Curate', '◆Companion', 'Ask', 'Belief Diffs', 'Digest', 'Live', '⌕Search', '↗Export',
     ]);
     fireEvent.click(screen.getByRole('menuitem', { name: /Export/ }));
     expect(onNavigate).toHaveBeenCalledWith('export');

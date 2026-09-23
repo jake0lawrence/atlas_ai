@@ -1435,3 +1435,46 @@ export const COMPANION_SIDEBAR_SUGGESTIONS = {
     { id: "comp-2", icon: "🧩", title: "Knowledge gap detected", description: "You've discussed Personal Finance 28 times but never connected it to your automation workflows.", accent: C.lime, actions: ["View connection", "Ask Atlas"] },
   ],
 };
+
+// ─── LIVE CAPTURE (MCP) ─────────────────────────────────
+// What the model wrote into Atlas through an Atlas MCP server during the demo
+// "today" (DEMO_NOW). A mock: there is no server. Exports still do the
+// one-time backfill; this is the go-forward path that replaces re-exporting.
+export const MCP_CLIENTS = [
+  { id: "claude", name: "Claude", connected: "Jan 12", calls: 214 },
+  { id: "gpt", name: "ChatGPT", connected: "Jan 30", calls: 41 },
+];
+
+// The tools the server exposes. Write tools only append; the model never
+// deletes or edits what is already in the atlas.
+export const MCP_TOOLS = [
+  { name: "atlas.log_decision", kind: "decision", desc: "Record a decision and the reason given for it" },
+  { name: "atlas.add_to_topic", kind: "topic", desc: "Attach a conversation summary to a topic, or propose a new topic" },
+  { name: "atlas.flag_pivot", kind: "pivot", desc: "Mark where a view changed, with before and after" },
+  { name: "atlas.link_topics", kind: "link", desc: "Propose a connection between two topics" },
+  { name: "atlas.search", kind: "read", desc: "Look up what the atlas already knows (read-only)" },
+];
+
+// `review: true` entries wait in Curate, because they would change the shape
+// of the atlas (a new topic, a new connection, a reversed decision).
+export const MCP_CAPTURE_LOG = [
+  { id: "c1", time: "8:42 AM", client: "claude", chat: "CourtCollect payment plan edge cases", tool: "atlas.log_decision", topicId: "courtcollect",
+    text: "Partial payments apply to the oldest fine first, not pro rata.", why: "Matches how the clerk's office already reconciles by hand; pro rata broke three of their reports.", review: false },
+  { id: "c2", time: "8:44 AM", client: "claude", chat: "CourtCollect payment plan edge cases", tool: "atlas.add_to_topic", topicId: "courtcollect",
+    text: "Worked through six payment-plan edge cases: missed installments, overpayment, and plan transfer between cases.", review: false },
+  { id: "c3", time: "10:15 AM", client: "gpt", chat: "Quick budget check for February", tool: "atlas.add_to_topic", topicId: "finance",
+    text: "February spend is running 12% under plan; moved the difference to the emergency fund.", review: false },
+  { id: "c4", time: "11:03 AM", client: "claude", chat: "Should Keymaster move off serverless?", tool: "atlas.flag_pivot", topicId: "keymaster",
+    before: "Serverless functions for every endpoint.", after: "One long-running service; cold starts were breaking key rotation.",
+    text: "Reversal of the Oct 2024 serverless decision.", review: true },
+  { id: "c5", time: "11:09 AM", client: "claude", chat: "Should Keymaster move off serverless?", tool: "atlas.link_topics", topicId: "keymaster", toId: "webdev",
+    text: "Same cold-start problem that pushed the web stack to a persistent server last year.", review: true },
+  { id: "c6", time: "1:30 PM", client: "claude", chat: "Cover letter for a civic-tech PM role", tool: "atlas.add_to_topic", topicId: "resumes",
+    text: "Drafted a cover letter leading with the court-collections migration work.", review: false },
+  { id: "c7", time: "1:34 PM", client: "claude", chat: "Cover letter for a civic-tech PM role", tool: "atlas.search", topicId: "courtcollect",
+    text: "Looked up the CourtCollect launch metrics to cite in the letter.", review: false },
+  { id: "c8", time: "3:52 PM", client: "gpt", chat: "Voice notes into Obsidian", tool: "atlas.add_to_topic", topicId: null, newTopic: "Voice Capture",
+    text: "Proposed a new topic: a pipeline from phone voice notes into the vault.", review: true },
+  { id: "c9", time: "4:20 PM", client: "claude", chat: "n8n retry policy", tool: "atlas.log_decision", topicId: "n8n",
+    text: "Retries back off exponentially and stop after five attempts; failures go to an Airtable queue.", why: "Silent infinite retries hid a broken webhook for two days in January.", review: false },
+];
