@@ -73,8 +73,21 @@ function hexToRgb(hex) {
   return rgb;
 }
 
-/** `alpha(C.gold, 0.35)` -> `"rgba(251,191,36,0.35)"` */
+const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+/**
+ * `alpha(C.gold, 0.35)` -> `"rgba(251,191,36,0.35)"`. Hex in only: an rgba
+ * string (say `white(0.7)` handed to a helper that calls alpha) used to come
+ * out as `rgba(NaN,...)`, an invisible color that no test noticed. Dev and
+ * tests throw on it; a production build keeps the color it was given.
+ */
 export function alpha(hex, a) {
+  if (!HEX.test(hex)) {
+    const msg = `alpha() takes a hex color from C, got ${JSON.stringify(hex)}. Pass C.white (not white(0.7)) to helpers that call alpha().`;
+    if (import.meta.env?.DEV) throw new Error(msg);
+    console.warn(msg);
+    return hex;
+  }
   const [r, g, b] = hexToRgb(hex);
   return `rgba(${r},${g},${b},${a})`;
 }

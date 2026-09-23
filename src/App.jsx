@@ -185,7 +185,7 @@ export default function App() {
 
   // ─── CONNECTION VALIDATION ─────────────────────
   if (view === "connectionValidation") {
-    return <div key="connectionValidation" className="view-transition"><ConnectionValidation onComplete={handleConnectionValidationComplete} mobile={mobile} w={w} /></div>;
+    return <div key="connectionValidation" className="view-transition"><ConnectionValidation onComplete={handleConnectionValidationComplete} onNavigate={handleNavigate} mobile={mobile} w={w} /></div>;
   }
 
   // ─── INSIGHT & DECISION REVIEW ────────────────

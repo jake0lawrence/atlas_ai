@@ -1,487 +1,421 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import {
-  TOPICS, CONNECTIONS,
-} from '../data/constants';
-import { FONTS, BODY, MONO, CSS } from '../styles/base';
-import { C, alpha, white } from '../styles/tokens';
-import { row, stackTight, screen, eyebrow, display, lede, body, mono, track } from '../styles/shared';
+import { useState, useEffect, useReducer } from "react";
+import { TOPICS, CONNECTIONS } from '../data/constants';
+import { CSS } from '../styles/base';
+import { screen } from '../styles/shared';
+import { C, alpha, white, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
+import { CurationHeader, KeyHints } from '../components/CurationChrome';
 
-// ═══════════════════════════════════════════════════════════════
-// CONNECTION VALIDATION (v5 Curation Pipeline — Section 1C)
-// ═══════════════════════════════════════════════════════════════
+// ─── The connections, as data ───────────────────────────────────
+const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
 
-const ConnectionValidation = ({ onComplete, mobile, w }) => {
-  const [connections, setConnections] = useState(() =>
-    CONNECTIONS.map((c, i) => ({ ...c, id: i, status: "pending" }))
-  );
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [editingIdx, setEditingIdx] = useState(null);
-  const [editLabel, setEditLabel] = useState("");
-  const [done, setDone] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [newFrom, setNewFrom] = useState("");
-  const [newTo, setNewTo] = useState("");
-  const [newLabel, setNewLabel] = useState("");
-  const connTimersRef = useRef([]);
+export const initialConnections = (data = CONNECTIONS) => data.map((c, i) => ({
+  ...c, id: i, status: "pending", originalLabel: c.label, added: false,
+}));
 
-  useEffect(() => {
-    return () => connTimersRef.current.forEach(clearTimeout);
-  }, []);
+export const initialState = () => ({ items: initialConnections(), activeId: null, editing: false });
 
-  const topicMap = useMemo(() => {
-    const map = {};
-    TOPICS.forEach(t => { map[t.id] = t; });
-    return map;
-  }, []);
+const pendingOf = (items) => items.filter(i => i.status === "pending");
 
-  const reviewed = connections.filter(c => c.status !== "pending").length;
-  const total = connections.length;
-  const progress = total > 0 ? (reviewed / total) * 100 : 0;
-  const active = activeIdx !== null ? connections[activeIdx] : null;
-  const tablet = w >= 640 && w < 1024;
+export const activeItem = ({ items, activeId }) => {
+  const pending = pendingOf(items);
+  return pending.find(i => i.id === activeId) || pending[0] || null;
+};
 
-  const moveNext = (fromIdx) => {
-    const start = (fromIdx ?? activeIdx ?? -1) + 1;
-    let next = connections.findIndex((c, i) => i >= start && c.status === "pending");
-    if (next < 0) next = connections.findIndex(c => c.status === "pending");
-    setActiveIdx(next >= 0 ? next : null);
+// The pending connection after (1) or before (-1) `fromId`, wrapping.
+export const nextPending = (items, fromId, dir = 1) => {
+  const pending = pendingOf(items);
+  if (pending.length === 0) return null;
+  const at = pending.findIndex(i => i.id === fromId);
+  if (at < 0) return pending[0];
+  return pending[(at + dir + pending.length) % pending.length];
+};
+
+export const summarize = (items) => {
+  const count = (s) => items.filter(i => i.status === s).length;
+  return {
+    total: items.length, pending: count("pending"), decided: items.length - count("pending"),
+    confirmed: count("confirmed"), edited: count("edited"), rejected: count("rejected"),
+    added: items.filter(i => i.added).length,
   };
+};
 
-  const handleAction = (idx, action) => {
-    setConnections(prev => prev.map((c, i) => {
-      if (i !== idx) return c;
-      const s = action === "confirmed" ? Math.min(c.strength + 0.1, 1) : c.strength;
-      return { ...c, status: action, strength: s };
-    }));
-    connTimersRef.current.push(setTimeout(() => moveNext(idx), 150));
-  };
+const samePair = (a, b) => (a.from === b.from && a.to === b.to) || (a.from === b.to && a.to === b.from);
 
-  const startEdit = (idx) => { setEditingIdx(idx); setEditLabel(connections[idx].label); };
-  const commitEdit = () => {
-    if (editingIdx !== null && editLabel.trim()) {
-      setConnections(prev => prev.map((c, i) =>
-        i === editingIdx ? { ...c, label: editLabel.trim(), status: "edited" } : c
-      ));
-      connTimersRef.current.push(setTimeout(() => moveNext(editingIdx), 150));
-    }
-    setEditingIdx(null);
-  };
+// Why a new connection can't be added, or null when it can.
+export const addProblem = (items, { from, to, label }) => {
+  if (!from || !to) return "Pick both topics.";
+  if (from === to) return "A topic can't connect to itself.";
+  if (!label.trim()) return "Say what connects them.";
+  if (items.some(i => i.status !== "rejected" && samePair(i, { from, to }))) return "Those two topics are already connected.";
+  return null;
+};
 
-  const addConnection = () => {
-    if (newFrom && newTo && newFrom !== newTo && newLabel.trim()) {
-      setConnections(prev => [...prev, {
-        id: prev.length, from: newFrom, to: newTo,
-        label: newLabel.trim(), strength: 0.5, status: "confirmed",
-      }]);
-      setAdding(false); setNewFrom(""); setNewTo(""); setNewLabel("");
-    }
-  };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKey = (e) => {
-      if (editingIdx !== null || done || adding) return;
-      if (activeIdx === null) return;
-      if (e.key === "Enter") { e.preventDefault(); handleAction(activeIdx, "confirmed"); }
-      else if (e.key === "e" || e.key === "E") { e.preventDefault(); startEdit(activeIdx); }
-      else if (e.key === "x" || e.key === "X") { e.preventDefault(); handleAction(activeIdx, "rejected"); }
-      else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        e.preventDefault();
-        const next = connections.findIndex((c, i) => i > activeIdx && c.status === "pending");
-        setActiveIdx(next >= 0 ? next : activeIdx);
-      }
-      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        e.preventDefault();
-        let prev = -1;
-        for (let i = activeIdx - 1; i >= 0; i--) { if (connections[i].status === "pending") { prev = i; break; } }
-        if (prev >= 0) setActiveIdx(prev);
-      }
+// Every change to the list goes through here, so keys and buttons agree
+// on which connection they act on.
+export const connectionsReducer = (state, action) => {
+  const active = activeItem(state);
+  const decide = (status, patch = {}) => {
+    const next = nextPending(state.items, active.id);
+    return {
+      items: state.items.map(i => i.id === active.id ? { ...i, ...patch, status } : i),
+      activeId: next && next.id !== active.id ? next.id : null,
+      editing: false,
     };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, []);
+  };
+  switch (action.type) {
+    case "decide":
+      return active ? decide(action.status) : state;
+    case "relabel": {
+      const label = action.label.trim();
+      if (!active || !label) return state;
+      return label === active.label ? decide("confirmed") : decide("edited", { label });
+    }
+    case "step":
+      return active ? { ...state, activeId: nextPending(state.items, active.id, action.dir)?.id ?? null, editing: false } : state;
+    case "open":
+      return { ...state, activeId: action.id, editing: false };
+    case "toggleEdit":
+      return active ? { ...state, editing: !state.editing } : state;
+    case "closeEdit":
+      return state.editing ? { ...state, editing: false } : state;
+    case "undo":
+      return {
+        ...state, activeId: action.id, editing: false,
+        items: state.items.flatMap(i => i.id !== action.id ? [i] : i.added ? [] : [{ ...i, status: "pending", label: i.originalLabel }]),
+      };
+    case "add": {
+      if (addProblem(state.items, action)) return state;
+      const id = Math.max(...state.items.map(i => i.id)) + 1;
+      const item = { id, from: action.from, to: action.to, label: action.label.trim(), originalLabel: action.label.trim(), strength: 0.5, status: "confirmed", added: true };
+      return { ...state, items: [...state.items, item] };
+    }
+    case "confirmRest":
+      return { ...state, items: state.items.map(i => i.status === "pending" ? { ...i, status: "confirmed" } : i), activeId: null, editing: false };
+    default:
+      return state;
+  }
+};
 
+// Topic positions on an ellipse, in fixture order, so the drawing is the same every run.
+export const layout = (ids, { cx = 200, cy = 130, rx = 170, ry = 104 } = {}) =>
+  Object.fromEntries(ids.map((id, i) => {
+    const a = (i / ids.length) * Math.PI * 2 - Math.PI / 2;
+    return [id, { x: Math.round((cx + rx * Math.cos(a)) * 10) / 10, y: Math.round((cy + ry * Math.sin(a)) * 10) / 10 }];
+  }));
+
+const POS = layout(TOPICS.map(t => t.id));
+
+const STATUS = {
+  pending: { label: "Waiting", color: white(0.3) },
+  confirmed: { label: "Confirmed", color: C.green },
+  edited: { label: "Relabeled", color: C.blue },
+  rejected: { label: "Rejected", color: C.red },
+};
+
+const KEY_ACTIONS = {
+  a: { type: "decide", status: "confirmed" },
+  x: { type: "decide", status: "rejected" },
+  e: { type: "toggleEdit" },
+  s: { type: "step", dir: 1 },
+  arrowdown: { type: "step", dir: 1 },
+  arrowup: { type: "step", dir: -1 },
+  escape: { type: "closeEdit" },
+};
+
+const SHORTCUTS = [["A", "confirm"], ["E", "relabel"], ["X", "reject"], ["S", "later"], ["↑ ↓", "previous / next"]];
+
+// ─── Pieces ─────────────────────────────────────────────────────
+const sectionTitle = { fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 600, color: white(0.55), textTransform: "uppercase", letterSpacing: "0.08em", margin: `0 0 ${SPACE.md}px` };
+const label = { fontFamily: BODY, fontSize: TYPE.xs, fontWeight: 600, color: white(0.45), textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: SPACE.sm };
+const list = { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: SPACE.sm };
+const field = { fontFamily: BODY, fontSize: TYPE.base, color: C.white, background: white(0.06), border: `1px solid ${white(0.18)}`, borderRadius: 8, padding: `${SPACE.sm}px ${SPACE.md}px`, width: "100%", boxSizing: "border-box" };
+const hidden = { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" };
+
+const button = (color, primary) => ({
+  display: "flex", alignItems: "center", justifyContent: "center", gap: SPACE.sm,
+  padding: `${SPACE.sm + 2}px ${SPACE.lg}px`, fontFamily: BODY, fontSize: TYPE.base, fontWeight: 600,
+  color: primary ? C.bg0 : color, background: primary ? color : alpha(color, 0.07),
+  border: `1px solid ${primary ? color : alpha(color, 0.3)}`, borderRadius: 10, cursor: "pointer",
+});
+
+const Pair = ({ conn, size = TYPE.base }) => {
+  const from = TOPIC_BY_ID[conn.from];
+  const to = TOPIC_BY_ID[conn.to];
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: SPACE.sm, minWidth: 0, flexWrap: "wrap", fontFamily: BODY, fontSize: size, fontWeight: 600 }}>
+      <span style={{ color: from?.color }}><span aria-hidden="true">{from?.icon} </span>{from?.name}</span>
+      <span aria-label="and" style={{ color: white(0.4), fontWeight: 400 }}>↔</span>
+      <span style={{ color: to?.color }}><span aria-hidden="true">{to?.icon} </span>{to?.name}</span>
+    </span>
+  );
+};
+
+const Strength = ({ value }) => (
+  <span style={{ display: "inline-flex", alignItems: "center", gap: SPACE.sm, fontFamily: MONO, fontSize: TYPE.xs, color: white(0.55) }}>
+    <span aria-hidden="true" style={{ width: 56, height: 5, background: white(0.08), borderRadius: 3, overflow: "hidden" }}>
+      <span style={{ display: "block", width: `${Math.round(value * 100)}%`, height: "100%", background: C.purple }} />
+    </span>
+    {Math.round(value * 100)}% strong
+  </span>
+);
+
+// The graph taking shape: every topic, every connection, colored by decision.
+const Graph = ({ items, active, stats }) => {
+  const summary = `Connection graph: ${stats.total} connections between ${TOPICS.length} topics. ${stats.confirmed + stats.edited} kept, ${stats.rejected} rejected, ${stats.pending} waiting.${active ? ` Now reviewing ${TOPIC_BY_ID[active.from]?.name} and ${TOPIC_BY_ID[active.to]?.name}.` : ""}`;
+  const lit = active ? new Set([active.from, active.to]) : new Set();
+  const ordered = [...items].sort((a, b) => (a.id === active?.id) - (b.id === active?.id));
+  return (
+    <figure style={{ margin: 0 }}>
+      <svg viewBox="0 0 400 260" role="img" aria-label={summary} style={{ width: "100%", height: "auto", display: "block" }}>
+        {ordered.map(c => {
+          const a = POS[c.from];
+          const b = POS[c.to];
+          if (!a || !b) return null;
+          const isActive = c.id === active?.id;
+          const color = isActive ? C.gold : STATUS[c.status].color;
+          return (
+            <line key={c.id} x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+              stroke={color} strokeWidth={isActive ? 3 : 1 + c.strength * 2}
+              strokeDasharray={c.status === "rejected" ? "4 4" : undefined}
+              strokeOpacity={isActive ? 1 : c.status === "rejected" ? 0.45 : c.status === "pending" ? 0.6 : 0.85}
+              strokeLinecap="round" />
+          );
+        })}
+        {TOPICS.map(t => {
+          const p = POS[t.id];
+          const on = lit.has(t.id);
+          return (
+            <g key={t.id}>
+              <circle cx={p.x} cy={p.y} r={on ? 15 : 12} fill={on ? alpha(t.color, 0.35) : C.bg1} stroke={t.color} strokeWidth={on ? 2.5 : 1.5} strokeOpacity={on ? 1 : 0.6} />
+              <text x={p.x} y={p.y + 4.5} textAnchor="middle" fontSize={on ? 14 : 12}>{t.icon}</text>
+            </g>
+          );
+        })}
+      </svg>
+      <figcaption style={{ display: "flex", flexWrap: "wrap", gap: `${SPACE.xs}px ${SPACE.md}px`, justifyContent: "center", marginTop: SPACE.sm, fontFamily: BODY, fontSize: TYPE.xs, color: white(0.55) }}>
+        {[["Now", C.gold], ...Object.values(STATUS).map(s => [s.label, s.color])].map(([name, color]) => (
+          <span key={name} style={{ display: "inline-flex", alignItems: "center", gap: SPACE.xs }}>
+            <span aria-hidden="true" style={{ width: 14, height: 3, borderRadius: 2, background: color }} />{name}
+          </span>
+        ))}
+      </figcaption>
+    </figure>
+  );
+};
+
+const RelabelForm = ({ conn, dispatch }) => {
+  const [text, setText] = useState(conn.label);
+  return (
+    <form onSubmit={e => { e.preventDefault(); dispatch({ type: "relabel", label: text }); }} style={{ display: "flex", flexDirection: "column", gap: SPACE.sm }}>
+      <label>
+        <span style={hidden}>Label for this connection</span>
+        <input value={text} onChange={e => setText(e.target.value)} autoFocus onKeyDown={e => { if (e.key === "Escape") { e.stopPropagation(); dispatch({ type: "closeEdit" }); } }} style={{ ...field, fontSize: 15 }} />
+      </label>
+      <span style={{ display: "flex", gap: SPACE.sm }}>
+        <button type="submit" style={button(C.blue, true)}>Save label</button>
+        <button type="button" onClick={() => dispatch({ type: "closeEdit" })} style={button(C.white)}>Cancel</button>
+      </span>
+    </form>
+  );
+};
+
+const ActiveCard = ({ conn, position, pendingCount, editing, dispatch, mobile, wide }) => (
+  <article aria-label={`Reviewing: ${TOPIC_BY_ID[conn.from]?.name} and ${TOPIC_BY_ID[conn.to]?.name}`} style={{
+    background: white(0.035), border: `1px solid ${alpha(C.gold, 0.35)}`, borderRadius: 14, padding: mobile ? SPACE.lg : SPACE.xl,
+    display: "flex", flexDirection: "column", gap: SPACE.lg,
+  }}>
+    <div style={{ fontFamily: MONO, fontSize: TYPE.xs, color: white(0.45) }}>{position} of {pendingCount} waiting</div>
+    <div>
+      <div style={label}>Atlas connected</div>
+      <Pair conn={conn} size={15} />
+      <div style={{ marginTop: SPACE.sm }}><Strength value={conn.strength} /></div>
+    </div>
+    <div>
+      <div style={label}>Because of</div>
+      {editing
+        ? <RelabelForm conn={conn} dispatch={dispatch} />
+        : <div style={{ fontFamily: BODY, fontSize: mobile ? 15 : 17, color: white(0.85), padding: `${SPACE.sm}px ${SPACE.md + 2}px`, borderRadius: 10, background: alpha(C.purple, 0.06), border: `1px solid ${alpha(C.purple, 0.18)}` }}>“{conn.label}”</div>}
+    </div>
+    {!editing && (
+      <div role="group" aria-label="Your call" style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : wide ? "repeat(4, 1fr)" : "1fr 1fr", gap: SPACE.sm }}>
+        <button onClick={() => dispatch({ type: "decide", status: "confirmed" })} aria-keyshortcuts="A" style={button(C.green, true)}><span aria-hidden="true">✓</span>Confirm</button>
+        <button onClick={() => dispatch({ type: "toggleEdit" })} aria-keyshortcuts="E" style={button(C.blue)}><span aria-hidden="true">✎</span>Relabel</button>
+        <button onClick={() => dispatch({ type: "decide", status: "rejected" })} aria-keyshortcuts="X" style={button(C.red)}><span aria-hidden="true">✕</span>Reject</button>
+        <button onClick={() => dispatch({ type: "step", dir: 1 })} aria-keyshortcuts="S" style={button(C.white)}><span aria-hidden="true">→</span>Later</button>
+      </div>
+    )}
+  </article>
+);
+
+const Row = ({ conn, children, mobile }) => (
+  <div style={{
+    display: "flex", alignItems: "center", gap: SPACE.md, flexWrap: mobile ? "wrap" : "nowrap",
+    background: white(0.02), border: `1px solid ${white(0.07)}`, borderRadius: 12,
+    padding: mobile ? `${SPACE.sm + 2}px ${SPACE.md}px` : `${SPACE.sm + 2}px ${SPACE.lg}px`,
+  }}>
+    <span style={{ flex: mobile ? "1 1 100%" : 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Pair conn={conn} />
+      <span style={{ fontFamily: BODY, fontSize: TYPE.sm, color: white(0.55) }}>“{conn.label}”{conn.status === "edited" ? ` (was “${conn.originalLabel}”)` : ""}</span>
+    </span>
+    {children}
+  </div>
+);
+
+const AddForm = ({ items, dispatch, onClose }) => {
+  const [draft, setDraft] = useState({ from: "", to: "", label: "" });
+  const [tried, setTried] = useState(false);
+  const problem = addProblem(items, draft);
+  const set = (k) => (e) => setDraft(d => ({ ...d, [k]: e.target.value }));
+  const submit = (e) => {
+    e.preventDefault();
+    setTried(true);
+    if (!problem) { dispatch({ type: "add", ...draft }); onClose(); }
+  };
+  return (
+    <form onSubmit={submit} aria-label="Add a connection" style={{ background: alpha(C.purple, 0.05), border: `1px solid ${alpha(C.purple, 0.25)}`, borderRadius: 14, padding: SPACE.lg, display: "flex", flexDirection: "column", gap: SPACE.md }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: SPACE.md }}>
+        {[["from", "From topic"], ["to", "To topic"]].map(([k, text]) => (
+          <label key={k} style={{ display: "flex", flexDirection: "column", gap: SPACE.xs, fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6) }}>
+            {text}
+            <select value={draft[k]} onChange={set(k)} style={field}>
+              <option value="" style={{ background: C.navy }}>Choose…</option>
+              {TOPICS.map(t => <option key={t.id} value={t.id} style={{ background: C.navy }}>{t.name}</option>)}
+            </select>
+          </label>
+        ))}
+      </div>
+      <label style={{ display: "flex", flexDirection: "column", gap: SPACE.xs, fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6) }}>
+        What connects them
+        <input value={draft.label} onChange={set("label")} placeholder="Shared tech stack" style={field} />
+      </label>
+      {tried && problem && <p role="alert" style={{ margin: 0, fontFamily: BODY, fontSize: TYPE.sm, color: C.red }}>{problem}</p>}
+      <span style={{ display: "flex", gap: SPACE.sm }}>
+        <button type="submit" style={button(C.purple, true)}>Add connection</button>
+        <button type="button" onClick={onClose} style={button(C.white)}>Cancel</button>
+      </span>
+    </form>
+  );
+};
+
+const undoButton = { fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6), background: "none", border: `1px solid ${white(0.12)}`, borderRadius: 8, padding: `${SPACE.xs}px ${SPACE.md}px`, cursor: "pointer", flexShrink: 0 };
+
+// ─── The view ───────────────────────────────────────────────────
+const ConnectionValidation = ({ onComplete, onNavigate, mobile, w }) => {
+  const [state, dispatch] = useReducer(connectionsReducer, undefined, initialState);
+  const [adding, setAdding] = useState(false);
+  const { items, editing } = state;
+  const stats = summarize(items);
+  const active = activeItem(state);
+  const pending = pendingOf(items);
+  const decided = items.filter(i => i.status !== "pending");
+  const wide = !mobile && w >= 1024;
+  const hasPending = stats.pending > 0;
+
+  // Shortcuts go through the reducer; off while a form has focus or nothing waits.
   useEffect(() => {
-    if (reviewed === total && total > 0 && !done) connTimersRef.current.push(setTimeout(() => setDone(true), 400));
-  }, [reviewed, total, done]);
+    if (!hasPending) return undefined;
+    const onKey = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = e.target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      const action = KEY_ACTIONS[e.key.toLowerCase()];
+      if (!action) return;
+      e.preventDefault();
+      dispatch(action);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hasPending]);
 
-  const confirmed = connections.filter(c => c.status === "confirmed").length;
-  const edited = connections.filter(c => c.status === "edited").length;
-  const rejected = connections.filter(c => c.status === "rejected").length;
-
-  // Mini-graph: determine highlighted topics from active connection
-  const highlightedTopics = new Set();
-  if (active) { highlightedTopics.add(active.from); highlightedTopics.add(active.to); }
+  const pct = Math.round((stats.decided / stats.total) * 100);
 
   return (
     <div style={screen(mobile)}>
       <style>{CSS}</style>
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at 50% 30%, ${alpha(C.purple, 0.04)} 0%, transparent 50%)`, pointerEvents: "none" }} />
+      <main style={{ maxWidth: 1100, width: "100%", margin: "0 auto" }}>
+        <CurationHeader
+          view="connectionValidation" title="Check the" accent="connections" onNavigate={onNavigate} mobile={mobile}
+          lede={`Atlas linked your topics in ${CONNECTIONS.length} places. Confirm the links that are real, relabel the ones it named badly, reject the rest, and add any it missed.`}
+        />
 
-      <div style={{ maxWidth: 1100, width: "100%", margin: "0 auto", position: "relative", zIndex: 1 }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: mobile ? 20 : 28 }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "4px 14px", borderRadius: 20, marginBottom: 14,
-            background: alpha(C.purple, 0.08), border: `1px solid ${alpha(C.purple, 0.2)}`,
-            fontFamily: MONO, fontSize: 10, color: C.purple, fontWeight: 600, letterSpacing: "0.08em",
-          }}>
-            CURATION · STEP 3
+        <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Connections with a decision" style={{ marginBottom: SPACE.xl }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: SPACE.sm, fontFamily: MONO, fontSize: TYPE.xs }}>
+            <span style={{ color: white(0.55) }}>{stats.decided} of {stats.total} decided · {stats.pending} waiting</span>
+            <span style={{ color: hasPending ? C.gold : C.green }}>{pct}%</span>
           </div>
-          <h1 style={display(mobile)}>
-            Validate <span style={{ color: C.purple }}>Connections</span>
-          </h1>
-          <p style={{ ...lede(mobile), marginTop: 6 }}>
-            AI discovered {CONNECTIONS.length} connections between your topics. Confirm, edit, or reject.
-          </p>
-        </div>
-
-        {/* Progress bar */}
-        <div style={{ marginBottom: mobile ? 20 : 28 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: white(0.3) }}>{reviewed} / {total} reviewed</span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: progress === 100 ? C.green : alpha(C.purple, 0.5) }}>{Math.round(progress)}%</span>
-          </div>
-          <div style={track}>
-            <div style={{
-              width: `${progress}%`, height: "100%",
-              background: progress === 100 ? `linear-gradient(90deg, ${C.green}, ${C.greenDeep})` : `linear-gradient(90deg, ${C.purple}CC, ${C.purple})`,
-              borderRadius: 3, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)",
-              boxShadow: progress === 100 ? `0 0 16px ${alpha(C.green, 0.4)}` : `0 0 12px ${alpha(C.purple, 0.3)}`,
-            }} />
+          <div style={{ width: "100%", height: 6, background: white(0.05), borderRadius: 3, overflow: "hidden" }}>
+            <div style={{ width: `${pct}%`, height: "100%", background: hasPending ? C.gold : C.green, borderRadius: 3, transition: "width 0.4s ease" }} />
           </div>
         </div>
 
-        {done ? (
-          <div className="fade-up" style={{ textAlign: "center", padding: mobile ? "48px 20px" : "64px 40px" }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>🔗</div>
-            <h2 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 32, fontWeight: 700, color: C.purple, marginBottom: 8 }}>
-              Connections Validated
-            </h2>
-            <p style={body(mobile)}>
-              {confirmed} confirmed, {edited} edited, {rejected} rejected{connections.length > CONNECTIONS.length ? `, ${connections.length - CONNECTIONS.length} added` : ""}
-            </p>
-            <p style={{ fontFamily: BODY, fontSize: 12, color: white(0.2), marginBottom: 28 }}>
-              Your knowledge graph now reflects real relationships.
-            </p>
-            <button onClick={onComplete} style={{
-              fontFamily: BODY, fontSize: 16, fontWeight: 600, color: C.bg0,
-              background: `linear-gradient(135deg, ${C.purple}, ${C.purpleDeep})`, border: "none",
-              borderRadius: 12, padding: "14px 40px", cursor: "pointer",
-              boxShadow: `0 4px 24px ${alpha(C.purple, 0.25)}`, transition: "all 0.25s",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${alpha(C.purple, 0.35)}`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 24px ${alpha(C.purple, 0.25)}`; }}
-            >
-              Continue →
-            </button>
+        <section aria-labelledby="cv-now" style={{ display: "grid", gridTemplateColumns: wide ? "400px 1fr" : "1fr", gap: SPACE.xl, alignItems: "start", marginBottom: SPACE.xxl }}>
+          <div style={{ background: white(0.02), border: `1px solid ${white(0.07)}`, borderRadius: 14, padding: SPACE.lg }}>
+            <Graph items={items} active={active} stats={stats} />
           </div>
-        ) : (
-          <>
-            {/* Mini connection graph */}
-            <div style={{
-              background: white(0.015), borderRadius: 18,
-              border: `1px solid ${white(0.04)}`, padding: mobile ? "16px 12px" : "20px 16px",
-              marginBottom: mobile ? 16 : 24, overflow: "hidden",
-            }}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: mobile ? 6 : 10, justifyContent: "center", alignItems: "center" }}>
-                {TOPICS.map(topic => {
-                  const isHighlighted = highlightedTopics.has(topic.id);
-                  const isFrom = active && active.from === topic.id;
-                  const isTo = active && active.to === topic.id;
-                  const size = mobile ? 36 : 44;
-                  return (
-                    <div key={topic.id} style={{
-                      width: size, height: size, borderRadius: "50%",
-                      background: isFrom || isTo ? `radial-gradient(circle, ${topic.color}40, ${topic.color}15)` : `radial-gradient(circle, ${topic.color}12, ${topic.color}04)`,
-                      border: `2px solid ${isFrom || isTo ? topic.color : topic.color + "15"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      opacity: active ? (isHighlighted ? 1 : 0.2) : 0.5,
-                      transform: isFrom || isTo ? "scale(1.15)" : "scale(1)",
-                      transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
-                      boxShadow: isFrom || isTo ? `0 0 16px ${topic.color}30` : "none",
-                      flexShrink: 0,
-                    }}>
-                      <span style={{ fontSize: mobile ? 12 : 15 }}>{topic.icon}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              {active && (
-                <div className="fade-up" style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: mobile ? 8 : 12,
-                  marginTop: mobile ? 10 : 14, padding: "8px 0",
-                }}>
-                  <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: topicMap[active.from]?.color, fontWeight: 600 }}>
-                    {topicMap[active.from]?.icon} {topicMap[active.from]?.name}
-                  </span>
-                  <span style={{ fontFamily: MONO, fontSize: 11, color: alpha(C.purple, 0.5) }}>←→</span>
-                  <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 13, color: topicMap[active.to]?.color, fontWeight: 600 }}>
-                    {topicMap[active.to]?.icon} {topicMap[active.to]?.name}
-                  </span>
+          <div>
+            <h2 id="cv-now" style={sectionTitle}>{active ? "Now reviewing" : "All reviewed"}</h2>
+            {active
+              ? <ActiveCard key={active.id} conn={active} position={pending.indexOf(active) + 1} pendingCount={pending.length} editing={editing} dispatch={dispatch} mobile={mobile} wide={wide} />
+              : (
+                <div role="status" style={{ padding: SPACE.xl, background: alpha(C.green, 0.05), border: `1px solid ${alpha(C.green, 0.2)}`, borderRadius: 14 }}>
+                  <p style={{ margin: `0 0 ${SPACE.lg}px`, fontFamily: BODY, fontSize: 15, color: white(0.8), lineHeight: 1.5 }}>
+                    Every connection has a decision: {stats.confirmed} confirmed, {stats.edited} relabeled, {stats.rejected} rejected{stats.added ? `, ${stats.added} of them added by you` : ""}.
+                  </p>
+                  <button onClick={onComplete} style={{ ...button(C.gold, true), display: "inline-flex", fontSize: 15 }}>Next: review insights →</button>
                 </div>
               )}
-            </div>
+          </div>
+        </section>
 
-            {/* Connection cards */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-              {connections.map((conn, idx) => {
-                const fromT = topicMap[conn.from];
-                const toT = topicMap[conn.to];
-                const isActive = idx === activeIdx;
-                const isDone = conn.status !== "pending";
-                const isEditing = editingIdx === idx;
-
-                return (
-                  <div key={conn.id} style={{
-                    background: isActive ? white(0.04) : isDone ? white(0.01) : white(0.02),
-                    border: `1px solid ${isActive ? alpha(C.purple, 0.3) : isDone ? white(0.03) : white(0.06)}`,
-                    borderRadius: 14, overflow: "hidden",
-                    opacity: isDone && !isActive ? 0.4 : 1,
-                    transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
-                    animation: `queueSlideUp 0.5s ease both`,
-                    animationDelay: `${idx * 40}ms`,
-                  }}>
-                    {!isActive ? (
-                      /* Compact row */
-                      <div style={{
-                        display: "flex", alignItems: "center", gap: mobile ? 6 : 12,
-                        padding: mobile ? "10px 12px" : "12px 18px",
-                        cursor: conn.status === "pending" ? "pointer" : "default",
-                      }}
-                        onClick={() => { if (conn.status === "pending") setActiveIdx(idx); }}
-                        role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (conn.status === "pending") setActiveIdx(idx); }}}
-                      >
-                        <div style={{
-                          width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-                          background: conn.status === "confirmed" ? C.green : conn.status === "edited" ? C.blue : conn.status === "rejected" ? C.red : white(0.1),
-                        }} />
-                        <span style={{ fontSize: 13, flexShrink: 0 }}>{fromT?.icon}</span>
-                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.4), fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {fromT?.name}
-                        </span>
-                        <span style={{ fontFamily: MONO, fontSize: 9, color: white(0.12), flexShrink: 0 }}>↔</span>
-                        <span style={{ fontSize: 13, flexShrink: 0 }}>{toT?.icon}</span>
-                        <span style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.4), fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
-                          {toT?.name}
-                        </span>
-                        {/* Strength bar */}
-                        <div style={{ width: mobile ? 30 : 50, height: 4, background: white(0.05), borderRadius: 2, overflow: "hidden", flexShrink: 0 }}>
-                          <div style={{ width: `${conn.strength * 100}%`, height: "100%", background: C.purple, borderRadius: 2 }} />
-                        </div>
-                        {isDone && (
-                          <span style={{
-                            fontFamily: MONO, fontSize: 10, flexShrink: 0, textTransform: "uppercase",
-                            color: conn.status === "confirmed" ? C.green : conn.status === "edited" ? C.blue : C.red,
-                          }}>{conn.status}</span>
-                        )}
-                      </div>
-                    ) : (
-                      /* Expanded active card */
-                      <div style={{ padding: mobile ? "16px 14px" : "20px 24px" }}>
-                        <div style={{
-                          display: mobile ? "flex" : "grid",
-                          gridTemplateColumns: tablet ? "1fr 1fr auto" : "1fr 1.2fr 200px",
-                          flexDirection: mobile ? "column" : undefined,
-                          gap: mobile ? 16 : 20,
-                        }}>
-                          {/* LEFT: Connection info */}
-                          <div>
-                            <div style={eyebrow}>
-                              Connection
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                              <span style={{ fontSize: 20 }}>{fromT?.icon}</span>
-                              <span style={{ fontFamily: BODY, fontSize: 14, color: fromT?.color, fontWeight: 600 }}>{fromT?.name}</span>
-                            </div>
-                            <div style={{
-                              fontFamily: MONO, fontSize: 11, color: alpha(C.purple, 0.4),
-                              padding: "2px 0", marginBottom: 10, marginLeft: 4,
-                            }}>↕ connects to</div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                              <span style={{ fontSize: 20 }}>{toT?.icon}</span>
-                              <span style={{ fontFamily: BODY, fontSize: 14, color: toT?.color, fontWeight: 600 }}>{toT?.name}</span>
-                            </div>
-                            {/* Strength */}
-                            <div style={row}>
-                              <span style={mono}>Strength</span>
-                              <div style={{ width: 80, height: 6, background: white(0.05), borderRadius: 3, overflow: "hidden" }}>
-                                <div style={{ width: `${conn.strength * 100}%`, height: "100%", background: `linear-gradient(90deg, ${C.purple}, ${C.purpleDeep})`, borderRadius: 3 }} />
-                              </div>
-                              <span style={{ fontFamily: MONO, fontSize: 10, color: C.purple }}>{Math.round(conn.strength * 100)}%</span>
-                            </div>
-                          </div>
-
-                          {/* CENTER: Label */}
-                          <div>
-                            <div style={eyebrow}>
-                              AI-Generated Label
-                            </div>
-                            {isEditing ? (
-                              <div>
-                                <input
-                                  value={editLabel}
-                                  onChange={e => setEditLabel(e.target.value)}
-                                  onBlur={commitEdit}
-                                  onKeyDown={e => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingIdx(null); }}
-                                  autoFocus
-                                  style={{
-                                    fontFamily: BODY, fontSize: 15, fontWeight: 500, color: C.white,
-                                    background: white(0.06), border: `1px solid ${alpha(C.purple, 0.3)}`,
-                                    borderRadius: 8, padding: "8px 12px", width: "100%", outline: "none",
-                                  }}
-                                />
-                                <div style={{ fontFamily: MONO, fontSize: 9, color: white(0.15), marginTop: 6 }}>
-                                  Enter to save · Escape to cancel
-                                </div>
-                              </div>
-                            ) : (
-                              <div style={{
-                                fontFamily: BODY, fontSize: mobile ? 15 : 17, fontWeight: 500,
-                                color: white(0.65), lineHeight: 1.5,
-                                padding: "8px 14px", borderRadius: 10,
-                                background: alpha(C.purple, 0.04), border: `1px solid ${alpha(C.purple, 0.1)}`,
-                              }}>
-                                "{conn.label}"
-                              </div>
-                            )}
-                          </div>
-
-                          {/* RIGHT: Actions */}
-                          <div>
-                            <div style={eyebrow}>
-                              Actions
-                            </div>
-                            <div style={stackTight}>
-                              {[
-                                { action: "confirmed", label: "Confirm", color: C.green, icon: "✓" },
-                                { action: "edit", label: "Edit Label", color: C.blue, icon: "✎" },
-                                { action: "rejected", label: "Reject", color: C.red, icon: "✕" },
-                              ].map(btn => (
-                                <button key={btn.action} onClick={() => btn.action === "edit" ? startEdit(idx) : handleAction(idx, btn.action)}
-                                  style={{
-                                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                                    width: "100%", padding: mobile ? "10px 14px" : "11px 16px",
-                                    fontFamily: BODY, fontSize: 13, fontWeight: 600,
-                                    color: btn.action === "confirmed" ? C.bg0 : btn.color,
-                                    background: btn.action === "confirmed" ? btn.color : `${btn.color}10`,
-                                    border: `1px solid ${btn.action === "confirmed" ? btn.color : btn.color + "30"}`,
-                                    borderRadius: 10, cursor: "pointer", transition: "all 0.2s",
-                                  }}
-                                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 4px 16px ${btn.color}25`; }}
-                                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-                                >
-                                  <span style={{ fontSize: 14, lineHeight: 1 }}>{btn.icon}</span>
-                                  {btn.label}
-                                </button>
-                              ))}
-                            </div>
-                            {!mobile && (
-                              <div style={{ marginTop: 12, fontFamily: MONO, fontSize: 9, color: white(0.12), lineHeight: 1.8 }}>
-                                Enter confirm · E edit · X reject
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Add new connection */}
-            {adding ? (
-              <div className="fade-up" style={{
-                background: alpha(C.purple, 0.04), border: `1px solid ${alpha(C.purple, 0.2)}`,
-                borderRadius: 14, padding: mobile ? "16px 14px" : "20px 24px", marginBottom: 20,
-              }}>
-                <div style={{ fontFamily: BODY, fontSize: 13, color: C.purple, fontWeight: 600, marginBottom: 12 }}>
-                  Add a Connection AI Missed
-                </div>
-                <div style={{ display: "flex", flexDirection: mobile ? "column" : "row", gap: 10, marginBottom: 12 }}>
-                  <select value={newFrom} onChange={e => setNewFrom(e.target.value)} style={{
-                    fontFamily: BODY, fontSize: 13, color: C.white, background: white(0.06),
-                    border: `1px solid ${white(0.1)}`, borderRadius: 8, padding: "8px 12px", flex: 1, outline: "none",
-                  }}>
-                    <option value="" style={{ background: C.navy }}>From topic...</option>
-                    {TOPICS.map(t => <option key={t.id} value={t.id} style={{ background: C.navy }}>{t.icon} {t.name}</option>)}
-                  </select>
-                  <select value={newTo} onChange={e => setNewTo(e.target.value)} style={{
-                    fontFamily: BODY, fontSize: 13, color: C.white, background: white(0.06),
-                    border: `1px solid ${white(0.1)}`, borderRadius: 8, padding: "8px 12px", flex: 1, outline: "none",
-                  }}>
-                    <option value="" style={{ background: C.navy }}>To topic...</option>
-                    {TOPICS.filter(t => t.id !== newFrom).map(t => <option key={t.id} value={t.id} style={{ background: C.navy }}>{t.icon} {t.name}</option>)}
-                  </select>
-                </div>
-                <input
-                  value={newLabel} onChange={e => setNewLabel(e.target.value)}
-                  placeholder="Connection label (e.g., 'Shared tech stack')"
-                  onKeyDown={e => { if (e.key === "Enter") addConnection(); }}
-                  style={{
-                    fontFamily: BODY, fontSize: 13, color: C.white, background: white(0.06),
-                    border: `1px solid ${white(0.1)}`, borderRadius: 8, padding: "8px 12px",
-                    width: "100%", outline: "none", marginBottom: 12,
-                  }}
-                />
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button onClick={addConnection} disabled={!newFrom || !newTo || !newLabel.trim()} style={{
-                    fontFamily: BODY, fontSize: 13, fontWeight: 600, color: newFrom && newTo && newLabel.trim() ? C.bg0 : white(0.3),
-                    background: newFrom && newTo && newLabel.trim() ? C.purple : white(0.04),
-                    border: "none", borderRadius: 8, padding: "8px 20px", cursor: "pointer", transition: "all 0.2s",
-                  }}>Add Connection</button>
-                  <button onClick={() => setAdding(false)} style={{
-                    fontFamily: BODY, fontSize: 13, color: white(0.3),
-                    background: "none", border: `1px solid ${white(0.1)}`,
-                    borderRadius: 8, padding: "8px 16px", cursor: "pointer",
-                  }}>Cancel</button>
-                </div>
-              </div>
-            ) : (
-              <button onClick={() => setAdding(true)} style={{
-                fontFamily: BODY, fontSize: 12, fontWeight: 500, color: alpha(C.purple, 0.6),
-                background: "none", border: `1px dashed ${alpha(C.purple, 0.2)}`,
-                borderRadius: 10, padding: "10px 18px", cursor: "pointer", width: "100%",
-                marginBottom: 20, transition: "all 0.2s",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = alpha(C.purple, 0.4); e.currentTarget.style.color = C.purple; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = alpha(C.purple, 0.2); e.currentTarget.style.color = alpha(C.purple, 0.6); }}
-              >
-                + Add a connection AI missed
-              </button>
-            )}
-
-            {/* Bottom bar */}
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: mobile ? "14px 0" : "16px 0",
-              borderTop: `1px solid ${white(0.05)}`,
-            }}>
-              <div style={{ fontFamily: MONO, fontSize: 11, color: white(0.2) }}>
-                {reviewed > 0 ? `${confirmed} confirmed · ${edited} edited · ${rejected} rejected` : "Review each connection"}
-              </div>
-              <button onClick={() => {
-                setConnections(prev => prev.map(c => c.status === "pending" ? { ...c, status: "confirmed" } : c));
-              }} style={{
-                fontFamily: BODY, fontSize: 14, fontWeight: 600,
-                color: reviewed > 0 ? C.bg0 : white(0.5),
-                background: reviewed > 0 ? `linear-gradient(135deg, ${C.purple}, ${C.purpleDeep})` : white(0.06),
-                border: reviewed > 0 ? "none" : `1px solid ${white(0.1)}`,
-                borderRadius: 10, padding: "10px 28px", cursor: "pointer",
-                boxShadow: reviewed > 0 ? `0 4px 20px ${alpha(C.purple, 0.25)}` : "none",
-                transition: "all 0.3s",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
-              >
-                {reviewed > 0 ? "Approve Remaining →" : "Approve All →"}
-              </button>
-            </div>
-          </>
+        {pending.length > 1 && (
+          <section aria-labelledby="cv-waiting" style={{ marginBottom: SPACE.xxl }}>
+            <h2 id="cv-waiting" style={sectionTitle}>Also waiting ({pending.length - 1})</h2>
+            <ol aria-label="Also waiting" style={list}>
+              {pending.filter(c => c.id !== active?.id).map(c => (
+                <li key={c.id}>
+                  <Row conn={c} mobile={mobile}>
+                    <Strength value={c.strength} />
+                    <button onClick={() => dispatch({ type: "open", id: c.id })} aria-label={`Review ${TOPIC_BY_ID[c.from]?.name} and ${TOPIC_BY_ID[c.to]?.name}`} style={undoButton}>Review</button>
+                  </Row>
+                </li>
+              ))}
+            </ol>
+          </section>
         )}
-      </div>
+
+        {decided.length > 0 && (
+          <section aria-labelledby="cv-decided" style={{ marginBottom: SPACE.xxl }}>
+            <h2 id="cv-decided" style={sectionTitle}>Your decisions ({decided.length})</h2>
+            <ol aria-label="Your decisions" style={list}>
+              {decided.map(c => (
+                <li key={c.id}>
+                  <Row conn={c} mobile={mobile}>
+                    <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: STATUS[c.status].color, textTransform: "uppercase" }}>{c.added ? "Added" : STATUS[c.status].label}</span>
+                    <button onClick={() => dispatch({ type: "undo", id: c.id })} aria-label={c.added ? `Remove the connection you added between ${TOPIC_BY_ID[c.from]?.name} and ${TOPIC_BY_ID[c.to]?.name}` : `Undo: review ${TOPIC_BY_ID[c.from]?.name} and ${TOPIC_BY_ID[c.to]?.name} again`} style={undoButton}>{c.added ? "Remove" : "Undo"}</button>
+                  </Row>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        <section aria-labelledby="cv-add" style={{ marginBottom: SPACE.xxl }}>
+          <h2 id="cv-add" style={sectionTitle}>Missing a link?</h2>
+          {adding
+            ? <AddForm items={items} dispatch={dispatch} onClose={() => setAdding(false)} />
+            : <button onClick={() => setAdding(true)} style={{ ...button(C.purple), width: "100%", borderStyle: "dashed" }}>+ Add a connection Atlas missed</button>}
+        </section>
+
+        <footer style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: SPACE.lg, flexWrap: "wrap", paddingTop: SPACE.xl, borderTop: `1px solid ${white(0.06)}` }}>
+          <KeyHints keys={SHORTCUTS} mobile={mobile} />
+          {hasPending && (
+            <div style={{ display: "flex", alignItems: "center", gap: SPACE.md, flexWrap: "wrap" }}>
+              <button onClick={() => dispatch({ type: "confirmRest" })} style={button(C.green)}>Confirm the {stats.pending} waiting</button>
+              <button onClick={onComplete} style={button(C.white)}>Continue to insights →</button>
+            </div>
+          )}
+        </footer>
+      </main>
     </div>
   );
 };
