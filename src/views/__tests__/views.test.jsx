@@ -47,7 +47,7 @@ const VIEWS = [
   ['TopicCurationPanel', TopicCurationPanel, { onComplete: noop }],
   ['ConnectionValidation', ConnectionValidation, { onComplete: noop }],
   ['InsightDecisionReview', InsightDecisionReview, { onComplete: noop }],
-  ['CurationSummary', CurationSummary, { onComplete: noop }],
+  ['CurationSummary', CurationSummary, { onComplete: noop, onNavigate: noop }],
   ['DashboardView', DashboardView, { totalConvos: 3847, totalWords: 2_000_000, maxCount: 156, onTopicClick: noop, onBriefMe: noop, recentlySynced: [], onRewind: noop }],
   ['TimelineView', TimelineView, { topic, onBack: noop, onEventClick: noop, newEvents: {} }],
   ['ConversationDrilldown', ConversationDrilldown, { topicId: topic.id, eventIndex: 4, onBack: noop }],

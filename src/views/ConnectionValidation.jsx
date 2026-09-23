@@ -361,7 +361,7 @@ const ConnectionValidation = ({ onComplete, onNavigate, mobile, w }) => {
                   <p style={{ margin: `0 0 ${SPACE.lg}px`, fontFamily: BODY, fontSize: 15, color: white(0.8), lineHeight: 1.5 }}>
                     Every connection has a decision: {stats.confirmed} confirmed, {stats.edited} relabeled, {stats.rejected} rejected{stats.added ? `, ${stats.added} of them added by you` : ""}.
                   </p>
-                  <button onClick={onComplete} style={{ ...button(C.gold, true), display: "inline-flex", fontSize: 15 }}>Next: review insights →</button>
+                  <button onClick={() => onComplete(stats)} style={{ ...button(C.gold, true), display: "inline-flex", fontSize: 15 }}>Next: review insights →</button>
                 </div>
               )}
           </div>
@@ -411,7 +411,7 @@ const ConnectionValidation = ({ onComplete, onNavigate, mobile, w }) => {
           {hasPending && (
             <div style={{ display: "flex", alignItems: "center", gap: SPACE.md, flexWrap: "wrap" }}>
               <button onClick={() => dispatch({ type: "confirmRest" })} style={button(C.green)}>Confirm the {stats.pending} waiting</button>
-              <button onClick={onComplete} style={button(C.white)}>Continue to insights →</button>
+              <button onClick={() => onComplete(stats)} style={button(C.white)}>Continue to insights →</button>
             </div>
           )}
         </footer>

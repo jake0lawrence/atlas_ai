@@ -46,6 +46,8 @@ export default function App() {
   // ─── CENTRALIZED STATE (Zustand) ──────────────────
   const view = useStore(s => s.view);
   const setView = useStore(s => s.setView);
+  const curationResults = useStore(s => s.curationResults);
+  const recordCuration = useStore(s => s.recordCuration);
   const selectedTopic = useStore(s => s.selectedTopic);
   const setSelectedTopic = useStore(s => s.setSelectedTopic);
   const selectedEvent = useStore(s => s.selectedEvent);
@@ -143,10 +145,11 @@ export default function App() {
   const handleEventClick = useCallback((topicId, eventIndex) => { storeHandleEventClick(topicId, eventIndex); }, [storeHandleEventClick]);
   const handleStartProcessing = useCallback(() => setView("loading"), [setView]);
   const handleLoadingComplete = useCallback(() => setView("curation"), [setView]);
-  const handleCurationComplete = useCallback(() => setView("topicCuration"), [setView]);
-  const handleTopicCurationComplete = useCallback(() => setView("connectionValidation"), [setView]);
-  const handleConnectionValidationComplete = useCallback(() => setView("insightReview"), [setView]);
-  const handleInsightReviewComplete = useCallback(() => setView("curationSummary"), [setView]);
+  // Each curation step hands its tally over as it finishes; the Summary reads them.
+  const handleCurationComplete = useCallback((r) => { recordCuration("curation", r); setView("topicCuration"); }, [recordCuration, setView]);
+  const handleTopicCurationComplete = useCallback((r) => { recordCuration("topicCuration", r); setView("connectionValidation"); }, [recordCuration, setView]);
+  const handleConnectionValidationComplete = useCallback((r) => { recordCuration("connectionValidation", r); setView("insightReview"); }, [recordCuration, setView]);
+  const handleInsightReviewComplete = useCallback((r) => { recordCuration("insightReview", r); setView("curationSummary"); }, [recordCuration, setView]);
   const handleCurationSummaryComplete = useCallback(() => setView("dashboard"), [setView]);
   const handleArchaeologyClick = useCallback((chainId) => { setSelectedChain(chainId); setView("archaeology"); }, [setSelectedChain, setView]);
   const handleNavigate = navigateTo;
@@ -197,7 +200,7 @@ export default function App() {
 
   // ─── CURATION SUMMARY ──────────────────────────
   if (view === "curationSummary") {
-    return <div key="curationSummary" className="view-transition"><CurationSummary onComplete={handleCurationSummaryComplete} mobile={mobile} w={w} /></div>;
+    return <div key="curationSummary" className="view-transition"><CurationSummary results={curationResults} onComplete={handleCurationSummaryComplete} onNavigate={handleNavigate} mobile={mobile} w={w} /></div>;
   }
 
   // ─── DECISION ARCHAEOLOGY ──────────────────────
