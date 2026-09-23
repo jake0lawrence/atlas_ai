@@ -1,0 +1,82 @@
+{
+ "D1-database|claude-sonnet-5": {
+  "chars": 4449,
+  "llama2_tokens": 1130
+ },
+ "D2-deploy-pivot|claude-sonnet-5": {
+  "chars": 3883,
+  "llama2_tokens": 1113
+ },
+ "D3-job-offer|claude-sonnet-5": {
+  "chars": 3472,
+  "llama2_tokens": 941
+ },
+ "D4-pricing|claude-sonnet-5": {
+  "chars": 2356,
+  "llama2_tokens": 620
+ },
+ "D5-scope-cut|claude-sonnet-5": {
+  "chars": 3611,
+  "llama2_tokens": 1009
+ },
+ "D6-language|claude-sonnet-5": {
+  "chars": 2863,
+  "llama2_tokens": 747
+ },
+ "T1-units|claude-sonnet-5": {
+  "chars": 141,
+  "llama2_tokens": 58
+ },
+ "T2-grammar|claude-sonnet-5": {
+  "chars": 265,
+  "llama2_tokens": 86
+ },
+ "T3-trivia|claude-sonnet-5": {
+  "chars": 480,
+  "llama2_tokens": 120
+ },
+ "E3-add-this|claude-sonnet-5": {
+  "chars": 560,
+  "llama2_tokens": 142
+ },
+ "E2-log-decision|claude-sonnet-5": {
+  "chars": 2243,
+  "llama2_tokens": 620
+ },
+ "E1-save-convo|claude-sonnet-5": {
+  "chars": 2199,
+  "llama2_tokens": 583
+ },
+ "D1-database|claude-opus-5-5": {
+  "chars": 3385,
+  "llama2_tokens": 879
+ },
+ "D3-job-offer|claude-opus-5-5": {
+  "chars": 4088,
+  "llama2_tokens": 1098
+ },
+ "D4-pricing|claude-opus-5-5": {
+  "chars": 2805,
+  "llama2_tokens": 771
+ },
+ "D2-deploy-pivot|claude-opus-5-5": {
+  "chars": 3998,
+  "llama2_tokens": 1121
+ },
+ "D5-scope-cut|claude-opus-5-5": {
+  "chars": 2993,
+  "llama2_tokens": 824
+ },
+ "T1-units|claude-opus-5-5": {
+  "chars": 226,
+  "llama2_tokens": 92
+ },
+ "T2-grammar|claude-opus-5-5": {
+  "chars": 574,
+  "llama2_tokens": 175
+ },
+ "T3-trivia|claude-opus-5-5": {
+  "chars": 392,
+  "llama2_tokens": 108
+ }
+}

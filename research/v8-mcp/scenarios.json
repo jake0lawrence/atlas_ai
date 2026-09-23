@@ -1,0 +1,53 @@
+{
+  "note": "Two-turn user scripts. kind=decision: the user reaches a decision and never mentions Atlas (should be captured unprompted). kind=trivial: nothing worth keeping (should not be captured). kind=explicit: the user asks for the save (ceiling check).",
+  "scenarios": [
+    { "id": "D1-database", "kind": "decision", "turns": [
+      "I'm building a SaaS that tracks municipal court cases, payments and which collection agency each case is assigned to. Postgres or MongoDB?",
+      "Makes sense, the data is relational. I'm going with Postgres on Supabase."
+    ] },
+    { "id": "D2-deploy-pivot", "kind": "decision", "turns": [
+      "Three days now fighting Docker on Railway. The multi-stage build keeps breaking Prisma client generation. Keep debugging or switch platforms?",
+      "OK, I'm done with it. Switching to Vercel plus Supabase Cloud today."
+    ] },
+    { "id": "D3-job-offer", "kind": "decision", "turns": [
+      "I have an offer from a govtech startup: 20% less pay, much more ownership. My current job is stable and I like my team. Help me think it through.",
+      "You're right that the timing is bad with the house. I'm declining the offer and I'll revisit in six months."
+    ] },
+    { "id": "D4-pricing", "kind": "decision", "turns": [
+      "Pricing my password manager app: a flat $3 a month, or free with a $5 a month pro tier?",
+      "Freemium with a $5 pro tier. That's final, I'll update the landing page tonight."
+    ] },
+    { "id": "D5-scope-cut", "kind": "decision", "turns": [
+      "Game jam in two weeks. I'm making a roguelike deckbuilder and I planned online multiplayer. Is that realistic solo?",
+      "Fair. I'm cutting multiplayer entirely, single player only for the jam."
+    ] },
+    { "id": "D6-language", "kind": "decision", "turns": [
+      "For backend tooling at work, should I learn Rust or Go next? I mostly write TypeScript.",
+      "Go it is. I'll start the Tour of Go this week."
+    ] },
+    { "id": "T1-units", "kind": "trivial", "turns": [
+      "How many kilometers is 5 miles?",
+      "Thanks!"
+    ] },
+    { "id": "T2-grammar", "kind": "trivial", "turns": [
+      "Fix the grammar: 'Me and him goes to the store yesterday.'",
+      "Perfect, thanks."
+    ] },
+    { "id": "T3-trivia", "kind": "trivial", "turns": [
+      "What's the capital of Australia?",
+      "Huh, I always thought it was Sydney. Thanks."
+    ] },
+    { "id": "E1-save-convo", "kind": "explicit", "turns": [
+      "I'm weighing whether to move my newsletter from Substack to Buttondown. Substack takes 10%, Buttondown is a flat fee.",
+      "Buttondown wins for me. Save this conversation to my Atlas."
+    ] },
+    { "id": "E2-log-decision", "kind": "explicit", "turns": [
+      "We debated whether the MVP needs SSO. Enterprise pilots want it, but it's weeks of work.",
+      "We agreed the MVP ships without SSO. Log that decision in my Atlas."
+    ] },
+    { "id": "E3-add-this", "kind": "explicit", "turns": [
+      "I finally figured out why my tests were flaky: the fake clock wasn't paused before the page loaded.",
+      "Please add this to Atlas so I remember the fix."
+    ] }
+  ]
+}
