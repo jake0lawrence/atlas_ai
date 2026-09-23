@@ -39,7 +39,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/dashboard', '/companion', '/connections', '/companion/diff', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/dashboard', '/companion', '/connections', '/companion/diff', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -75,6 +75,11 @@ export const SWEEP_ROUTES = [
     await page.getByRole('button', { name: /Confirm$/ }).click();
     await page.getByRole('button', { name: /Reject$/ }).click();
     await page.getByRole('button', { name: /Relabel$/ }).click();
+  } },
+  // Insight review: the first kept, the next one's past perspective open.
+  { path: '/curation/insights', id: 'curation-insights-past', setup: async (page) => {
+    await page.getByRole('button', { name: /It happened/ }).click();
+    await page.getByRole('button', { name: /What did past-you decide/ }).click();
   } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
