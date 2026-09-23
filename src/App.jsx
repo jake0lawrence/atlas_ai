@@ -190,7 +190,7 @@ export default function App() {
 
   // ─── INSIGHT & DECISION REVIEW ────────────────
   if (view === "insightReview") {
-    return <div key="insightReview" className="view-transition"><InsightDecisionReview onComplete={handleInsightReviewComplete} mobile={mobile} w={w} /></div>;
+    return <div key="insightReview" className="view-transition"><InsightDecisionReview onComplete={handleInsightReviewComplete} onNavigate={handleNavigate} mobile={mobile} w={w} /></div>;
   }
 
   // ─── CURATION SUMMARY ──────────────────────────

@@ -26,11 +26,11 @@ const PastPerspectivePanel = ({ decisionId, mobile, onClose }) => {
           <span style={{ fontSize: 16 }}>🪞</span>
           <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, fontWeight: 600, color: C.purple }}>What Would Past-Me Say?</span>
         </div>
-        <button onClick={onClose} role="button" tabIndex={0} style={{ fontFamily: MONO, fontSize: 11, color: white(0.25), background: "none", border: `1px solid ${white(0.08)}`, borderRadius: 6, padding: "2px 8px", cursor: "pointer" }}>✕</button>
+        <button onClick={onClose} aria-label="Close past perspective" style={{ fontFamily: MONO, fontSize: 11, color: white(0.55), background: "none", border: `1px solid ${white(0.08)}`, borderRadius: 6, padding: "2px 8px", cursor: "pointer" }}>✕</button>
       </div>
       <div style={{ padding: mobile ? "10px 14px" : "12px 20px 6px" }}>
-        <div style={{ fontFamily: BODY, fontSize: 10, color: alpha(C.purple, 0.5), textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 6 }}>Current Decision Point</div>
-        <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: white(0.6), fontWeight: 500, marginBottom: 12 }}>{analogy.currentQuestion}</div>
+        <div style={{ fontFamily: BODY, fontSize: 10, color: C.purple, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 6 }}>Current Decision Point</div>
+        <div style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: white(0.85), fontWeight: 500, marginBottom: 12 }}>{analogy.currentQuestion}</div>
       </div>
       {analogy.analogies.map((a, i) => {
         const topic = topicMap[a.topicId];
@@ -40,35 +40,35 @@ const PastPerspectivePanel = ({ decisionId, mobile, onClose }) => {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <span style={{ fontFamily: MONO, fontSize: 9, color: C.purple, background: alpha(C.purple, 0.12), padding: "2px 7px", borderRadius: 8, fontWeight: 600 }}>{a.relevance}% match</span>
               {topic && <span style={{ fontSize: 12 }}>{topic.icon}</span>}
-              <span style={{ fontFamily: MONO, fontSize: 9, color: white(0.2) }}>{a.sourceRef}</span>
+              <span style={{ fontFamily: MONO, fontSize: 9, color: white(0.5) }}>{a.sourceRef}</span>
             </div>
             {/* Past decision */}
-            <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.55), lineHeight: 1.5, marginBottom: 10 }}>{a.pastDecision}</div>
+            <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.8), lineHeight: 1.5, marginBottom: 10 }}>{a.pastDecision}</div>
             {/* Past reasoning excerpt */}
             <div style={{ background: alpha(C.purple, 0.04), border: `1px solid ${alpha(C.purple, 0.1)}`, borderRadius: 10, padding: mobile ? "10px 12px" : "10px 14px", marginBottom: 10 }}>
-              <div style={{ fontFamily: BODY, fontSize: 9, color: alpha(C.purple, 0.4), textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 6 }}>How You Reasoned</div>
-              <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.45), lineHeight: 1.5, fontStyle: "italic" }}>"{a.pastReasoning}"</div>
+              <div style={{ fontFamily: BODY, fontSize: 9, color: C.purple, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 6 }}>How You Reasoned</div>
+              <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.7), lineHeight: 1.5, fontStyle: "italic" }}>"{a.pastReasoning}"</div>
             </div>
             {/* Source conversation excerpt */}
             <div style={{ background: white(0.02), borderRadius: 8, border: `1px solid ${white(0.04)}`, padding: mobile ? "8px 10px" : "8px 12px", marginBottom: 10 }}>
               <div style={{ marginBottom: 6 }}>
-                <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.gold, 0.35), marginRight: 6 }}>YOU</span>
-                <span style={{ fontFamily: BODY, fontSize: 11, color: white(0.3), lineHeight: 1.5 }}>{a.pastSnippet.user}</span>
+                <span style={{ fontFamily: MONO, fontSize: 9, color: C.gold, marginRight: 6 }}>YOU</span>
+                <span style={{ fontFamily: BODY, fontSize: 11, color: white(0.6), lineHeight: 1.5 }}>{a.pastSnippet.user}</span>
               </div>
               <div>
-                <span style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.purple, 0.4), marginRight: 6 }}>AI</span>
-                <span style={{ fontFamily: BODY, fontSize: 11, color: white(0.25), lineHeight: 1.5 }}>{a.pastSnippet.ai}</span>
+                <span style={{ fontFamily: MONO, fontSize: 9, color: C.purple, marginRight: 6 }}>AI</span>
+                <span style={{ fontFamily: BODY, fontSize: 11, color: white(0.55), lineHeight: 1.5 }}>{a.pastSnippet.ai}</span>
               </div>
             </div>
             {/* Context comparison: then vs now */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
               <div style={{ background: white(0.02), borderRadius: 8, padding: "8px 10px", border: `1px solid ${white(0.04)}` }}>
-                <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.red, 0.5), marginBottom: 4, fontWeight: 600 }}>THEN — {a.pastDate}</div>
-                <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.3), lineHeight: 1.5 }}>{a.thenContext}</div>
+                <div style={{ fontFamily: MONO, fontSize: 9, color: C.red, marginBottom: 4, fontWeight: 600 }}>THEN — {a.pastDate}</div>
+                <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.6), lineHeight: 1.5 }}>{a.thenContext}</div>
               </div>
               <div style={{ background: white(0.02), borderRadius: 8, padding: "8px 10px", border: `1px solid ${white(0.04)}` }}>
-                <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.green, 0.5), marginBottom: 4, fontWeight: 600 }}>NOW</div>
-                <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.3), lineHeight: 1.5 }}>{a.nowContext}</div>
+                <div style={{ fontFamily: MONO, fontSize: 9, color: C.green, marginBottom: 4, fontWeight: 600 }}>NOW</div>
+                <div style={{ fontFamily: BODY, fontSize: 10, color: white(0.6), lineHeight: 1.5 }}>{a.nowContext}</div>
               </div>
             </div>
             {/* Outcome */}
@@ -76,7 +76,7 @@ const PastPerspectivePanel = ({ decisionId, mobile, onClose }) => {
               <span style={{ fontFamily: MONO, fontSize: 12, color: outcomeColors[a.outcomeType], flexShrink: 0, marginTop: 1 }}>{outcomeIcons[a.outcomeType]}</span>
               <div>
                 <div style={{ fontFamily: MONO, fontSize: 9, color: `${outcomeColors[a.outcomeType]}90`, fontWeight: 600, marginBottom: 3 }}>OUTCOME</div>
-                <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.45), lineHeight: 1.5 }}>{a.outcome}</div>
+                <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.7), lineHeight: 1.5 }}>{a.outcome}</div>
               </div>
             </div>
           </div>
