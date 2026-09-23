@@ -66,7 +66,7 @@ const ask = async (model, system, prompt, extra = []) => {
 
 // Transcripts: the capture eval's conversations, one per scenario and model,
 // rendered the way an export importer would hand them to the enrichment pass.
-const records = readFileSync(resolve(HERE, "results/capture.jsonl"), "utf8").trim().split("\n").map(l => JSON.parse(l)).filter(r => r.ok);
+const records = readFileSync(resolve(HERE, arg("transcripts", "results/capture.jsonl")), "utf8").trim().split("\n").map(l => JSON.parse(l)).filter(r => r.ok);
 const { scenarios } = JSON.parse(readFileSync(join(HERE, "scenarios.json"), "utf8"));
 const byId = Object.fromEntries(scenarios.map(s => [s.id, s]));
 const seen = new Set();
