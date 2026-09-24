@@ -13,6 +13,7 @@ const useStore = create((set, get) => ({
   selectedChain: null,
   showRewind: false,
   cmdPaletteOpen: false,
+  cmdPaletteQuery: '',
   briefingTopic: null,
   tourActive: false,
   v6TourActive: false,
@@ -22,7 +23,9 @@ const useStore = create((set, get) => ({
   setSelectedEvent: (event) => set({ selectedEvent: event }),
   setSelectedChain: (chain) => set({ selectedChain: chain }),
   setShowRewind: (show) => set({ showRewind: show }),
-  setCmdPaletteOpen: (open) => set({ cmdPaletteOpen: open }),
+  setCmdPaletteOpen: (open) => set({ cmdPaletteOpen: open, cmdPaletteQuery: '' }),
+  // Open the palette with a query already typed (/search?q=...).
+  openSearch: (query = '') => set({ cmdPaletteOpen: true, cmdPaletteQuery: query }),
   setBriefingTopic: (topic) => set({ briefingTopic: topic }),
   setTourActive: (active) => set({ tourActive: active }),
   setV6TourActive: (active) => set({ v6TourActive: active }),
@@ -36,7 +39,7 @@ const useStore = create((set, get) => ({
     selectedEvent: { topicId, eventIndex },
     view: 'conversation',
   }),
-  toggleCmdPalette: () => set((s) => ({ cmdPaletteOpen: !s.cmdPaletteOpen })),
+  toggleCmdPalette: () => set((s) => ({ cmdPaletteOpen: !s.cmdPaletteOpen, cmdPaletteQuery: '' })),
 
   // ─── KNOWLEDGE BASE SLICE ──────────────────────────────────
   contradictions: CONTRADICTIONS_INITIAL,

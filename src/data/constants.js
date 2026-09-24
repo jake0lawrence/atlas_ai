@@ -189,19 +189,22 @@ export const MONTHLY_ACTIVITY = [
   { month: "Jan 26", gpt: 8, claude: 180 }, { month: "Feb 26", gpt: 6, claude: 184 },
 ];
 
+// Conversations the ⌘K palette can find. `topicId` files one under a topic
+// (null: personal, never filed); the palette opens its conversation when that
+// topic's timeline has an event on the same date, and the topic otherwise.
 export const SEARCH_RESULTS = [
-  { query: "restaurant gina", title: "Date night restaurant recommendations", date: "2024-11-08", platform: "ChatGPT", preview: "Italian restaurant recommendations in the Elgin area for anniversary dinner..." },
-  { query: "restaurant gina", title: "Chicago weekend trip planning", date: "2024-09-14", platform: "ChatGPT", preview: "Downtown Chicago day trip — restaurants near Millennium Park..." },
-  { query: "deployment docker", title: "CourtCollect Docker debugging", date: "2024-11-14", platform: "Claude", preview: "Extended debugging for Railway deployment. Multi-stage build conflict..." },
-  { query: "deployment docker", title: "Keymaster container setup", date: "2024-08-22", platform: "Claude", preview: "Docker Compose for local Keymaster development environment..." },
-  { query: "interview transunion", title: "TransUnion 3rd round preparation", date: "2025-01-20", platform: "Claude", preview: "Comprehensive behavioral interview prep with STAR method..." },
-  { query: "interview veritone", title: "Veritone Implementation Manager prep", date: "2025-01-14", platform: "Claude", preview: "Research on Veritone's AI platform and role-specific preparation..." },
-  { query: "dice game", title: "Dice or Die core gameplay loop", date: "2024-10-22", platform: "ChatGPT", preview: "Risk/reward push-your-luck mechanics and scoring system..." },
-  { query: "dice game", title: "Game design document creation", date: "2024-11-05", platform: "Claude", preview: "Comprehensive GDD: mechanics, monetization, art direction..." },
-  { query: "gina counselor", title: "Supporting Gina's CRSS program", date: "2024-10-12", platform: "ChatGPT", preview: "Helping with the Elgin Community College certification program..." },
-  { query: "meta ads budget", title: "HMPRG Meta campaign optimization", date: "2024-10-25", platform: "Claude", preview: "$800 budget campaigns targeting Illinois youth..." },
-  { query: "supabase auth", title: "CourtCollect authentication flow", date: "2024-10-18", platform: "Claude", preview: "Multi-tenant auth with role-based access for courts and agencies..." },
-  { query: "supabase auth", title: "Keymaster security architecture", date: "2024-07-28", platform: "Claude", preview: "Zero-knowledge encryption with client-side decryption..." },
+  { query: "restaurant gina", title: "Date night restaurant recommendations", topicId: null, date: "2024-11-08", platform: "ChatGPT", preview: "Italian restaurant recommendations in the Elgin area for anniversary dinner..." },
+  { query: "restaurant gina", title: "Chicago weekend trip planning", topicId: null, date: "2024-09-14", platform: "ChatGPT", preview: "Downtown Chicago day trip — restaurants near Millennium Park..." },
+  { query: "deployment docker", title: "CourtCollect Docker debugging", topicId: "courtcollect", date: "2024-11-14", platform: "Claude", preview: "Extended debugging for Railway deployment. Multi-stage build conflict..." },
+  { query: "deployment docker", title: "Keymaster container setup", topicId: "keymaster", date: "2024-08-22", platform: "Claude", preview: "Docker Compose for local Keymaster development environment..." },
+  { query: "interview transunion", title: "TransUnion 3rd round preparation", topicId: "jobsearch", date: "2025-01-20", platform: "Claude", preview: "Comprehensive behavioral interview prep with STAR method..." },
+  { query: "interview veritone", title: "Veritone Implementation Manager prep", topicId: "jobsearch", date: "2025-01-14", platform: "Claude", preview: "Research on Veritone's AI platform and role-specific preparation..." },
+  { query: "dice game", title: "Dice or Die core gameplay loop", topicId: "gamedev", date: "2024-10-22", platform: "ChatGPT", preview: "Risk/reward push-your-luck mechanics and scoring system..." },
+  { query: "dice game", title: "Game design document creation", topicId: "gamedev", date: "2024-11-05", platform: "Claude", preview: "Comprehensive GDD: mechanics, monetization, art direction..." },
+  { query: "gina counselor", title: "Supporting Gina's CRSS program", topicId: null, date: "2024-10-12", platform: "ChatGPT", preview: "Helping with the Elgin Community College certification program..." },
+  { query: "meta ads budget", title: "HMPRG Meta campaign optimization", topicId: "hmprg", date: "2024-10-25", platform: "Claude", preview: "$800 budget campaigns targeting Illinois youth..." },
+  { query: "supabase auth", title: "CourtCollect authentication flow", topicId: "courtcollect", date: "2024-10-18", platform: "Claude", preview: "Multi-tenant auth with role-based access for courts and agencies..." },
+  { query: "supabase auth", title: "Keymaster security architecture", topicId: "keymaster", date: "2024-07-28", platform: "Claude", preview: "Zero-knowledge encryption with client-side decryption..." },
 ];
 
 export const INSIGHTS = [

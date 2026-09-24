@@ -29,7 +29,7 @@ export const STATIONS = [
 
 const STATION_OF_VIEW = {
   dashboard: "atlas", connections: "atlas", evolution: "atlas",
-  timeline: "atlas", conversation: "atlas", archaeology: "atlas", search: "atlas", export: "atlas",
+  timeline: "atlas", conversation: "atlas", archaeology: "atlas", export: "atlas",
   curation: "curate", topicCuration: "curate", connectionValidation: "curate", insightReview: "curate", curationSummary: "curate",
   companion: "companion", beliefDiffs: "companion", digest: "companion", liveCapture: "companion",
 };
@@ -137,7 +137,7 @@ const Nav = ({ view, onNavigate, mobile, tablet, lastSyncTime, newCount, isSynci
                   ))}
                   <div style={{ borderTop: `1px solid ${white(0.06)}`, margin: `${SPACE.xs}px 0` }} />
                   {[["search", "⌕", "Search"], ["export", "↗", "Export"]].map(([id, icon, label]) => (
-                    <button key={id} role="menuitem" onClick={() => go(id)} style={{
+                    <button key={id} role="menuitem" onClick={() => { if (id === "search") { setMenuOpen(false); onCmdK?.(); } else go(id); }} style={{
                       display: "flex", alignItems: "center", gap: SPACE.md, width: "100%", textAlign: "left",
                       fontFamily: BODY, fontSize: TYPE.base, color: white(0.55), background: "transparent",
                       border: "none", borderRadius: 8, padding: `${SPACE.md}px ${SPACE.lg}px`, cursor: "pointer",
@@ -184,7 +184,7 @@ const Nav = ({ view, onNavigate, mobile, tablet, lastSyncTime, newCount, isSynci
 
         <div style={{ display: "flex", alignItems: "center", gap: SPACE.sm, flexShrink: 0 }}>
           {onCmdK && (
-            <button data-tour="cmd-k" onClick={onCmdK} title="Search (⌘K)" style={{ ...ACTION_BUTTON, fontFamily: MONO, fontSize: TYPE.xs, color: white(0.3) }}>
+            <button data-tour="cmd-k" onClick={onCmdK} title="Search (⌘K)" aria-label="Search (⌘K)" style={{ ...ACTION_BUTTON, fontFamily: MONO, fontSize: TYPE.xs, color: white(0.3) }}>
               <span style={{ fontSize: TYPE.sm }}>⌕</span>{!tablet && <span style={{ color: white(0.18) }}>⌘K</span>}
             </button>
           )}

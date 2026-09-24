@@ -26,6 +26,10 @@ function locationToState(pathname) {
 
   if (pathname === '/companion/rewind') return { view: 'dashboard', showRewind: true };
 
+  // Not a page: the ⌘K palette opens over the current view (the dashboard on
+  // a fresh load) and the URL is handed back to that view.
+  if (pathname === '/search') return { view: 'dashboard', search: true };
+
   if (pathname.startsWith('/companion/diff/')) return { view: 'beliefDiffs' };
   if (pathname.startsWith('/companion/digest/')) return { view: 'digest' };
 
@@ -43,6 +47,8 @@ function stateToPath({ view, selectedTopic, selectedEvent, selectedChain, showRe
     return `/archaeology/${selectedChain}`;
   return VIEW_TO_PATH[view] || '/dashboard';
 }
+
+const queryOf = (search) => new URLSearchParams(search).get('q') || '';
 
 // ─── Hook ───────────────────────────────────────────────────
 
@@ -74,6 +80,7 @@ export default function useRouterSync() {
     if (state.selectedEvent) store.setSelectedEvent(state.selectedEvent);
     if (state.selectedChain) store.setSelectedChain(state.selectedChain);
     if (state.showRewind) store.setShowRewind(true);
+    if (state.search) store.openSearch(queryOf(routerRef.current.location.search));
     skipNextUrlSync.current = true;
   }, []);
 
@@ -103,8 +110,13 @@ export default function useRouterSync() {
     });
     if (location.pathname === currentPath) return;
 
-    skipNextUrlSync.current = true;
     const state = locationToState(location.pathname);
+    if (state.search) {
+      store.openSearch(queryOf(routerRef.current.location.search));
+      routerRef.current.navigate(currentPath, { replace: true });
+      return;
+    }
+    skipNextUrlSync.current = true;
     store.setView(state.view || 'dashboard');
     store.setSelectedTopic(state.selectedTopic || null);
     store.setSelectedEvent(state.selectedEvent || null);
