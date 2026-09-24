@@ -216,7 +216,9 @@ export default function App() {
               if (targetView === "archaeology" && targetChain) { setSelectedChain(targetChain); }
               else { setView("dashboard"); setSelectedChain(null); }
             }}
+            onOpenChain={(id) => setSelectedChain(id)}
             onConversationClick={(topicId, eventIndex) => { setSelectedEvent({ topicId, eventIndex }); setView("conversation"); }}
+            onTopicClick={handleTopicClick}
             mobile={mobile}
           />
         </div>
