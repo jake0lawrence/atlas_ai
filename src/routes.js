@@ -106,6 +106,11 @@ export const SWEEP_ROUTES = [
   { path: '/connections', id: 'connections-topic', mobile: true, setup: async (page) => {
     await page.getByRole('button', { name: /^Job Search: / }).click();
   } },
+  // Belief diffs on another subject, showing what you believed then.
+  { path: '/companion/diff', id: 'belief-diffs-then', mobile: true, setup: async (page) => {
+    await page.getByRole('button', { name: /Automation Philosophy/ }).click();
+    await page.getByRole('button', { name: 'Then', exact: true }).click();
+  } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
 ];
