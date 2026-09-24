@@ -31,6 +31,7 @@ export const DEEP_LINKS = [
   { path: '/topic/courtcollect/conversation/4', view: 'conversation' },
   { path: '/topic/courtcollect/conversation/0', view: 'conversation', note: 'event without a transcript: the summary-only page' },
   { path: '/archaeology/why-typescript', view: 'archaeology' },
+  { path: '/archaeology/nope', view: 'archaeology', note: 'unknown chain: the designed not-found page' },
   { path: '/companion/rewind', view: 'dashboard', overlay: 'rewind' },
   { path: '/nope', view: 'dashboard', note: 'unknown path falls back to the dashboard' },
 ];
@@ -39,7 +40,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4', '/archaeology/why-typescript', '/archaeology/nope']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -114,6 +115,12 @@ export const SWEEP_ROUTES = [
   // The digest's in-progress month: outlined bar, no theme yet.
   { path: '/companion/digest', id: 'digest-in-progress', mobile: true, setup: async (page) => {
     await page.getByRole('button', { name: /still being written/ }).click();
+  } },
+  // A decision chain with one step picked on the arc, its card highlighted.
+  { path: '/archaeology/why-vercel', id: 'archaeology-step', mobile: true, setup: async (page) => {
+    await page.getByRole('button', { name: /^Challenging, / }).click();
+    await page.clock.runFor(100).catch(() => page.waitForTimeout(100));
+    await page.evaluate(() => window.scrollTo(0, 0));
   } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
