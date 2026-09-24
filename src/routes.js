@@ -39,7 +39,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/companion/diff', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -110,6 +110,10 @@ export const SWEEP_ROUTES = [
   { path: '/companion/diff', id: 'belief-diffs-then', mobile: true, setup: async (page) => {
     await page.getByRole('button', { name: /Automation Philosophy/ }).click();
     await page.getByRole('button', { name: 'Then', exact: true }).click();
+  } },
+  // The digest's in-progress month: outlined bar, no theme yet.
+  { path: '/companion/digest', id: 'digest-in-progress', mobile: true, setup: async (page) => {
+    await page.getByRole('button', { name: /still being written/ }).click();
   } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
