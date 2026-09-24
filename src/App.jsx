@@ -276,7 +276,7 @@ export default function App() {
 
         {view === "companion" && <AskAtlas onConversationClick={(topicId) => { const topic = TOPICS.find(t => t.id === topicId); if (topic) handleTopicClick(topic); }} mobile={mobile} contradictions={contradictions} resolvedContradictions={resolvedContradictions} onResolveContradiction={resolveContradiction} />}
         {view === "connections" && <ConnectionsView onTopicClick={handleTopicClick} mobile={mobile} />}
-        {view === "evolution" && <EvolutionView mobile={mobile} onRewind={() => setShowRewind(true)} />}
+        {view === "evolution" && <EvolutionView mobile={mobile} onRewind={() => setShowRewind(true)} onTopicClick={handleTopicClick} />}
         {view === "beliefDiffs" && <BeliefDiffsView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}
         {view === "digest" && <DigestView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}
         {view === "liveCapture" && <LiveCaptureView mobile={mobile} onTopicClick={handleTopicClick} />}
