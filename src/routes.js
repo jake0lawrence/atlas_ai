@@ -140,5 +140,19 @@ export const SWEEP_ROUTES = [
   // A shared search: /search?q= opens the palette with the query typed.
   { path: '/search?q=docker', id: 'search-docker', mobile: true },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
+  // A topic's briefing: from its bubble's hover card on desktop, from the
+  // companion sidebar on a phone (bubbles have no hover card there).
+  { path: '/dashboard', id: 'dashboard-brief', mobile: true, setup: async (page) => {
+    if (page.viewportSize().width < 600) {
+      await page.keyboard.press('Control+/');
+      await page.getByRole('button', { name: 'Brief me: CourtCollect' }).click();
+      return;
+    }
+    await page.clock.runFor(1500).catch(() => page.waitForTimeout(1500)); // the bubbles grow in
+    await page.getByRole('button', { name: /^CourtCollect: / }).hover();
+    await page.getByRole('button', { name: 'Brief me' }).click();
+  } },
+  // A sync partway through: two phases done, the third running.
+  { path: '/dashboard', id: 'dashboard-sync', setup: async (page) => { await page.getByRole('button', { name: /Sync$/ }).click(); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
 ];

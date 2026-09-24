@@ -1,213 +1,137 @@
-import { useState, useEffect } from "react";
-import {
-  TOUR_STEPS, TOUR_STORAGE_KEY,
-} from '../data/constants';
-import { FONTS, BODY, MONO } from '../styles/base';
-import { C, alpha, white, black } from '../styles/tokens';
+import { useState, useEffect, useRef } from "react";
+import { TOUR_STEPS, TOUR_STORAGE_KEY } from '../data/constants';
+import { C, alpha, white, black, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
 
-// ═══════════════════════════════════════════════════════════════
-// GUIDED TOUR MODE (7A)
-// ═══════════════════════════════════════════════════════════════
+// The one guided tour (v7): a spotlight on each target that is on screen, a
+// centered card for a step whose target is not (the phone menu hides the
+// stations and the ⌘K button). Every way out, the last step, Skip, Escape or
+// a click outside, marks the tour seen, so it does not come back next load.
 
-const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = TOUR_STORAGE_KEY }) => {
+const reducedMotion = () => Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+const SPOT_PAD = 10;
+
+export const markSeen = (storageKey) => {
+  try { localStorage.setItem(storageKey, "true"); } catch (e) { console.warn('tour: could not save that it was seen:', e); }
+};
+
+// Where the card goes: below the target when it fits, above otherwise, kept
+// on screen horizontally. Pure, so the arithmetic is tested.
+export const placeCard = (rect, viewport, cardWidth, cardHeight = 280) => {
+  const below = viewport.height - (rect.top + rect.height + SPOT_PAD) > cardHeight;
+  const left = Math.max(16, Math.min(rect.left + rect.width / 2 - cardWidth / 2, viewport.width - cardWidth - 16));
+  return below
+    ? { left, top: rect.top + rect.height + SPOT_PAD + 16 }
+    : { left, bottom: viewport.height - rect.top + SPOT_PAD + 16 };
+};
+
+const button = (primary) => ({
+  fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 600, borderRadius: 8, cursor: "pointer",
+  padding: `${SPACE.sm}px ${SPACE.lg}px`,
+  color: primary ? C.bg0 : white(0.75), background: primary ? C.gold : white(0.05),
+  border: `1px solid ${primary ? C.gold : white(0.14)}`,
+});
+
+const Tour = ({ onClose, mobile, steps, storageKey }) => {
   const [step, setStep] = useState(0);
-  const [targetRect, setTargetRect] = useState(null);
-
-  useEffect(() => {
-    if (!active) { setStep(0); setTargetRect(null); }
-  }, [active]);
-
-  // Track target element position and scroll it into view
-  useEffect(() => {
-    if (!active) return;
-    const current = steps[step];
-    if (!current.target) { setTargetRect(null); return; }
-
-    const el = document.querySelector(current.target);
-    if (!el) { setTargetRect(null); return; }
-
-    const updateRect = () => {
-      const r = el.getBoundingClientRect();
-      setTargetRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-    };
-
-    // Measure immediately for instant positioning
-    updateRect();
-
-    // Scroll into view if needed, then re-measure after scroll settles
-    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    const timer = setTimeout(updateRect, 400);
-
-    window.addEventListener("resize", updateRect);
-    window.addEventListener("scroll", updateRect, true);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("resize", updateRect);
-      window.removeEventListener("scroll", updateRect, true);
-    };
-  }, [active, step, steps]);
-
-  useEffect(() => {
-    if (!active) return;
-    const handleKey = (e) => {
-      if (e.key === "Escape") { onClose(); return; }
-      if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); step < steps.length - 1 ? setStep(s => s + 1) : handleFinish(); }
-      if (e.key === "ArrowLeft" && step > 0) { e.preventDefault(); setStep(s => s - 1); }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  });
-
-  const handleFinish = () => {
-    try { localStorage.setItem(storageKey, "true"); } catch (e) { console.warn('Failed to save tour state:', e); }
-    onClose();
-  };
-
-  if (!active) return null;
-
+  const [rect, setRect] = useState(null);
+  const nextRef = useRef(null);
   const current = steps[step];
-  const isFirst = step === 0;
-  const isLast = step === steps.length - 1;
-  const hasTarget = !!current.target && !!targetRect;
-  const spotPad = 10;
+  const last = step === steps.length - 1;
 
-  // Shared tooltip inner content
-  const tooltipInner = (
-    <>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: mobile ? 22 : 26 }}>{current.icon}</span>
-          <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 21, fontWeight: 700, color: C.white, lineHeight: 1.2 }}>{current.title}</h3>
-        </div>
-        <button onClick={handleFinish} style={{
-          background: white(0.05), border: `1px solid ${white(0.08)}`,
-          borderRadius: 6, padding: "3px 8px", cursor: "pointer",
-          fontFamily: MONO, fontSize: 10, color: white(0.25),
-        }}>ESC</button>
-      </div>
-      <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 14, color: white(0.55), lineHeight: 1.65, marginBottom: 24 }}>{current.description}</p>
-      {current.highlight && (
-        <div style={{
-          background: alpha(C.gold, 0.06), border: `1px solid ${alpha(C.gold, 0.15)}`,
-          borderRadius: 8, padding: "8px 12px", marginBottom: 20,
-          fontFamily: BODY, fontSize: 11, color: C.gold, fontWeight: 500,
-        }}>The curation pipeline is Atlas's key differentiator — your judgment shapes the knowledge base.</div>
-      )}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", gap: 4 }}>
-          {steps.map((_, i) => (
-            <div key={i} style={{
-              width: i === step ? 18 : 6, height: 6, borderRadius: 3,
-              background: i === step ? C.gold : i < step ? alpha(C.gold, 0.3) : white(0.1),
-              transition: "all 0.25s",
-            }} />
-          ))}
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {!isFirst && (
-            <button onClick={() => setStep(s => s - 1)} style={{
-              fontFamily: BODY, fontSize: 12, fontWeight: 500, color: white(0.4),
-              background: white(0.04), border: `1px solid ${white(0.08)}`,
-              borderRadius: 8, padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
-            }}>Back</button>
-          )}
-          {isFirst && (
-            <button onClick={handleFinish} style={{
-              fontFamily: BODY, fontSize: 12, fontWeight: 500, color: white(0.3),
-              background: "transparent", border: "none", padding: "7px 10px", cursor: "pointer",
-            }}>Skip tour</button>
-          )}
-          <button onClick={() => isLast ? handleFinish() : setStep(s => s + 1)} style={{
-            fontFamily: BODY, fontSize: 12, fontWeight: 600,
-            color: C.bg0, background: C.gold,
-            border: "none", borderRadius: 8, padding: "7px 20px",
-            cursor: "pointer", transition: "all 0.2s",
-          }}>{isLast ? "Get Started" : "Next"}</button>
-        </div>
-      </div>
-      <div style={{ textAlign: "center", marginTop: 12, fontFamily: MONO, fontSize: 10, color: white(0.15) }}>
-        {step + 1} / {steps.length} · Use arrow keys to navigate
-      </div>
-    </>
-  );
+  const finish = () => { markSeen(storageKey); onClose(); };
+  const go = (to) => { if (to >= 0 && to < steps.length) setStep(to); };
 
-  // Card style (shared between both modes)
-  const cardStyle = {
-    background: current.highlight ? `linear-gradient(135deg, ${C.bg2} 0%, ${alpha(C.gold, 0.06)} 100%)` : C.bg2,
-    border: `1px solid ${current.highlight ? alpha(C.gold, 0.3) : white(0.1)}`,
-    borderRadius: 16, padding: mobile ? "24px 20px" : "28px 28px 24px",
-    boxShadow: current.highlight ? `0 24px 80px ${black(0.6)}, 0 0 40px ${alpha(C.gold, 0.08)}` : `0 24px 80px ${black(0.5)}`,
-    animation: "fadeUp 0.25s ease both",
+  // Follow the target: measure it, bring it into view, re-measure on scroll
+  // and resize. A step without a target on screen gets the centered card.
+  useEffect(() => {
+    const el = current.target ? document.querySelector(current.target) : null;
+    const measure = () => {
+      if (!el) { setRect(null); return; }
+      const r = el.getBoundingClientRect();
+      setRect(r.width || r.height ? { top: r.top, left: r.left, width: r.width, height: r.height } : null);
+    };
+    el?.scrollIntoView?.({ behavior: reducedMotion() ? "auto" : "smooth", block: "nearest" });
+    measure();
+    const settle = setTimeout(measure, 400);
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => {
+      clearTimeout(settle);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [current.target]);
+
+  useEffect(() => { nextRef.current?.focus({ preventScroll: true }); }, [step]);
+
+  // The arrows step through the tour; Enter and Space stay with the focused button.
+  const onKeyDown = (e) => {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finish(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); if (last) finish(); else go(step + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); go(step - 1); }
   };
 
-  // ── Spotlight mode: highlight the target element, position tooltip near it ──
-  if (hasTarget) {
-    const spaceBelow = window.innerHeight - (targetRect.top + targetRect.height + spotPad);
-    const placeBelow = spaceBelow > 280;
-    const tooltipWidth = mobile ? Math.min(window.innerWidth - 32, 360) : 420;
-    const tooltipLeft = Math.max(16, Math.min(
-      targetRect.left + targetRect.width / 2 - tooltipWidth / 2,
-      window.innerWidth - tooltipWidth - 16
-    ));
+  const motion = !reducedMotion();
+  const cardWidth = mobile ? Math.min(window.innerWidth - 32, 360) : 420;
+  const place = rect ? placeCard(rect, { width: window.innerWidth, height: window.innerHeight }, cardWidth) : null;
+  const titleId = "tour-step-title";
 
-    return (
-      <div role="dialog" aria-modal="true" aria-label="Guided tour" style={{ position: "fixed", inset: 0, zIndex: 10000 }} onClick={handleFinish}>
-        {/* Spotlight cutout: box-shadow darkens everything except the target */}
-        <div style={{
-          position: "fixed",
-          top: targetRect.top - spotPad,
-          left: targetRect.left - spotPad,
-          width: targetRect.width + spotPad * 2,
-          height: targetRect.height + spotPad * 2,
-          borderRadius: 12,
-          boxShadow: `0 0 0 9999px ${black(0.6)}`,
-          pointerEvents: "none",
-          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-          zIndex: 10001,
-        }} />
-        {/* Gold border ring around the spotlight area */}
-        <div style={{
-          position: "fixed",
-          top: targetRect.top - spotPad,
-          left: targetRect.left - spotPad,
-          width: targetRect.width + spotPad * 2,
-          height: targetRect.height + spotPad * 2,
-          borderRadius: 12,
-          border: `1.5px solid ${alpha(C.gold, 0.4)}`,
-          pointerEvents: "none",
-          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-          zIndex: 10002,
-        }} />
-        {/* Tooltip card positioned relative to spotlight */}
-        <div onClick={e => e.stopPropagation()} style={{
-          position: "fixed",
-          ...(placeBelow
-            ? { top: targetRect.top + targetRect.height + spotPad + 16 }
-            : { bottom: window.innerHeight - targetRect.top + spotPad + 16 }),
-          left: tooltipLeft,
-          width: tooltipWidth, maxWidth: "calc(100vw - 32px)",
-          zIndex: 10003,
-          ...cardStyle,
-        }}>
-          {tooltipInner}
+  const card = (
+    <div onClick={e => e.stopPropagation()} style={{
+      position: "fixed", zIndex: 10003, width: cardWidth, maxWidth: "calc(100vw - 32px)",
+      ...(place || { top: "50%", left: "50%", transform: "translate(-50%, -50%)" }),
+      background: C.bg2, border: `1px solid ${alpha(C.gold, 0.3)}`, borderRadius: 16,
+      padding: mobile ? SPACE.xl - 4 : `${SPACE.xl + 4}px ${SPACE.xl + 4}px ${SPACE.xl}px`,
+      boxShadow: `0 24px 80px ${black(0.6)}`,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: SPACE.md, marginBottom: SPACE.md }}>
+        <span aria-hidden="true" style={{ fontSize: mobile ? TYPE.xl : TYPE.xxl }}>{current.icon}</span>
+        <h2 id={titleId} style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.lg : TYPE.xl, fontWeight: 700, color: C.white, lineHeight: 1.2, margin: 0 }}>{current.title}</h2>
+      </div>
+      <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.base : TYPE.md - 1, color: white(0.75), lineHeight: 1.6, margin: `0 0 ${SPACE.xl}px` }}>{current.description}</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: SPACE.md }}>
+        <ol aria-label="Tour steps" style={{ display: "flex", gap: SPACE.xs, listStyle: "none", margin: 0, padding: 0 }}>
+          {steps.map((s, i) => (
+            <li key={s.title} aria-current={i === step ? "step" : undefined} style={{
+              width: i === step ? 18 : 6, height: 6, borderRadius: 3,
+              background: i === step ? C.gold : i < step ? alpha(C.gold, 0.45) : white(0.18),
+              transition: motion ? "width 0.25s" : "none",
+            }}><span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>{s.title}</span></li>
+          ))}
+        </ol>
+        <div style={{ display: "flex", gap: SPACE.sm }}>
+          {step === 0
+            ? <button onClick={finish} style={{ ...button(false), background: "transparent", border: "1px solid transparent", color: white(0.6) }}>Skip tour</button>
+            : <button onClick={() => go(step - 1)} style={button(false)}>Back</button>}
+          <button ref={nextRef} onClick={() => (last ? finish() : go(step + 1))} style={button(true)}>{last ? "Start exploring" : "Next"}</button>
         </div>
       </div>
-    );
-  }
-
-  // ── Centered mode: for steps without a specific target element ──
-  return (
-    <div role="dialog" aria-modal="true" aria-label="Guided tour" style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={handleFinish}>
-      <div style={{ position: "fixed", inset: 0, background: black(0.65), transition: "opacity 0.3s" }} />
-      <div onClick={e => e.stopPropagation()} style={{
-        position: "relative", width: mobile ? "90%" : 420, maxWidth: "90vw",
-        zIndex: 1,
-        ...cardStyle,
-      }}>
-        {tooltipInner}
+      <div style={{ marginTop: SPACE.md, fontFamily: MONO, fontSize: TYPE.xs, color: white(0.55), textAlign: "center" }}>
+        {step + 1} of {steps.length}{!mobile && " · ← → to move, esc to close"}
       </div>
     </div>
   );
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Guided tour" aria-describedby={titleId} onKeyDown={onKeyDown} onClick={finish}
+      style={{ position: "fixed", inset: 0, zIndex: 10000 }}>
+      {rect ? (
+        <div aria-hidden="true" style={{
+          position: "fixed", zIndex: 10001, pointerEvents: "none", borderRadius: 12,
+          top: rect.top - SPOT_PAD, left: rect.left - SPOT_PAD, width: rect.width + SPOT_PAD * 2, height: rect.height + SPOT_PAD * 2,
+          boxShadow: `0 0 0 9999px ${black(0.6)}`, border: `1.5px solid ${alpha(C.gold, 0.55)}`,
+          transition: motion ? "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
+        }} />
+      ) : (
+        <div aria-hidden="true" style={{ position: "fixed", inset: 0, background: black(0.65) }} />
+      )}
+      {card}
+    </div>
+  );
 };
+
+// Mounted only while active, so every run starts from the first step.
+const GuidedTour = ({ active, onClose, mobile, steps = TOUR_STEPS, storageKey = TOUR_STORAGE_KEY }) =>
+  active ? <Tour onClose={onClose} mobile={mobile} steps={steps} storageKey={storageKey} /> : null;
 
 export default GuidedTour;

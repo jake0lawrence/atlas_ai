@@ -963,7 +963,6 @@ export const BRIEFINGS = {
       { topicId: "webdev", summary: "Tech stack decisions flow from your React/Next.js/Supabase experience" },
       { topicId: "jobsearch", summary: "CourtCollect serves as a key portfolio piece in applications" },
     ],
-    lastActivity: { date: "Feb 3, 2026", title: "Josephine TX integration", summary: "API design and data mapping for City of Josephine." },
     suggestedPrompt: "Continue from where we left off on CourtCollect — last time we were designing the API integration for Josephine TX. I want to discuss how to generalize the data mapping layer so onboarding new courts is faster. Also, I'm hitting edge cases with partial payment calculations when cases get reassigned between agencies.",
   },
   jobsearch: {
@@ -986,7 +985,6 @@ export const BRIEFINGS = {
       { topicId: "tyler", summary: "100+ implementations provide the core experience narrative" },
       { topicId: "courtcollect", summary: "Demonstrates entrepreneurial initiative and technical ability" },
     ],
-    lastActivity: { date: "Feb 2, 2026", title: "Interview debrief & strategy update", summary: "Assessed pipeline status across active applications." },
     suggestedPrompt: "Let's do a job search pipeline review. I want to assess where each active application stands, identify which roles I should prioritize follow-ups on, and discuss whether my current positioning is working or if I need to adjust my narrative for the next round of applications.",
   },
   automation: {
@@ -1010,7 +1008,6 @@ export const BRIEFINGS = {
       { topicId: "obsidian", summary: "PKM + AI integration explores automated knowledge extraction" },
       { topicId: "courtcollect", summary: "Event-driven architecture decisions informed by automation experience" },
     ],
-    lastActivity: { date: "Jan 20, 2025", title: "Personal productivity system", summary: "Integrated calendar, tasks, and AI assistants." },
     suggestedPrompt: "I want to revisit my automation stack. I've been using the Claude API with n8n for document classification — let's discuss patterns for building reliable LLM-in-the-loop workflows. Specifically, how to handle model failures gracefully and when to fall back to deterministic processing.",
   },
   hmprg: {
@@ -1033,7 +1030,6 @@ export const BRIEFINGS = {
       { topicId: "webdev", summary: "Landing page optimization draws on web development skills" },
       { topicId: "n8n", summary: "Analytics pipeline built on n8n → Airtable for reporting" },
     ],
-    lastActivity: { date: "Feb 1, 2026", title: "Landing page optimization", summary: "Redesigned conversion funnel. Improved CTR by 40%." },
     suggestedPrompt: "Let's review the HMPRG campaign performance for Q1 2026. I want to analyze whether the Instagram-heavy budget allocation is still optimal, discuss the landing page changes and their impact on conversion rates, and plan the next content calendar cycle.",
   },
 };
@@ -1284,34 +1280,27 @@ export const EXPORT_FORMATS = [
   { id: "csv", label: "CSV", icon: "📊", desc: "Spreadsheet-compatible", ext: ".csv" },
 ];
 
+// The one guided tour (v7). A step with a `target` spotlights it when it is on
+// screen and falls back to a centered card when it is not.
 export const TOUR_STEPS = [
-  { title: "Welcome to Atlas", description: "Let's take a quick tour of your AI Knowledge Atlas. We'll highlight the key features that make this platform unique.", icon: "🗺️" },
-  { title: "Navigation", description: "Switch between views: Overview for your dashboard, Connections for your knowledge graph, Evolution for decisions & milestones, Search, and Export.", icon: "◈", target: "[data-tour='nav']" },
-  { title: "Knowledge Map", description: "Your topics are visualized as interactive bubbles — sized by conversation count. Click any topic to dive into its timeline.", icon: "🧠", target: "[data-tour='knowledge-map']" },
-  { title: "AI Journey", description: "Track your activity over time and see the shift between AI platforms. The heatmap reveals your thinking patterns across months.", icon: "📊", target: "[data-tour='ai-journey']" },
-  { title: "Human-Curated Pipeline", description: "This is what makes Atlas different. Every insight passes through your curation — the AI proposes, you decide. Your knowledge base is human-verified, not just AI-generated.", icon: "⚖️", highlight: true },
-  { title: "Quick Navigation", description: "Press ⌘K (or Ctrl+K) anytime to open the command palette. Jump to any topic or view instantly.", icon: "⌕", target: "[data-tour='cmd-k']" },
-  { title: "Incremental Sync", description: "Atlas isn't a one-time tool. Hit Sync to pull in new conversations and keep your knowledge base current.", icon: "⟳", target: "[data-tour='sync']" },
-  { title: "Ask Atlas", description: "Your knowledge has a voice now. Open the Companion tab to ask Atlas anything about your conversations — it queries across all your curated insights.", icon: "◆", target: "[data-tour='companion-tab']" },
-  { title: "Belief Diffs", description: "See how your thinking evolved. Belief Diffs show side-by-side comparisons of your past and present positions on any topic.", icon: "⇄", target: "[data-tour='belief-diffs-tab']" },
-  { title: "Monthly Digest", description: "Your knowledge, summarized. The Digest generates a monthly recap of conversations, new connections, and thinking shifts — like Spotify Wrapped for your mind.", icon: "📅", target: "[data-tour='digest-tab']" },
-  { title: "Rewind Mode", description: "Watch your knowledge graph grow over time. Rewind replays how topics and connections formed across months of conversations.", icon: "⏪", target: "[data-tour='rewind-btn']" },
-  { title: "You're All Set!", description: "Explore your 3 years of AI conversations, mapped and curated. Your mind, your atlas.", icon: "✨" },
+  { title: "Welcome to Atlas", description: "Atlas turns three years of your AI conversations into topics, the links between them, and the decisions you made along the way. Seven stops show you around.", icon: "🗺️" },
+  { title: "Three stations", description: "Curate is where you check what Atlas pulled out of your conversations; nothing reaches the map until you approve it. Atlas is the map. Companion is where you ask it questions and see how your thinking changed.", icon: "◈", target: "[data-tour='nav']" },
+  { title: "Your topics", description: "Each bubble is a topic, sized by how many conversations it holds. Click one for its timeline.", icon: "🧠", target: "[data-tour='knowledge-map']" },
+  { title: "Rewind", description: "Replay the map growing month by month, from the first topic to all fourteen.", icon: "⏪", target: "[data-tour='rewind-btn']" },
+  { title: "Search anything", description: "⌘K (Ctrl+K) searches conversations, topics and pages from anywhere. On a phone it is Search in the menu.", icon: "⌕", target: "[data-tour='cmd-k']" },
+  { title: "Sync", description: "Pull in new conversations. The topics they touch light up on the map.", icon: "⟳", target: "[data-tour='sync']" },
+  { title: "Companion sidebar", description: "Suggestions for whatever you are looking at, each one a link to the page that answers it. ⌘/ (Ctrl+/) opens it anywhere.", icon: "💡", target: "[data-tour='companion-sidebar']" },
+  { title: "Export", description: "Take it with you as Markdown, JSON, CSV or an Obsidian vault.", icon: "↗", target: "[data-tour='export']" },
+  { title: "You're set", description: "Start anywhere. The map is yours to curate, search and ask.", icon: "✨" },
 ];
 
-export const TOUR_STORAGE_KEY = "atlas_tour_completed";
+// v7 changed the layout the tour walks through, so it has its own key: someone
+// who finished the v5 tour sees this one once.
+export const TOUR_STORAGE_KEY = "atlas_tour_v7_completed";
 
 // ─── V6 "WHAT'S NEW" MINI-TOUR (for returning users) ────
-export const V6_TOUR_STEPS = [
-  { title: "What's New in v6", description: "Welcome back! Atlas v6 turns your curated knowledge into an active companion. Here's what's new.", icon: "🆕", highlight: true },
-  { title: "Ask Atlas", description: "Query your entire knowledge base in natural language. Atlas answers using only your curated, human-verified insights.", icon: "◆", target: "[data-tour='companion-tab']" },
-  { title: "Belief Diffs", description: "Compare how your thinking on any topic has shifted over time with side-by-side diffs.", icon: "⇄", target: "[data-tour='belief-diffs-tab']" },
-  { title: "Monthly Digest", description: "Auto-generated monthly summaries of your conversations, new connections, and thinking shifts.", icon: "📅", target: "[data-tour='digest-tab']" },
-  { title: "Companion Sidebar", description: "A persistent sidebar that offers contextual suggestions as you navigate. Open it anytime with ⌘/ (Ctrl+/).", icon: "💡", target: "[data-tour='companion-sidebar']" },
-  { title: "You're Caught Up!", description: "That's everything new in v6. Your knowledge now compounds — Atlas remembers so you don't have to.", icon: "✨" },
-];
 
-export const V6_TOUR_STORAGE_KEY = "atlas_v6_tour_completed";
+
 
 // ─── PAST ANALOGIES DATA (for "What Would Past-Me Say?") ──
 export const PAST_ANALOGIES = [
@@ -1411,31 +1400,35 @@ export const PAST_ANALOGIES = [
 ];
 
 // ─── COMPANION SIDEBAR SUGGESTIONS ──────────────────────
+// Suggestions the companion sidebar shows per view. Each action says where it
+// goes: `view` (a page), `topic` (a timeline) or `brief` (a briefing card);
+// "current" means the topic on screen. A test holds every claim's numbers to
+// the fixtures and every action to a real destination.
 export const COMPANION_SIDEBAR_SUGGESTIONS = {
   dashboard: [
-    { id: "dash-1", icon: "🧠", title: "Knowledge Mgmt is getting stale", description: "You haven't visited Knowledge Mgmt in 3 months — here's what's changed since your last deep dive.", accent: C.teal, actions: ["Brief me", "Ask Atlas"] },
-    { id: "dash-2", icon: "💡", title: "New connection pattern", description: "Your conversations about AI Automation and n8n & Airtable are converging — you may be developing a unified workflow philosophy.", accent: C.pink, actions: ["View diff", "Ask Atlas"] },
-    { id: "dash-3", icon: "📊", title: "Thinking streak active", description: "You've had 12 conversations about CourtCollect this month — that's 3x your average.", accent: C.amber, actions: ["View timeline", "Brief me"] },
+    { id: "dash-1", icon: "◐", title: "Keymaster is cooling", description: "You haven't been back to Keymaster since Dec 2025. Its timeline picks up where you left it.", accent: C.teal, actions: [{ label: "Open timeline", topic: "keymaster" }, { label: "Ask Atlas", view: "companion" }] },
+    { id: "dash-2", icon: "💡", title: "Automation and n8n are converging", description: "AI Automation and n8n & Airtable are linked, and your view on automation has shifted since you started.", accent: C.pink, actions: [{ label: "View diff", view: "beliefDiffs" }, { label: "Brief me", brief: "automation" }] },
+    { id: "dash-3", icon: "📋", title: "CourtCollect has a briefing ready", description: "47 conversations of decisions and open questions, summed up for the next time you pick it up.", accent: C.amber, actions: [{ label: "Brief me", brief: "courtcollect" }, { label: "Open timeline", topic: "courtcollect" }] },
   ],
   timeline: [
-    { id: "time-1", icon: "🔗", title: "Cross-topic connection", description: "This event connects to a similar architecture decision in Web Development from 6 months ago.", accent: C.cyan, actions: ["View connection", "Ask Atlas"] },
-    { id: "time-2", icon: "⚡", title: "Thinking velocity spike", description: "You had 5 conversations on this topic in one week — something was driving urgency.", accent: C.gold, actions: ["Brief me", "Ask Atlas"] },
+    { id: "time-1", icon: "🔗", title: "What this topic touches", description: "See every topic this one links to, and how strongly.", accent: C.cyan, actions: [{ label: "View connections", view: "connections" }, { label: "Ask Atlas", view: "companion" }] },
+    { id: "time-2", icon: "⚡", title: "Picking it back up?", description: "The briefing collects this topic's decisions and open questions in one place.", accent: C.gold, actions: [{ label: "Brief me", brief: "current" }, { label: "Ask Atlas", view: "companion" }] },
   ],
   connections: [
-    { id: "conn-1", icon: "🌐", title: "Potential new connection", description: "Atlas found a potential new connection between Dice or Die and Creative Writing — game narrative design overlaps.", accent: C.violet, actions: ["View diff", "Ask Atlas"] },
-    { id: "conn-2", icon: "💪", title: "Strongest bridge topic", description: "AI Automation connects to 5 other topics — it's your most interconnected area of thinking.", accent: C.pink, actions: ["Brief me", "Ask Atlas"] },
+    { id: "conn-1", icon: "🌐", title: "Your quietest corner", description: "Dice or Die and Creative Writing link only to each other: game narrative is the whole bridge.", accent: C.violet, actions: [{ label: "Open timeline", topic: "gamedev" }, { label: "Ask Atlas", view: "companion" }] },
+    { id: "conn-2", icon: "💪", title: "Strongest bridge topic", description: "AI Automation connects to 5 other topics, more than any other: it is your most interconnected area of thinking.", accent: C.pink, actions: [{ label: "Brief me", brief: "automation" }, { label: "Ask Atlas", view: "companion" }] },
   ],
   evolution: [
-    { id: "evo-1", icon: "🔄", title: "Thinking shifted 3 times", description: "Your thinking on serverless architecture has shifted 3 times — see the diffs between each phase.", accent: C.blue, actions: ["View diff", "Ask Atlas"] },
-    { id: "evo-2", icon: "📈", title: "Deepening pattern", description: "Your conversations are getting longer and more technical — expertise is compounding.", accent: C.green, actions: ["Brief me", "Ask Atlas"] },
+    { id: "evo-1", icon: "🔄", title: "See what changed", description: "Belief Diffs lays your earlier positions beside your current ones, subject by subject.", accent: C.blue, actions: [{ label: "View diff", view: "beliefDiffs" }, { label: "Ask Atlas", view: "companion" }] },
+    { id: "evo-2", icon: "📈", title: "Deepening pattern", description: "Your conversations are getting longer and more technical: expertise is compounding.", accent: C.green, actions: [{ label: "Read the digest", view: "digest" }, { label: "Ask Atlas", view: "companion" }] },
   ],
   conversation: [
-    { id: "conv-1", icon: "⚠️", title: "Possible contradiction", description: "This contradicts a decision you made on Nov 14, 2024 about deployment strategy.", accent: C.red, actions: ["View diff", "Ask Atlas"] },
-    { id: "conv-2", icon: "🔗", title: "Referenced elsewhere", description: "This conversation is referenced in 3 other topic threads — it was a pivotal moment.", accent: C.purple, actions: ["Brief me", "Ask Atlas"] },
+    { id: "conv-1", icon: "⚖️", title: "Has this held up?", description: "Belief Diffs shows which of your positions you later dropped and which held.", accent: C.red, actions: [{ label: "View diff", view: "beliefDiffs" }, { label: "Ask Atlas", view: "companion" }] },
+    { id: "conv-2", icon: "🔗", title: "The rest of the topic", description: "The briefing sums up this topic's decisions and open questions around this conversation.", accent: C.purple, actions: [{ label: "Brief me", brief: "current" }, { label: "Open timeline", topic: "current" }] },
   ],
   companion: [
-    { id: "comp-1", icon: "🎯", title: "Popular question pattern", description: "Most users ask about their decision history first — try 'What decisions have I revisited most?'", accent: C.gold, actions: ["Ask this", "Brief me"] },
-    { id: "comp-2", icon: "🧩", title: "Knowledge gap detected", description: "You've discussed Personal Finance 28 times but never connected it to your automation workflows.", accent: C.lime, actions: ["View connection", "Ask Atlas"] },
+    { id: "comp-1", icon: "🎯", title: "A good first question", description: "Try asking which decisions you have revisited most.", accent: C.gold, actions: [{ label: "Ask this", view: "companion" }] },
+    { id: "comp-2", icon: "🧩", title: "A thin bridge", description: "Personal Finance holds 28 conversations but links to one topic, AI Automation.", accent: C.lime, actions: [{ label: "Open timeline", topic: "finance" }, { label: "View connections", view: "connections" }] },
   ],
 };
 

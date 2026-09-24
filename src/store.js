@@ -16,7 +16,6 @@ const useStore = create((set, get) => ({
   cmdPaletteQuery: '',
   briefingTopic: null,
   tourActive: false,
-  v6TourActive: false,
 
   setView: (view) => set({ view }),
   setSelectedTopic: (topic) => set({ selectedTopic: topic }),
@@ -28,7 +27,6 @@ const useStore = create((set, get) => ({
   openSearch: (query = '') => set({ cmdPaletteOpen: true, cmdPaletteQuery: query }),
   setBriefingTopic: (topic) => set({ briefingTopic: topic }),
   setTourActive: (active) => set({ tourActive: active }),
-  setV6TourActive: (active) => set({ v6TourActive: active }),
 
   navigateTo: (viewId) => {
     if (viewId === 'rewind') set({ showRewind: true });

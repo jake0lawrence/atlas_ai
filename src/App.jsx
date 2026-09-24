@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import {
-  TOPICS, TOUR_STORAGE_KEY, V6_TOUR_STEPS, V6_TOUR_STORAGE_KEY,
+  TOPICS, TOUR_STORAGE_KEY,
 } from './data/constants';
 import useWindowSize from './hooks/useWindowSize';
 import useRouterSync from './hooks/useRouterSync';
@@ -78,8 +78,6 @@ export default function App() {
   const setBriefingTopic = useStore(s => s.setBriefingTopic);
   const tourActive = useStore(s => s.tourActive);
   const setTourActive = useStore(s => s.setTourActive);
-  const v6TourActive = useStore(s => s.v6TourActive);
-  const setV6TourActive = useStore(s => s.setV6TourActive);
   const handleTopicClick = useStore(s => s.handleTopicClick);
   const storeHandleEventClick = useStore(s => s.handleEventClick);
   const navigateTo = useStore(s => s.navigateTo);
@@ -89,23 +87,21 @@ export default function App() {
   const appTimersRef = useRef([]);
 
   useEffect(() => {
-    return () => appTimersRef.current.forEach(clearTimeout);
+    const timers = appTimersRef.current; // one array for the App's lifetime
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   useEffect(() => {
     if (view === "dashboard" && !tourLaunched.current) {
       tourLaunched.current = true;
       try {
+        // First visit to the dashboard since the v7 layout: show the tour once.
         if (!localStorage.getItem(TOUR_STORAGE_KEY)) {
-          // New user: show full tour
           appTimersRef.current.push(setTimeout(() => setTourActive(true), 600));
-        } else if (!localStorage.getItem(V6_TOUR_STORAGE_KEY)) {
-          // Returning v5 user: show "What's New in v6" mini-tour
-          appTimersRef.current.push(setTimeout(() => setV6TourActive(true), 600));
         }
       } catch (e) { console.warn('tour activation:', e); }
     }
-  }, [view]);
+  }, [view, setTourActive]);
 
   useEffect(() => {
     const handleGlobalKey = (e) => {
@@ -126,6 +122,7 @@ export default function App() {
         if (showRewind) { setShowRewind(false); return; }
         if (briefingTopic) { setBriefingTopic(null); return; }
         if (cmdPaletteOpen) return; // handled by CommandPalette itself
+        if (companionSidebarOpen) { toggleCompanionSidebar(); return; }
         if (view === "conversation") { setView("timeline"); setSelectedEvent(null); return; }
         if (view === "timeline") { setView("dashboard"); setSelectedTopic(null); return; }
         if (view === "companion") { setView("dashboard"); return; }
@@ -136,7 +133,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleGlobalKey);
     return () => window.removeEventListener("keydown", handleGlobalKey);
-  }, [view, cmdPaletteOpen, briefingTopic, showRewind, toggleCmdPalette, toggleCompanionSidebar, setShowRewind, setBriefingTopic, setView, setSelectedEvent, setSelectedTopic, setSelectedChain]);
+  }, [view, cmdPaletteOpen, companionSidebarOpen, briefingTopic, showRewind, toggleCmdPalette, toggleCompanionSidebar, setShowRewind, setBriefingTopic, setView, setSelectedEvent, setSelectedTopic, setSelectedChain]);
 
   const maxCount = Math.max(...TOPICS.map(t => t.count));
   const totalWords = TOPICS.reduce((a, t) => a + t.words, 0) + 680000;
@@ -153,6 +150,8 @@ export default function App() {
   const handleCurationSummaryComplete = useCallback(() => setView("dashboard"), [setView]);
   const handleArchaeologyClick = useCallback((chainId) => { setSelectedChain(chainId); setView("archaeology"); }, [setSelectedChain, setView]);
   const handleNavigate = navigateTo;
+  // What a companion suggestion can do: open a page, a topic's timeline, or its briefing.
+  const sidebarActions = { onNavigate: handleNavigate, onTopicClick: handleTopicClick, onBriefMe: setBriefingTopic };
 
   // ─── SYNC HANDLER ────────────────────────────────
   const handleSync = useCallback(() => {
@@ -235,7 +234,8 @@ export default function App() {
           />
         </div>
         <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
-        <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="dashboard" onNavigate={handleNavigate} mobile={mobile} />
+        {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />}
+        <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="archaeology" {...sidebarActions} mobile={mobile} />
       </>
     );
   }
@@ -250,7 +250,8 @@ export default function App() {
           <ConversationDrilldown topicId={selectedEvent.topicId} eventIndex={selectedEvent.eventIndex} onBack={() => { const t = TOPICS.find(x => x.id === selectedEvent.topicId); if (t) setSelectedTopic(t); setView("timeline"); setSelectedEvent(null); }} onHome={() => { setView("dashboard"); setSelectedEvent(null); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} />
         </div>
         <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
-        <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="conversation" onNavigate={handleNavigate} mobile={mobile} />
+        {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />}
+        <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="conversation" currentTopic={TOPICS.find(t => t.id === selectedEvent.topicId)} {...sidebarActions} mobile={mobile} />
       </>
     );
   }
@@ -265,7 +266,8 @@ export default function App() {
           <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} newEvents={syncedNewEvents} />
         </div>
         <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
-        <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="timeline" onNavigate={handleNavigate} mobile={mobile} />
+        {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />}
+        <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="timeline" currentTopic={selectedTopic} {...sidebarActions} mobile={mobile} />
       </>
     );
   }
@@ -304,9 +306,8 @@ export default function App() {
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
       <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
-      <GuidedTour active={v6TourActive} onClose={() => setV6TourActive(false)} mobile={mobile} steps={V6_TOUR_STEPS} storageKey={V6_TOUR_STORAGE_KEY} />
-      {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} mobile={mobile} />}
-      <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view={view} onNavigate={handleNavigate} mobile={mobile} />
+      {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />}
+      <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view={view} {...sidebarActions} mobile={mobile} />
     </div>
     </ErrorBoundary>
   );
