@@ -117,7 +117,11 @@ export const SWEEP_ROUTES = [
     await page.getByRole('button', { name: /still being written/ }).click();
   } },
   // A decision chain with one step picked on the arc, its card highlighted.
+  // The step scrolls its card into view; the fixed companion tab can land a
+  // pixel off after that (it did in CI, 68 pixels), so it is hidden here as
+  // in companion-answer. Every other route still captures the tab.
   { path: '/archaeology/why-vercel', id: 'archaeology-step', mobile: true, setup: async (page) => {
+    await page.addStyleTag({ content: '[data-tour="companion-sidebar"] { visibility: hidden !important; }' });
     await page.getByRole('button', { name: /^Challenging, / }).click();
     await page.clock.runFor(100).catch(() => page.waitForTimeout(100));
     await page.evaluate(() => window.scrollTo(0, 0));
