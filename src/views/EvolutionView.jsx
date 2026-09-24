@@ -1,235 +1,266 @@
-import { useState, useRef } from "react";
-import {
-  PLATFORM_INSIGHTS, EVOLUTION_PHASES, PIVOT_ENTRIES,
-} from '../data/constants';
-import { FONTS, BODY, MONO } from '../styles/base';
-import { C, alpha, white, black } from '../styles/tokens';
-import { grow, title, lede, monoSmall } from '../styles/shared';
+import { useState } from "react";
+import { TOPICS, PLATFORM_INSIGHTS, EVOLUTION_PHASES, PIVOT_ENTRIES } from '../data/constants';
+import { C, alpha, white, black, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
 
-const EvolutionView = ({ mobile, onRewind }) => {
-  const [expanded, setExpanded] = useState(null);
-  const [evoTab, setEvoTab] = useState("timeline");
-  const [pivotAnnotations, setPivotAnnotations] = useState(() => {
-    const initial = {};
-    PIVOT_ENTRIES.forEach(p => { if (p.annotation) initial[p.id] = p.annotation; });
-    return initial;
-  });
-  const [editingPivot, setEditingPivot] = useState(null);
-  const [expandedPivot, setExpandedPivot] = useState(null);
-  const annotationRef = useRef(null);
+// ─── The phases, as data ────────────────────────────────────────
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  const handleSaveAnnotation = (pivotId, text) => {
-    setPivotAnnotations(prev => ({ ...prev, [pivotId]: text }));
-    setEditingPivot(null);
-  };
+// "Dec 2025" -> months since year 0, or null when it does not parse.
+export const monthIndex = (text) => {
+  const m = /^([A-Z][a-z]{2}) (\d{4})$/.exec(text.trim());
+  if (!m || !MONTHS.includes(m[1])) return null;
+  return Number(m[2]) * 12 + MONTHS.indexOf(m[1]);
+};
 
-  const evoTabs = [
-    { id: "timeline", label: "Timeline", icon: "◇" },
-    { id: "pivots", label: "Pivots", icon: "↩️" },
-  ];
+// "Jan – Jun 2023" or "Jul 2025 – Feb 2026" -> { start, end, label: "Jan 2023" }.
+// A start month without a year takes the end's year.
+export const phaseRange = (period) => {
+  const [a, b] = period.split("–").map(s => s.trim());
+  const endYear = b.slice(-4);
+  const startText = /\d{4}$/.test(a) ? a : `${a} ${endYear}`;
+  return { start: monthIndex(startText), end: monthIndex(b), label: startText };
+};
 
+// The index of the phase a "Mon YYYY" date falls in, or -1.
+export const phaseOf = (date, phases = EVOLUTION_PHASES) => {
+  const at = monthIndex(date);
+  return phases.findIndex(p => { const r = phaseRange(p.period); return at >= r.start && at <= r.end; });
+};
+
+const TOPIC_BY_NAME = Object.fromEntries(TOPICS.map(t => [t.name, t]));
+const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+const TOTAL = EVOLUTION_PHASES.reduce((a, p) => a + p.conversations, 0);
+const PEAK = Math.max(...EVOLUTION_PHASES.map(p => p.conversations));
+const PIVOTS_BY_PHASE = EVOLUTION_PHASES.map((_, i) => PIVOT_ENTRIES.filter(p => phaseOf(p.date) === i));
+
+// ─── Pieces ─────────────────────────────────────────────────────
+const sectionTitle = { fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 600, color: white(0.55), textTransform: "uppercase", letterSpacing: "0.08em", margin: `0 0 ${SPACE.md}px` };
+const label = { fontFamily: MONO, fontSize: TYPE.xs, color: white(0.55), textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: SPACE.xs };
+const list = { listStyle: "none", margin: 0, padding: 0 };
+const smallButton = (color = C.white, primary) => ({
+  fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 600, color: primary ? C.bg0 : color,
+  background: primary ? color : alpha(color, 0.07), border: `1px solid ${primary ? color : alpha(color, 0.3)}`,
+  borderRadius: 8, padding: `${SPACE.xs + 2}px ${SPACE.md}px`, cursor: "pointer", flexShrink: 0,
+});
+
+// The signature piece: one bar per phase, height by conversations, with the
+// pivots that happened in it marked underneath. Each bar selects its phase.
+const PhaseBand = ({ selected, onSelect, mobile }) => (
+  <div role="group" aria-label="Phases" style={{ display: "grid", gridTemplateColumns: `repeat(${EVOLUTION_PHASES.length}, 1fr)`, gap: mobile ? SPACE.xs : SPACE.sm, alignItems: "end" }}>
+    {EVOLUTION_PHASES.map((p, i) => {
+      const on = i === selected;
+      const pivots = PIVOTS_BY_PHASE[i];
+      return (
+        <button key={p.title} onClick={() => onSelect(i)} aria-pressed={on}
+          aria-label={`${p.title}, ${p.period}: ${p.conversations} conversations${pivots.length ? `, ${pivots.length} pivot${pivots.length > 1 ? "s" : ""}` : ""}`}
+          style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: SPACE.xs, background: "none", border: "none", padding: 0, cursor: "pointer", minWidth: 0 }}>
+          <span style={{ fontFamily: MONO, fontSize: mobile ? TYPE.xs : TYPE.sm, fontWeight: 700, color: on ? p.color : white(0.6), textAlign: "center" }}>{p.conversations}</span>
+          <span aria-hidden="true" style={{
+            height: Math.round((mobile ? 110 : 150) * p.conversations / PEAK), borderRadius: "6px 6px 2px 2px",
+            background: on ? p.color : alpha(p.color, 0.35), border: `1px solid ${on ? p.color : alpha(p.color, 0.6)}`,
+          }} />
+          <span aria-hidden="true" style={{ display: "flex", justifyContent: "center", gap: 3, minHeight: 10 }}>
+            {pivots.map(pv => <span key={pv.id} style={{ width: 8, height: 8, transform: "rotate(45deg)", background: C.purple }} />)}
+          </span>
+          <span style={{ fontFamily: BODY, fontSize: TYPE.xs, color: on ? C.white : white(0.6), fontWeight: on ? 600 : 400, textAlign: "center", lineHeight: 1.3 }}>
+            {mobile ? phaseRange(p.period).label.replace(/^(\w{3}) \d\d(\d\d)$/, "$1 ’$2") : phaseRange(p.period).label}
+          </span>
+        </button>
+      );
+    })}
+  </div>
+);
+
+const TopicChip = ({ name, onTopicClick }) => {
+  const t = TOPIC_BY_NAME[name];
+  const style = { fontFamily: BODY, fontSize: TYPE.sm, color: t ? t.color : white(0.7), background: t ? alpha(t.color, 0.08) : white(0.04), border: `1px solid ${t ? alpha(t.color, 0.3) : white(0.1)}`, borderRadius: 6, padding: `2px ${SPACE.sm + 2}px` };
+  return t && onTopicClick
+    ? <button onClick={() => onTopicClick(t)} aria-label={`Open the ${t.name} timeline`} style={{ ...style, cursor: "pointer" }}>{t.icon} {t.name}</button>
+    : <span style={style}>{name}</span>;
+};
+
+const Pivot = ({ pivot, open, onToggle, annotation, editing, onEdit, onSave, onCancel, onTopicClick, mobile }) => {
+  const [draft, setDraft] = useState(annotation || "");
+  const topic = TOPIC_BY_ID[pivot.topicId];
+  const detailId = `pivot-${pivot.id}`;
   return (
-    <div>
-      <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <h2 style={title(mobile)}>How You Evolved</h2>
-        <p style={lede(mobile)}>From asking "how do I" to designing entire systems.</p>
-        {onRewind && (
-          <button onClick={onRewind} style={{
-            fontFamily: BODY, fontSize: mobile ? 11 : 12, fontWeight: 500,
-            color: C.pink, background: alpha(C.pink, 0.08),
-            border: `1px solid ${alpha(C.pink, 0.2)}`, borderRadius: 8,
-            padding: mobile ? "7px 14px" : "8px 18px", cursor: "pointer",
-            transition: "all 0.25s", marginTop: 12,
-            display: "inline-flex", alignItems: "center", gap: 6,
-          }}>
-            <span style={{ fontSize: 14 }}>⏪</span> Watch It Build
-          </button>
-        )}
-      </div>
+    <article id={`${detailId}-card`} aria-label={pivot.title} style={{ background: open ? alpha(pivot.topicColor, 0.04) : white(0.02), border: `1px solid ${open ? alpha(pivot.topicColor, 0.3) : white(0.07)}`, borderRadius: 14 }}>
+      <button onClick={onToggle} aria-expanded={open} aria-controls={detailId}
+        style={{ display: "flex", alignItems: "center", gap: SPACE.md, width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer", padding: mobile ? SPACE.md : `${SPACE.lg}px ${SPACE.xl}px` }}>
+        <span aria-hidden="true" style={{ fontSize: 20, flexShrink: 0 }}>{pivot.topicIcon}</span>
+        <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: SPACE.sm, flexWrap: "wrap", fontFamily: BODY, fontSize: TYPE.sm }}>
+            <span style={{ fontFamily: MONO, color: pivot.topicColor }}>{pivot.date}</span>
+            <span style={{ color: white(0.6) }}>{pivot.topicName}</span>
+            <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: annotation ? C.green : C.gold }}>{annotation ? "Annotated" : "Not annotated"}</span>
+          </span>
+          <span style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.md : TYPE.lg - 2, fontWeight: 600, color: C.white, lineHeight: 1.3 }}>{pivot.title}</span>
+        </span>
+        <span aria-hidden="true" style={{ color: white(0.5), transform: open ? "rotate(90deg)" : "none", flexShrink: 0 }}>▸</span>
+      </button>
 
-      {/* Tab switcher */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 28 }}>
-        {evoTabs.map(tab => (
-          <button key={tab.id} onClick={() => setEvoTab(tab.id)} style={{
-            fontFamily: BODY, fontSize: mobile ? 11 : 12, fontWeight: evoTab === tab.id ? 600 : 400,
-            color: evoTab === tab.id ? C.bg0 : white(0.4),
-            background: evoTab === tab.id ? C.purple : white(0.04),
-            border: `1px solid ${evoTab === tab.id ? C.purple : white(0.08)}`,
-            borderRadius: 8, padding: mobile ? "7px 16px" : "8px 20px", cursor: "pointer",
-            transition: "all 0.25s", display: "inline-flex", alignItems: "center", gap: 6,
-          }}>
-            <span style={{ fontSize: 13 }}>{tab.icon}</span> {tab.label}
-            {tab.id === "pivots" && <span style={{
-              fontFamily: MONO, fontSize: 9, background: evoTab === tab.id ? black(0.2) : alpha(C.purple, 0.15),
-              color: evoTab === tab.id ? black(0.6) : C.purple,
-              padding: "1px 6px", borderRadius: 8, marginLeft: 2,
-            }}>{PIVOT_ENTRIES.length}</span>}
-          </button>
-        ))}
-      </div>
-
-      {evoTab === "timeline" ? (
-        <>
-          <div style={{ position: "relative", paddingLeft: mobile ? 32 : 40 }}>
-            <div style={{ position: "absolute", left: mobile ? 12 : 16, top: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${C.blue}, ${C.green}, ${C.amber}, ${C.red}, ${C.purple}, ${C.pink})` }} />
-            {EVOLUTION_PHASES.map((phase, i) => (
-              <div key={i} style={{ marginBottom: 16, position: "relative", cursor: "pointer" }} onClick={() => setExpanded(expanded === i ? null : i)}>
-                <div style={{ position: "absolute", left: mobile ? -26 : -30, top: 8, width: mobile ? 16 : 20, height: mobile ? 16 : 20, borderRadius: "50%", background: phase.color, border: `3px solid ${C.bg0}`, boxShadow: `0 0 10px ${phase.color}35` }} />
-                <div style={{
-                  background: expanded === i ? `linear-gradient(135deg, ${phase.color}0C, transparent)` : white(0.025),
-                  border: `1px solid ${expanded === i ? phase.color + "28" : white(0.06)}`,
-                  borderRadius: 12, padding: expanded === i ? (mobile ? "16px 18px" : "20px 24px") : (mobile ? "14px 16px" : "16px 20px"), transition: "all 0.3s",
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                    <div style={{ minWidth: 0 }}>
-                      <span style={{ fontFamily: MONO, fontSize: mobile ? 10 : 11, color: phase.color }}>{phase.period}</span>
-                      <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: C.white, margin: "3px 0 0", fontWeight: 600 }}>{phase.title}</h3>
-                    </div>
-                    <div style={{ fontFamily: BODY, fontSize: mobile ? 20 : 24, fontWeight: 700, color: phase.color + "50", flexShrink: 0 }}>{phase.conversations}</div>
-                  </div>
-                  {expanded === i && (
-                    <div style={{ marginTop: 10 }} className="fade-up">
-                      <p style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.5), lineHeight: 1.6 }}>{phase.desc}</p>
-                      <div style={{ fontFamily: MONO, fontSize: 10, color: white(0.2), marginTop: 8 }}>{phase.conversations} conversations</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+      {open && (
+        <div id={detailId} style={{ padding: mobile ? `0 ${SPACE.md}px ${SPACE.md}px` : `0 ${SPACE.xl}px ${SPACE.xl}px`, display: "flex", flexDirection: "column", gap: SPACE.lg }}>
+          <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr auto 1fr", gap: SPACE.sm, alignItems: "center" }}>
+            <div style={{ padding: SPACE.md, borderRadius: 8, background: white(0.03), border: `1px solid ${white(0.08)}` }}>
+              <div style={label}>Before</div>
+              <div style={{ fontFamily: BODY, fontSize: TYPE.base, color: white(0.7), lineHeight: 1.5 }}>{pivot.before}</div>
+            </div>
+            <span aria-hidden="true" style={{ color: C.purple, textAlign: "center" }}>{mobile ? "↓" : "→"}</span>
+            <div style={{ padding: SPACE.md, borderRadius: 8, background: alpha(C.purple, 0.06), border: `1px solid ${alpha(C.purple, 0.25)}` }}>
+              <div style={{ ...label, color: C.purple }}>After</div>
+              <div style={{ fontFamily: BODY, fontSize: TYPE.base, color: white(0.85), lineHeight: 1.5 }}>{pivot.after}</div>
+            </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 14, marginTop: 36 }}>
-            {PLATFORM_INSIGHTS.map((p, i) => (
-              <div key={i} style={{ background: `linear-gradient(135deg, ${p.color}06, transparent)`, border: `1px solid ${p.color}18`, borderRadius: 12, padding: mobile ? "16px 18px" : "20px 24px" }}>
-                <h4 style={{ fontFamily: BODY, fontSize: 12, color: p.color, fontWeight: 600, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>{p.label}</h4>
-                {p.items.map((item, j) => (
-                  <div key={j} style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.45), padding: "4px 0", borderBottom: j < p.items.length - 1 ? `1px solid ${white(0.04)}` : "none" }}>{item}</div>
-                ))}
-              </div>
-            ))}
+
+          <div>
+            <div style={label}>What changed it</div>
+            <p style={{ margin: 0, fontFamily: BODY, fontSize: TYPE.base, color: white(0.75), lineHeight: 1.55 }}>{pivot.trigger}</p>
           </div>
-        </>
-      ) : (
-        /* ── Pivots Tab ── */
-        <div style={{ display: "flex", flexDirection: "column", gap: mobile ? 14 : 18 }}>
-          <p style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.3), textAlign: "center", marginBottom: 4 }}>
-            Auto-detected moments where your thinking shifted. Annotate to build your decision journal.
-          </p>
-          {PIVOT_ENTRIES.map((pivot) => {
-            const isOpen = expandedPivot === pivot.id;
-            const annotation = pivotAnnotations[pivot.id];
-            const isEditing = editingPivot === pivot.id;
-            return (
-              <div key={pivot.id} className="fade-up" style={{
-                background: isOpen ? `linear-gradient(135deg, ${pivot.topicColor}08, transparent)` : white(0.025),
-                border: `1px solid ${isOpen ? pivot.topicColor + "25" : white(0.06)}`,
-                borderRadius: 14, overflow: "hidden", transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
-              }}>
-                {/* Pivot header */}
-                <div onClick={() => setExpandedPivot(isOpen ? null : pivot.id)} role="button" tabIndex={0}
-                  onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedPivot(isOpen ? null : pivot.id); } }}
-                  style={{ padding: mobile ? "14px 16px" : "18px 24px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 20, flexShrink: 0 }}>{pivot.topicIcon}</span>
-                  <div style={grow}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 3 }}>
-                      <span style={{ fontFamily: MONO, fontSize: mobile ? 9 : 10, color: pivot.topicColor }}>{pivot.date}</span>
-                      <span style={monoSmall}>·</span>
-                      <span style={{ fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.35) }}>{pivot.topicName}</span>
-                      {annotation ? (
-                        <span style={{ fontFamily: MONO, fontSize: 9, color: C.green, background: alpha(C.green, 0.1), padding: "1px 7px", borderRadius: 8 }}>annotated</span>
-                      ) : (
-                        <span style={{ fontFamily: MONO, fontSize: 9, color: C.gold, background: alpha(C.gold, 0.1), padding: "1px 7px", borderRadius: 8 }}>awaiting annotation</span>
-                      )}
-                    </div>
-                    <h4 style={{ fontFamily: FONTS, fontSize: mobile ? 14 : 16, color: C.white, fontWeight: 600 }}>{pivot.title}</h4>
-                  </div>
-                  <span style={{ fontFamily: BODY, fontSize: 18, color: white(0.15), transition: "transform 0.25s", transform: isOpen ? "rotate(90deg)" : "rotate(0)", flexShrink: 0 }}>▸</span>
+
+          <div>
+            <div style={label}>Topics it touched</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: SPACE.xs + 2 }}>
+              {topic && !pivot.impact.includes(topic.name) && <TopicChip name={topic.name} onTopicClick={onTopicClick} />}
+              {pivot.impact.map(name => <TopicChip key={name} name={name} onTopicClick={onTopicClick} />)}
+            </div>
+          </div>
+
+          <div style={{ padding: SPACE.md, borderRadius: 8, background: annotation ? alpha(C.green, 0.05) : white(0.02), border: `1px solid ${annotation ? alpha(C.green, 0.25) : white(0.08)}` }}>
+            {editing ? (
+              <form onSubmit={(e) => { e.preventDefault(); onSave(draft); }}>
+                <label htmlFor={`${detailId}-note`} style={{ ...label, display: "block" }}>Why did your thinking change?</label>
+                <textarea id={`${detailId}-note`} value={draft} onChange={e => setDraft(e.target.value)} rows={3}
+                  placeholder="What you learned, in your words"
+                  style={{ width: "100%", boxSizing: "border-box", fontFamily: BODY, fontSize: TYPE.base, color: C.white, background: black(0.3), border: `1px solid ${alpha(C.purple, 0.4)}`, borderRadius: 6, padding: SPACE.sm, resize: "vertical", lineHeight: 1.5 }} />
+                <div style={{ display: "flex", gap: SPACE.sm, justifyContent: "flex-end", marginTop: SPACE.sm }}>
+                  <button type="button" onClick={() => { setDraft(annotation || ""); onCancel(); }} style={smallButton()}>Cancel</button>
+                  <button type="submit" style={smallButton(C.purple, true)}>Save</button>
                 </div>
-
-                {/* Expanded pivot detail */}
-                {isOpen && (
-                  <div style={{ padding: mobile ? "0 16px 16px" : "0 24px 24px", borderTop: `1px solid ${white(0.05)}`, paddingTop: mobile ? 12 : 16 }} className="fade-up">
-                    {/* Before → After */}
-                    <div style={{ display: "flex", alignItems: mobile ? "stretch" : "center", flexDirection: mobile ? "column" : "row", gap: mobile ? 8 : 14, marginBottom: 16 }}>
-                      <div style={{ flex: 1, padding: mobile ? "10px 12px" : "12px 16px", background: alpha(C.red, 0.05), borderRadius: 8, border: `1px solid ${alpha(C.red, 0.12)}` }}>
-                        <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.red, 0.5), textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Before</div>
-                        <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.5), lineHeight: 1.5 }}>{pivot.before}</div>
-                      </div>
-                      <span style={{ fontFamily: BODY, fontSize: 16, color: alpha(C.purple, 0.4), flexShrink: 0, textAlign: "center" }}>→</span>
-                      <div style={{ flex: 1, padding: mobile ? "10px 12px" : "12px 16px", background: alpha(C.green, 0.05), borderRadius: 8, border: `1px solid ${alpha(C.green, 0.12)}` }}>
-                        <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.green, 0.5), textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>After</div>
-                        <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.5), lineHeight: 1.5 }}>{pivot.after}</div>
-                      </div>
-                    </div>
-
-                    {/* Trigger */}
-                    <div style={{ marginBottom: 16, padding: mobile ? "10px 12px" : "12px 16px", background: alpha(C.gold, 0.04), borderRadius: 8, border: `1px solid ${alpha(C.gold, 0.1)}` }}>
-                      <div style={{ fontFamily: MONO, fontSize: 9, color: alpha(C.gold, 0.5), textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Trigger</div>
-                      <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.45), lineHeight: 1.5 }}>{pivot.trigger}</div>
-                    </div>
-
-                    {/* Impact assessment */}
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontFamily: MONO, fontSize: 9, color: white(0.25), textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Affected Topics</div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {pivot.impact.map((topic, i) => (
-                          <span key={i} style={{
-                            fontFamily: BODY, fontSize: mobile ? 10 : 11, color: white(0.4),
-                            background: white(0.04), border: `1px solid ${white(0.08)}`,
-                            borderRadius: 6, padding: "3px 10px",
-                          }}>{topic}</span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Annotation field */}
-                    <div style={{ padding: mobile ? "10px 12px" : "12px 16px", background: annotation ? alpha(C.green, 0.04) : alpha(C.purple, 0.04), borderRadius: 8, border: `1px solid ${annotation ? alpha(C.green, 0.12) : alpha(C.purple, 0.12)}` }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                        <div style={{ fontFamily: MONO, fontSize: 9, color: annotation ? alpha(C.green, 0.5) : alpha(C.purple, 0.5), textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                          {annotation ? "Your Annotation" : "Changed my mind because..."}
-                        </div>
-                        {!isEditing && (
-                          <button onClick={(e) => { e.stopPropagation(); setEditingPivot(pivot.id); }} style={{
-                            fontFamily: BODY, fontSize: 10, color: C.purple, background: alpha(C.purple, 0.08),
-                            border: `1px solid ${alpha(C.purple, 0.15)}`, borderRadius: 6, padding: "3px 10px", cursor: "pointer",
-                          }}>{annotation ? "Edit" : "Annotate"}</button>
-                        )}
-                      </div>
-                      {isEditing ? (
-                        <div>
-                          <textarea ref={annotationRef} defaultValue={annotation || ""} placeholder="Why did your thinking change? What did you learn?"
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                              width: "100%", minHeight: 70, fontFamily: BODY, fontSize: mobile ? 11 : 12,
-                              color: white(0.6), background: black(0.3), border: `1px solid ${alpha(C.purple, 0.2)}`,
-                              borderRadius: 6, padding: "8px 10px", resize: "vertical", outline: "none", lineHeight: 1.5,
-                            }} />
-                          <div style={{ display: "flex", gap: 8, marginTop: 8, justifyContent: "flex-end" }}>
-                            <button onClick={(e) => { e.stopPropagation(); setEditingPivot(null); }} style={{
-                              fontFamily: BODY, fontSize: 10, color: white(0.3), background: "transparent",
-                              border: `1px solid ${white(0.08)}`, borderRadius: 6, padding: "4px 12px", cursor: "pointer",
-                            }}>Cancel</button>
-                            <button onClick={(e) => { e.stopPropagation(); handleSaveAnnotation(pivot.id, annotationRef.current?.value || ""); }} style={{
-                              fontFamily: BODY, fontSize: 10, color: C.bg0, background: C.purple,
-                              border: "none", borderRadius: 6, padding: "4px 12px", cursor: "pointer", fontWeight: 600,
-                            }}>Save</button>
-                          </div>
-                        </div>
-                      ) : annotation ? (
-                        <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.45), lineHeight: 1.5, fontStyle: "italic" }}>"{annotation}"</div>
-                      ) : (
-                        <div style={{ fontFamily: BODY, fontSize: mobile ? 11 : 12, color: white(0.2), lineHeight: 1.5, fontStyle: "italic" }}>Click "Annotate" to record why your thinking changed...</div>
-                      )}
-                    </div>
-                  </div>
-                )}
+              </form>
+            ) : (
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: SPACE.md }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ ...label, color: annotation ? C.green : white(0.55) }}>{annotation ? "Your note" : "No note yet"}</div>
+                  <p style={{ margin: 0, fontFamily: BODY, fontSize: TYPE.base, color: annotation ? white(0.8) : white(0.55), lineHeight: 1.55 }}>
+                    {annotation || "Say why your thinking changed, so the next time it comes up you have your own reasons, not just the outcome."}
+                  </p>
+                </div>
+                <button onClick={onEdit} style={smallButton(C.purple)}>{annotation ? "Edit" : "Add a note"}</button>
               </div>
-            );
-          })}
-          <div style={{ textAlign: "center", marginTop: 8, fontFamily: MONO, fontSize: mobile ? 9 : 10, color: white(0.15) }}>
-            {PIVOT_ENTRIES.length} pivots detected · {PIVOT_ENTRIES.filter(p => pivotAnnotations[p.id]).length} annotated
+            )}
           </div>
         </div>
       )}
+    </article>
+  );
+};
+
+// ─── The view ───────────────────────────────────────────────────
+const EvolutionView = ({ mobile, onRewind, onTopicClick }) => {
+  const [selected, setSelected] = useState(EVOLUTION_PHASES.length - 1);
+  const [openPivot, setOpenPivot] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [notes, setNotes] = useState(() => Object.fromEntries(PIVOT_ENTRIES.filter(p => p.annotation).map(p => [p.id, p.annotation])));
+  const phase = EVOLUTION_PHASES[selected];
+  const phasePivots = PIVOTS_BY_PHASE[selected];
+  const noted = PIVOT_ENTRIES.filter(p => notes[p.id]).length;
+  const first = EVOLUTION_PHASES[0];
+  const last = EVOLUTION_PHASES.at(-1);
+
+  const open = (id) => { setOpenPivot(id); setEditing(null); };
+  // From the phase panel: open the pivot and bring it into view.
+  const showPivot = (id) => {
+    open(id);
+    const smooth = !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => document.getElementById(`pivot-${id}-card`)?.scrollIntoView?.({ behavior: smooth ? "smooth" : "auto", block: "start" }));
+  };
+  const save = (id, text) => {
+    const t = text.trim();
+    setNotes(prev => { const next = { ...prev }; if (t) next[id] = t; else delete next[id]; return next; });
+    setEditing(null);
+  };
+
+  return (
+    <div style={{ maxWidth: 960, margin: "0 auto" }}>
+      <header style={{ display: "flex", alignItems: mobile ? "flex-start" : "flex-end", justifyContent: "space-between", gap: SPACE.lg, flexDirection: mobile ? "column" : "row", marginBottom: SPACE.xl }}>
+        <div style={{ maxWidth: 640 }}>
+          <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xl : TYPE.xxl, fontWeight: 800, color: C.white, letterSpacing: "-0.01em", margin: 0 }}>How you <span style={{ color: C.purple }}>evolved</span></h1>
+          <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.base : TYPE.md, color: white(0.6), lineHeight: 1.55, margin: `${SPACE.sm}px 0 0` }}>
+            {TOTAL.toLocaleString("en-US")} conversations in {EVOLUTION_PHASES.length} phases, from {first.title} ({phaseRange(first.period).label}) to {last.title} today, and {PIVOT_ENTRIES.length} pivots where your thinking changed.
+          </p>
+        </div>
+        {onRewind && (
+          <button onClick={onRewind} style={smallButton(C.pink)}><span aria-hidden="true">⏪ </span>Watch it build</button>
+        )}
+      </header>
+
+      <section aria-labelledby="ev-phases" style={{ background: white(0.02), border: `1px solid ${white(0.07)}`, borderRadius: 16, padding: mobile ? SPACE.md : SPACE.xl, marginBottom: SPACE.xxl }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: SPACE.md, flexWrap: "wrap", marginBottom: SPACE.lg }}>
+          <h2 id="ev-phases" style={{ ...sectionTitle, margin: 0 }}>Conversations per phase</h2>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: SPACE.xs + 2, fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6) }}>
+            <span aria-hidden="true" style={{ width: 8, height: 8, transform: "rotate(45deg)", background: C.purple }} />a pivot in that phase
+          </span>
+        </div>
+        <PhaseBand selected={selected} onSelect={setSelected} mobile={mobile} />
+
+        <div role="region" aria-live="polite" aria-label={`${phase.title}, selected phase`} style={{ marginTop: SPACE.xl, paddingTop: SPACE.lg, borderTop: `1px solid ${white(0.07)}` }}>
+          <div style={{ fontFamily: MONO, fontSize: TYPE.xs, color: phase.color, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Phase {selected + 1} of {EVOLUTION_PHASES.length} · {phase.period}
+          </div>
+          <h3 style={{ fontFamily: FONTS, fontSize: TYPE.xl, fontWeight: 700, color: C.white, margin: `${SPACE.xs}px 0 ${SPACE.sm}px` }}>{phase.title}</h3>
+          <p style={{ margin: 0, fontFamily: BODY, fontSize: TYPE.base, color: white(0.75), lineHeight: 1.6, maxWidth: 720 }}>
+            {phase.desc} <span style={{ color: white(0.55) }}>{phase.conversations} conversations, {Math.round(100 * phase.conversations / TOTAL)}% of the archive.</span>
+          </p>
+          {phasePivots.length > 0 && (
+            <ul aria-label={`Pivots in ${phase.title}`} style={{ ...list, display: "flex", flexWrap: "wrap", gap: SPACE.sm, marginTop: SPACE.md }}>
+              {phasePivots.map(p => (
+                <li key={p.id}>
+                  <button onClick={() => showPivot(p.id)} style={{ ...smallButton(C.purple), textAlign: "left", fontWeight: 500 }}>
+                    <span aria-hidden="true">◆ </span>{p.date}: {p.title}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      <section aria-labelledby="ev-pivots" style={{ marginBottom: SPACE.xxl }}>
+        <h2 id="ev-pivots" style={sectionTitle}>Pivots · {noted} of {PIVOT_ENTRIES.length} with your note</h2>
+        <p style={{ margin: `0 0 ${SPACE.md}px`, fontFamily: BODY, fontSize: TYPE.base, color: white(0.6), lineHeight: 1.55 }}>
+          Moments Atlas found where a decision reversed. Add a note to say why, in your words.
+        </p>
+        <ol style={{ ...list, display: "flex", flexDirection: "column", gap: SPACE.sm }}>
+          {PIVOT_ENTRIES.map(p => (
+            <li key={p.id}>
+              <Pivot
+                key={`${p.id}:${notes[p.id] || ""}`}
+                pivot={p} mobile={mobile} onTopicClick={onTopicClick}
+                open={openPivot === p.id} onToggle={() => open(openPivot === p.id ? null : p.id)}
+                annotation={notes[p.id]} editing={editing === p.id}
+                onEdit={() => setEditing(p.id)} onCancel={() => setEditing(null)} onSave={(text) => save(p.id, text)}
+              />
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section aria-labelledby="ev-platforms">
+        <h2 id="ev-platforms" style={sectionTitle}>Which assistant, for what</h2>
+        <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: SPACE.md }}>
+          {PLATFORM_INSIGHTS.map(p => (
+            <div key={p.label} style={{ background: alpha(p.color, 0.04), border: `1px solid ${alpha(p.color, 0.25)}`, borderRadius: 12, padding: mobile ? SPACE.md : `${SPACE.lg}px ${SPACE.xl}px` }}>
+              <h3 style={{ fontFamily: BODY, fontSize: TYPE.sm, color: p.color, fontWeight: 600, margin: `0 0 ${SPACE.sm}px`, textTransform: "uppercase", letterSpacing: "0.06em" }}>{p.label}</h3>
+              <ul style={list}>
+                {p.items.map((item, j) => (
+                  <li key={item} style={{ fontFamily: BODY, fontSize: TYPE.base, color: white(0.75), padding: `${SPACE.xs + 1}px 0`, borderBottom: j < p.items.length - 1 ? `1px solid ${white(0.06)}` : "none" }}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };

@@ -39,7 +39,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/companion/diff', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/companion/diff', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -94,6 +94,13 @@ export const SWEEP_ROUTES = [
     await page.getByRole('button', { name: /It happened/ }).click();
     await page.getByRole('button', { name: /Continue to the summary/ }).click();
     await page.getByRole('heading', { name: /Where the run/ }).waitFor();
+  } },
+  // Evolution with an earlier phase selected and a pivot open, its note form out.
+  { path: '/evolution', id: 'evolution-pivot', mobile: true, setup: async (page) => {
+    await page.getByRole('button', { name: /^The Builder,/ }).click();
+    const card = page.getByRole('article', { name: /^From 'automate everything'/ });
+    await card.getByRole('button').first().click();
+    await card.getByRole('button', { name: 'Add a note' }).click();
   } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
