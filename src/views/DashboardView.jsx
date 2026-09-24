@@ -149,8 +149,8 @@ const DashboardView = ({ mobile, tablet, totalConvos, totalWords, maxCount, onTo
           sub={`${TOPICS.length} topics, sized by conversation count. ${mobile ? "Tap" : "Hover or click"} one to explore it.`}
           action={
             <button data-tour="rewind-btn" onClick={onRewind} style={{
-              fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 500, color: C.pink, background: alpha(C.pink, 0.08),
-              border: `1px solid ${alpha(C.pink, 0.25)}`, borderRadius: 8, padding: `${SPACE.sm - 2}px ${SPACE.md}px`,
+              fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 500, color: C.purple, background: alpha(C.purple, 0.08),
+              border: `1px solid ${alpha(C.purple, 0.25)}`, borderRadius: 8, padding: `${SPACE.sm - 2}px ${SPACE.md}px`,
               cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
             }}><span aria-hidden>⏪</span> Rewind</button>
           } />

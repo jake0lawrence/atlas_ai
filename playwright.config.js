@@ -13,7 +13,10 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
-    reducedMotion: 'reduce',
+    // Not a top-level `use` option in this Playwright version: there it is
+    // silently ignored and matchMedia reads false. It has to go through
+    // contextOptions to reach the page.
+    contextOptions: { reducedMotion: 'reduce' },
     ...devices['Desktop Chrome'],
     viewport: { width: 1280, height: 900 },
   },

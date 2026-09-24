@@ -278,8 +278,8 @@ const AddForm = ({ items, dispatch, onClose }) => {
           <label key={k} style={{ display: "flex", flexDirection: "column", gap: SPACE.xs, fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6) }}>
             {text}
             <select value={draft[k]} onChange={set(k)} style={field}>
-              <option value="" style={{ background: C.navy }}>Choose…</option>
-              {TOPICS.map(t => <option key={t.id} value={t.id} style={{ background: C.navy }}>{t.name}</option>)}
+              <option value="" style={{ background: C.bg2 }}>Choose…</option>
+              {TOPICS.map(t => <option key={t.id} value={t.id} style={{ background: C.bg2 }}>{t.name}</option>)}
             </select>
           </label>
         ))}
