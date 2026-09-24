@@ -102,6 +102,10 @@ export const SWEEP_ROUTES = [
     await card.getByRole('button').first().click();
     await card.getByRole('button', { name: 'Add a note' }).click();
   } },
+  // Connections with one topic selected: its links lit, its panel open.
+  { path: '/connections', id: 'connections-topic', mobile: true, setup: async (page) => {
+    await page.getByRole('button', { name: /^Job Search: / }).click();
+  } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
 ];
