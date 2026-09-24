@@ -16,7 +16,6 @@ export const PATH_TO_VIEW = {
   '/companion/live': 'liveCapture',
   '/evolution': 'evolution',
   '/connections': 'connections',
-  '/search': 'search',
   '/export': 'export',
 };
 
@@ -33,6 +32,7 @@ export const DEEP_LINKS = [
   { path: '/archaeology/why-typescript', view: 'archaeology' },
   { path: '/archaeology/nope', view: 'archaeology', note: 'unknown chain: the designed not-found page' },
   { path: '/companion/rewind', view: 'dashboard', overlay: 'rewind' },
+  { path: '/search', view: 'dashboard', overlay: 'search', note: 'not a page: opens the ⌘K palette and hands the URL back' },
   { path: '/nope', view: 'dashboard', note: 'unknown path falls back to the dashboard' },
 ];
 
@@ -40,7 +40,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/export', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4', '/archaeology/why-typescript', '/archaeology/nope']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/export', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4', '/archaeology/why-typescript', '/archaeology/nope', '/search']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -126,6 +126,8 @@ export const SWEEP_ROUTES = [
   { path: '/export', id: 'export-csv', mobile: true, setup: async (page) => {
     await page.getByRole('button', { name: /CSV/ }).click();
   } },
+  // A shared search: /search?q= opens the palette with the query typed.
+  { path: '/search?q=docker', id: 'search-docker', mobile: true },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
 ];

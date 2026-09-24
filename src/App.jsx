@@ -21,7 +21,6 @@ import AskAtlas from './views/AskAtlas';
 import ConversationDrilldown from './views/ConversationDrilldown';
 import ConnectionsView from './views/ConnectionsView';
 import EvolutionView from './views/EvolutionView';
-import SearchView from './views/SearchView';
 import ReviewQueue from './views/ReviewQueue';
 import TopicCurationPanel from './views/TopicCurationPanel';
 import ConnectionValidation from './views/ConnectionValidation';
@@ -72,6 +71,7 @@ export default function App() {
   const completeSyncCycle = useStore(s => s.completeSyncCycle);
   const cmdPaletteOpen = useStore(s => s.cmdPaletteOpen);
   const setCmdPaletteOpen = useStore(s => s.setCmdPaletteOpen);
+  const cmdPaletteQuery = useStore(s => s.cmdPaletteQuery);
   const companionSidebarOpen = useStore(s => s.companionSidebarOpen);
   const toggleCompanionSidebar = useStore(s => s.toggleCompanionSidebar);
   const briefingTopic = useStore(s => s.briefingTopic);
@@ -222,7 +222,7 @@ export default function App() {
             mobile={mobile}
           />
         </div>
-        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
         <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="dashboard" onNavigate={handleNavigate} mobile={mobile} />
       </>
     );
@@ -237,7 +237,7 @@ export default function App() {
           <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
           <ConversationDrilldown topicId={selectedEvent.topicId} eventIndex={selectedEvent.eventIndex} onBack={() => { const t = TOPICS.find(x => x.id === selectedEvent.topicId); if (t) setSelectedTopic(t); setView("timeline"); setSelectedEvent(null); }} onHome={() => { setView("dashboard"); setSelectedEvent(null); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} />
         </div>
-        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
         <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="conversation" onNavigate={handleNavigate} mobile={mobile} />
       </>
     );
@@ -252,7 +252,7 @@ export default function App() {
           <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
           <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} newEvents={syncedNewEvents} />
         </div>
-        <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
         <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="timeline" onNavigate={handleNavigate} mobile={mobile} />
       </>
     );
@@ -282,7 +282,6 @@ export default function App() {
         {view === "beliefDiffs" && <BeliefDiffsView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}
         {view === "digest" && <DigestView mobile={mobile} onTopicClick={handleTopicClick} />}
         {view === "liveCapture" && <LiveCaptureView mobile={mobile} onTopicClick={handleTopicClick} />}
-        {view === "search" && <SearchView mobile={mobile} />}
         {view === "export" && <ExportPreview mobile={mobile} w={w} />}
 
         <div style={{ textAlign: "center", marginTop: mobile ? 40 : 60, padding: "18px 0", borderTop: `1px solid ${white(0.04)}` }}>
@@ -291,7 +290,7 @@ export default function App() {
         </div>
       </div>
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
-      <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} mobile={mobile} />
+      <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
       <GuidedTour active={v6TourActive} onClose={() => setV6TourActive(false)} mobile={mobile} steps={V6_TOUR_STEPS} storageKey={V6_TOUR_STORAGE_KEY} />
       {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} mobile={mobile} />}

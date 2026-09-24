@@ -32,7 +32,6 @@ import DecisionArchaeology from '../DecisionArchaeology';
 import RewindMode from '../RewindMode';
 import EvolutionView from '../EvolutionView';
 import ConnectionsView from '../ConnectionsView';
-import SearchView from '../SearchView';
 import ExportPreview from '../ExportPreview';
 
 const noop = () => {};
@@ -59,7 +58,6 @@ const VIEWS = [
   ['RewindMode', RewindMode, { onClose: noop }],
   ['EvolutionView', EvolutionView, { onRewind: noop }],
   ['ConnectionsView', ConnectionsView, { onTopicClick: noop }],
-  ['SearchView', SearchView, {}],
   ['ExportPreview', ExportPreview, {}],
 ];
 
