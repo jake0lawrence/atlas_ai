@@ -191,7 +191,7 @@ const EvolutionView = ({ mobile, onRewind, onTopicClick }) => {
           </p>
         </div>
         {onRewind && (
-          <button onClick={onRewind} style={smallButton(C.pink)}><span aria-hidden="true">⏪ </span>Watch it build</button>
+          <button onClick={onRewind} style={smallButton(C.purple)}><span aria-hidden="true">⏪ </span>Watch it build</button>
         )}
       </header>
 

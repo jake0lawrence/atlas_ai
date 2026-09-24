@@ -147,7 +147,9 @@ const ConversationDrilldown = ({ topicId, eventIndex, onBack, onHome, onEventCli
         </div>
       </aside>
 
-      <div style={{ display: "flex", gap: SPACE.xl, flexDirection: mobile ? "column" : "row", alignItems: "flex-start" }}>
+      {/* Stretched on a phone: a fit-content column grew to the widest code line
+          and pushed the page 23px past the screen; the code block scrolls instead. */}
+      <div style={{ display: "flex", gap: SPACE.xl, flexDirection: mobile ? "column" : "row", alignItems: mobile ? "stretch" : "flex-start" }}>
         <section aria-label="Conversation thread" style={{ flex: 1, minWidth: 0 }}>
           <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: SPACE.sm + 2 }}>
             {convo.messages.map((msg, i) => {

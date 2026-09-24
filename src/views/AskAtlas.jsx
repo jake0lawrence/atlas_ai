@@ -13,12 +13,12 @@ import { C, alpha, white, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/token
 const ANSWER_DELAY = 1500;
 const RESOLVE_DELAY = 500;
 const DEMO_ANSWER = "This demo answers the four suggested questions. With your real history, Atlas would search all 3,847 conversations, match your question against your curated topics, decisions and insights, and answer in your own words with every source cited.";
-const DRIFT_COLOR = { hard: C.red, soft: C.orange, stale: C.purple };
+const DRIFT_COLOR = { hard: C.red, soft: C.amber, stale: C.purple };
 
 export function confidenceLabel(c) {
   if (c >= 0.9) return { text: "High confidence", color: C.green };
   if (c >= 0.75) return { text: "Good confidence", color: C.gold };
-  if (c >= 0.5) return { text: "Moderate confidence", color: C.orange };
+  if (c >= 0.5) return { text: "Moderate confidence", color: C.amber };
   return { text: "Low confidence", color: C.red };
 }
 
@@ -89,7 +89,7 @@ const Answer = ({ msg, mobile, onConversationClick }) => {
         <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: C.gold, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>◆ Atlas</span>
         {conf && <Badge color={conf.color}>{conf.text} · {Math.round(msg.confidence * 100)}%</Badge>}
         {sources.length > 0 && <Badge color={C.gold}>{sources.length} source{sources.length === 1 ? "" : "s"}</Badge>}
-        {msg.isDemo && <Badge color={C.violet}>Demo</Badge>}
+        {msg.isDemo && <Badge color={C.purple}>Demo</Badge>}
         {msg.freshnessWarning && <Badge color={C.red}>⏳ Stale sources</Badge>}
       </div>
 

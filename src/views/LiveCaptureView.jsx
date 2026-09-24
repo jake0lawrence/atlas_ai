@@ -16,7 +16,7 @@ const KINDS = {
   decision: { label: "Decisions", color: C.red },
   topic: { label: "Topics", color: C.blue },
   pivot: { label: "Pivots", color: C.purple },
-  link: { label: "Links", color: C.cyan },
+  link: { label: "Links", color: C.amber },
   read: { label: "Reads", color: C.slate },
 };
 

@@ -20,7 +20,7 @@ class ErrorBoundary extends Component {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: C.bg0, color: C.white, fontFamily: 'sans-serif', padding: '24px' }}>
           <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Something went wrong</h1>
-          <pre style={{ background: C.navy, padding: '16px', borderRadius: '8px', maxWidth: '600px', overflow: 'auto', color: C.redLight, fontSize: '14px', marginBottom: '24px' }}>
+          <pre style={{ background: C.bg2, padding: '16px', borderRadius: '8px', maxWidth: '600px', overflow: 'auto', color: C.red, fontSize: '14px', marginBottom: '24px' }}>
             {this.state.error && this.state.error.message}
           </pre>
           <button

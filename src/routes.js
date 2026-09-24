@@ -97,11 +97,15 @@ export const SWEEP_ROUTES = [
     await page.getByRole('heading', { name: /Where the run/ }).waitFor();
   } },
   // Evolution with an earlier phase selected and a pivot open, its note form out.
+  // Opening the note scrolls it into view (instantly, under reduced motion), so
+  // the fixed companion tab is hidden and the scroll reset, as in companion-answer.
   { path: '/evolution', id: 'evolution-pivot', mobile: true, setup: async (page) => {
+    await page.addStyleTag({ content: '[data-tour="companion-sidebar"] { visibility: hidden !important; }' });
     await page.getByRole('button', { name: /^The Builder,/ }).click();
     const card = page.getByRole('article', { name: /^From 'automate everything'/ });
     await card.getByRole('button').first().click();
     await card.getByRole('button', { name: 'Add a note' }).click();
+    await page.evaluate(() => window.scrollTo(0, 0));
   } },
   // Connections with one topic selected: its links lit, its panel open.
   { path: '/connections', id: 'connections-topic', mobile: true, setup: async (page) => {
@@ -130,10 +134,10 @@ export const SWEEP_ROUTES = [
   { path: '/export', id: 'export-csv', mobile: true, setup: async (page) => {
     await page.getByRole('button', { name: /CSV/ }).click();
   } },
-  // Rewind under reduced motion: it opens on the finished map and waits.
-  // (The config's reducedMotion option does not reach matchMedia; emulateMedia does.)
-  { path: '/companion/rewind', id: 'rewind-reduced', mobile: true, setup: async (page) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
+  // The baseline runs with reduced motion (Rewind opens on the finished map);
+  // this one turns motion back on to capture Rewind playing from the start.
+  { path: '/companion/rewind', id: 'rewind-motion', mobile: true, setup: async (page) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.reload({ waitUntil: 'networkidle' });
   } },
   // Rewind scrubbed back to the Architect phase with one topic picked.

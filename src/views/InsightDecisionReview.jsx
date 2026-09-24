@@ -98,7 +98,7 @@ export const insightsReducer = (state, action) => {
 const TYPES = {
   decision: { label: "Decision", color: C.red, icon: "🎯" },
   pivot: { label: "Pivot", color: C.purple, icon: "↩" },
-  milestone: { label: "Milestone", color: C.yellow, icon: "🏆" },
+  milestone: { label: "Milestone", color: C.amber, icon: "🏆" },
 };
 
 const STATUS = {

@@ -13,7 +13,6 @@ export const C = {
   bg1: "#0D0D12",
   bg2: "#131318",
   bg3: "#141418",
-  navy: "#1a1a2e",     // <option> background
   black: "#000",
   white: "#fff",
 
