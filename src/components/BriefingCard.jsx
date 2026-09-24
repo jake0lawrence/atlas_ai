@@ -73,7 +73,8 @@ const BriefingCard = ({ topic, onClose, onTopicClick, onConversationClick, mobil
   const timer = useRef(null);
   const closeRef = useRef(null);
 
-  useEffect(() => { closeRef.current?.focus(); }, []);
+  // Focus the close button without scrolling the page under the dialog.
+  useEffect(() => { closeRef.current?.focus({ preventScroll: true }); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const say = (s) => { setStatus(s); clearTimeout(timer.current); timer.current = setTimeout(() => setStatus(null), 2500); };

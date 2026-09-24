@@ -151,6 +151,10 @@ export const SWEEP_ROUTES = [
     await page.clock.runFor(1500).catch(() => page.waitForTimeout(1500)); // the bubbles grow in
     await page.getByRole('button', { name: /^CourtCollect: / }).hover();
     await page.getByRole('button', { name: 'Brief me' }).click();
+    // Leave no hover card behind the dialog and no scroll from reaching the bubble.
+    await page.mouse.move(0, 0);
+    await page.getByRole('button', { name: 'Brief me' }).waitFor({ state: 'detached' });
+    await page.evaluate(() => window.scrollTo(0, 0));
   } },
   // A sync partway through: two phases done, the third running.
   { path: '/dashboard', id: 'dashboard-sync', setup: async (page) => { await page.getByRole('button', { name: /Sync$/ }).click(); } },
