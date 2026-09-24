@@ -40,7 +40,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4', '/archaeology/why-typescript', '/archaeology/nope']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/export', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4', '/archaeology/why-typescript', '/archaeology/nope']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -121,6 +121,10 @@ export const SWEEP_ROUTES = [
     await page.getByRole('button', { name: /^Challenging, / }).click();
     await page.clock.runFor(100).catch(() => page.waitForTimeout(100));
     await page.evaluate(() => window.scrollTo(0, 0));
+  } },
+  // Export with the CSV preview: the generated file, first lines shown.
+  { path: '/export', id: 'export-csv', mobile: true, setup: async (page) => {
+    await page.getByRole('button', { name: /CSV/ }).click();
   } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },

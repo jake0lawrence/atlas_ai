@@ -1,310 +1,238 @@
 import { useState } from "react";
-import {
-  INSIGHTS, EVOLUTION_PHASES, VAULT_TREE, EXPORT_FORMATS,
-} from '../data/constants';
-import { FONTS, BODY, MONO } from '../styles/base';
-import { C, alpha, white, black } from '../styles/tokens';
-import { row, title, lede } from '../styles/shared';
+import { TOPICS, CONNECTIONS, INSIGHTS, EVOLUTION_PHASES, VAULT_TREE, EXPORT_FORMATS, DEMO_NOW } from '../data/constants';
+import { C, alpha, white, black, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
 
-// ─── EXPORT & SHARE PREVIEW ─────────────────────────────────
+// ─── The export, as data ────────────────────────────────────────
+// Every preview and download is generated from the same fixtures the rest of
+// the demo reads, so what you see here is exactly what you would get.
+const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+const linksOf = (id) => CONNECTIONS.filter(c => c.from === id || c.to === id).map(c => ({ id: c.from === id ? c.to : c.from, label: c.label, strength: c.strength }));
+const EXPORTED = `${DEMO_NOW.getFullYear()}-${String(DEMO_NOW.getMonth() + 1).padStart(2, "0")}-${String(DEMO_NOW.getDate()).padStart(2, "0")}`;
 
+// RFC 4180: quote a field that holds a comma, a quote or a line break.
+export const csvField = (v) => {
+  const s = String(v ?? "");
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+export const toCSV = (topics = TOPICS) => [
+  "topic_id,name,category,conversations,words,first_seen,last_seen,depth,claude,chatgpt",
+  ...topics.map(t => [t.id, t.name, t.category, t.count, t.words, t.firstSeen, t.lastSeen, t.depth, t.platform.claude, t.platform.gpt].map(csvField).join(",")),
+].join("\n") + "\n";
+
+export const toJSON = (topics = TOPICS, connections = CONNECTIONS) => JSON.stringify({
+  atlas: {
+    exported: EXPORTED,
+    stats: { topics: topics.length, connections: connections.length, conversations: topics.reduce((a, t) => a + t.count, 0), words: topics.reduce((a, t) => a + t.words, 0) },
+    topics: topics.map(t => ({ id: t.id, name: t.name, category: t.category, conversations: t.count, words: t.words, firstSeen: t.firstSeen, lastSeen: t.lastSeen, depth: t.depth, platform: t.platform })),
+    connections: connections.map(c => ({ from: c.from, to: c.to, label: c.label, strength: c.strength })),
+  },
+}, null, 2) + "\n";
+
+export const toMarkdown = (topics = TOPICS) => [
+  "# Atlas knowledge export",
+  "",
+  `Exported ${EXPORTED}. ${topics.length} topics, ${CONNECTIONS.length} connections.`,
+  ...topics.flatMap(t => [
+    "",
+    `## ${t.name}`,
+    "",
+    `- Category: ${t.category}`,
+    `- Conversations: ${t.count} (${t.platform.claude} Claude, ${t.platform.gpt} ChatGPT)`,
+    `- Words: ${t.words.toLocaleString("en-US")}`,
+    `- Active: ${t.firstSeen} to ${t.lastSeen}`,
+    ...linksOf(t.id).map(l => `- Connected to ${TOPIC_BY_ID[l.id]?.name}: ${l.label}`),
+  ]),
+].join("\n") + "\n";
+
+export const vaultFiles = (nodes = VAULT_TREE, path = []) => nodes.flatMap(n => n.type === "folder" ? vaultFiles(n.children, [...path, n.name]) : [{ ...n, path: [...path, n.name].join("/") }]);
+
+export const byteSize = (text) => new TextEncoder().encode(text).length;
+export const formatBytes = (n) => n < 1024 ? `${n} B` : `${(n / 1024).toFixed(1)} KB`;
+
+const FILES = vaultFiles();
+const OUTPUTS = {
+  obsidian: { text: FILES.map(f => f.content).join("\n"), files: FILES.length },
+  markdown: { text: toMarkdown(), files: 1, name: "atlas.md", type: "text/markdown" },
+  json: { text: toJSON(), files: 1, name: "atlas.json", type: "application/json" },
+  csv: { text: toCSV(), files: 1, name: "atlas.csv", type: "text/csv" },
+};
+
+// Hand the text to the browser as a file. Returns false where that isn't possible.
+const download = (name, text, type) => {
+  if (typeof URL === "undefined" || !URL.createObjectURL) return false;
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+  return true;
+};
+
+// ─── Pieces ─────────────────────────────────────────────────────
+const sectionTitle = { fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 600, color: white(0.55), textTransform: "uppercase", letterSpacing: "0.08em", margin: `0 0 ${SPACE.md}px` };
+const list = { listStyle: "none", margin: 0, padding: 0 };
+const button = (color, primary) => ({
+  display: "inline-flex", alignItems: "center", gap: SPACE.xs + 2, fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 600,
+  color: primary ? C.bg0 : color, background: primary ? color : alpha(color, 0.07),
+  border: `1px solid ${primary ? color : alpha(color, 0.35)}`, borderRadius: 8, padding: `${SPACE.xs + 3}px ${SPACE.md}px`, cursor: "pointer",
+});
+
+const Wikilinks = ({ text }) => text.split(/(\[\[.*?\]\])/g).map((part, i) =>
+  part.startsWith("[[") && part.endsWith("]]")
+    ? <span key={i} style={{ color: C.gold, background: alpha(C.gold, 0.1), padding: "0 4px", borderRadius: 3 }}>{part.slice(2, -2)}</span>
+    : part);
+
+const Note = ({ content, mobile }) => (
+  <div style={{ fontFamily: BODY, fontSize: TYPE.base, color: white(0.75), lineHeight: 1.7 }}>
+    {content.split("\n").map((line, i) => {
+      if (line.startsWith("# ")) return <div key={i} style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.lg : TYPE.xl, color: C.white, fontWeight: 700, margin: `0 0 ${SPACE.sm}px` }}>{line.slice(2)}</div>;
+      if (line.startsWith("## ")) return <div key={i} style={{ fontFamily: FONTS, fontSize: TYPE.md, color: C.gold, fontWeight: 600, margin: `${SPACE.md}px 0 ${SPACE.xs}px` }}>{line.slice(3)}</div>;
+      if (line.startsWith("- ")) return <div key={i} style={{ paddingLeft: SPACE.md, position: "relative" }}><span aria-hidden="true" style={{ position: "absolute", left: 0, color: white(0.4) }}>·</span><Wikilinks text={line.slice(2)} /></div>;
+      if (line.trim() === "") return <div key={i} style={{ height: SPACE.sm }} />;
+      return <div key={i}><Wikilinks text={line.replace(/\*\*/g, "")} /></div>;
+    })}
+  </div>
+);
+
+const Tree = ({ nodes, open, toggle, selected, onSelect, depth = 0 }) => (
+  <ul style={{ ...list, paddingLeft: depth ? SPACE.md : 0 }}>
+    {nodes.map(n => n.type === "folder" ? (
+      <li key={n.name}>
+        <button onClick={() => toggle(n.name)} aria-expanded={Boolean(open[n.name])} style={{ display: "flex", alignItems: "center", gap: SPACE.xs + 2, width: "100%", background: "none", border: "none", padding: `${SPACE.xs + 1}px ${SPACE.sm}px`, cursor: "pointer", fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 600, color: C.white, textAlign: "left", borderRadius: 6 }}>
+          <span aria-hidden="true" style={{ color: C.gold, fontSize: TYPE.xs, width: 10, display: "inline-block", transform: open[n.name] ? "rotate(90deg)" : "none" }}>▶</span>
+          {n.name}<span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: white(0.5), marginLeft: "auto" }}>{n.children.length}</span>
+        </button>
+        {open[n.name] && <Tree nodes={n.children} open={open} toggle={toggle} selected={selected} onSelect={onSelect} depth={depth + 1} />}
+      </li>
+    ) : (
+      <li key={n.name}>
+        <button onClick={() => onSelect(n.name)} aria-current={selected === n.name ? "true" : undefined} style={{
+          display: "block", width: "100%", textAlign: "left", background: selected === n.name ? alpha(C.gold, 0.1) : "none",
+          border: "none", borderLeft: `2px solid ${selected === n.name ? C.gold : "transparent"}`, padding: `${SPACE.xs + 1}px ${SPACE.sm}px ${SPACE.xs + 1}px ${SPACE.sm + 14}px`,
+          cursor: "pointer", fontFamily: BODY, fontSize: TYPE.sm, color: selected === n.name ? C.gold : white(0.75), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>{n.name}</button>
+      </li>
+    ))}
+  </ul>
+);
+
+const PREVIEW_LINES = 24;
+
+// ─── The view ───────────────────────────────────────────────────
 const ExportPreview = ({ mobile }) => {
-  const [expandedFolders, setExpandedFolders] = useState({ "Atlas Vault": true, "CourtCollect": false, "Job Search": false, "AI Automation": false });
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedFormat, setSelectedFormat] = useState("obsidian");
-  const [shareCard, setShareCard] = useState(null);
+  const [format, setFormat] = useState("obsidian");
+  const [open, setOpen] = useState({ "Atlas Vault": true, "CourtCollect": true });
+  const [file, setFile] = useState(FILES[0].name);
+  const [status, setStatus] = useState("");
+  const [card, setCard] = useState(0);
+  const current = FILES.find(f => f.name === file);
+  const out = OUTPUTS[format];
+  const lines = out.text.trimEnd().split("\n");
+  const cards = [
+    ...EVOLUTION_PHASES.map(p => ({ key: p.title, title: p.title, kicker: p.period, body: p.desc, figure: `${p.conversations} conversations`, color: p.color })),
+    ...INSIGHTS.map(x => ({ key: x.title, title: x.title, kicker: "Thinking pattern", body: x.desc, figure: `${x.pct}%`, color: C.gold })),
+  ];
+  const shown = cards[card];
 
-  const toggleFolder = (name) => setExpandedFolders(prev => ({ ...prev, [name]: !prev[name] }));
-
-  const renderWikilinks = (text) => {
-    const parts = text.split(/(\[\[.*?\]\])/g);
-    return parts.map((part, i) => {
-      if (part.startsWith("[[") && part.endsWith("]]")) {
-        const linkText = part.slice(2, -2);
-        return <span key={i} style={{ color: C.gold, background: alpha(C.gold, 0.08), padding: "1px 4px", borderRadius: 3, fontWeight: 500, cursor: "pointer" }}>{linkText}</span>;
-      }
-      return part;
-    });
+  const save = (name, text, type) => setStatus(download(name, text, type) ? `Downloaded ${name}.` : "This browser can't save files from the page.");
+  const copy = async (text, what) => {
+    try { await navigator.clipboard.writeText(text); setStatus(`Copied ${what}.`); }
+    catch (e) { console.warn("export copy:", e); setStatus("Copy didn't work here. Select the text and copy it instead."); }
   };
 
-  const renderTree = (nodes, depth = 0) => nodes.map((node) => {
-    const indent = depth * (mobile ? 16 : 22);
-    if (node.type === "folder") {
-      const isOpen = expandedFolders[node.name];
-      return (
-        <div key={node.name}>
-          <div onClick={() => toggleFolder(node.name)}
-            role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFolder(node.name); }}}
-            style={{ display: "flex", alignItems: "center", gap: 6, padding: mobile ? "6px 8px" : "7px 10px", paddingLeft: indent + 10, cursor: "pointer", borderRadius: 6, background: isOpen ? alpha(C.gold, 0.04) : "transparent", transition: "background 0.2s" }}
-            onMouseEnter={e => e.currentTarget.style.background = white(0.04)}
-            onMouseLeave={e => e.currentTarget.style.background = isOpen ? alpha(C.gold, 0.04) : "transparent"}>
-            <span style={{ fontFamily: MONO, fontSize: mobile ? 10 : 12, color: C.gold, transition: "transform 0.2s", transform: isOpen ? "rotate(90deg)" : "rotate(0deg)", display: "inline-block" }}>▶</span>
-            <span style={{ fontSize: mobile ? 13 : 14 }}>📁</span>
-            <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: C.white, fontWeight: 500 }}>{node.name}</span>
-            <span style={{ fontFamily: MONO, fontSize: 10, color: white(0.2), marginLeft: "auto" }}>{node.children.length}</span>
-          </div>
-          {isOpen && <div style={{ animation: "fadeUp 0.3s ease both" }}>{renderTree(node.children, depth + 1)}</div>}
-        </div>
-      );
-    }
-    const isSelected = selectedFile?.name === node.name;
-    return (
-      <div key={node.name} onClick={() => setSelectedFile(node)}
-        style={{ display: "flex", alignItems: "center", gap: 6, padding: mobile ? "5px 8px" : "6px 10px", paddingLeft: indent + 10, cursor: "pointer", borderRadius: 6, background: isSelected ? alpha(C.gold, 0.08) : "transparent", borderLeft: isSelected ? `2px solid ${C.gold}` : "2px solid transparent", transition: "all 0.2s" }}
-        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = white(0.03); }}
-        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}>
-        <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: isSelected ? C.gold : white(0.5), fontWeight: isSelected ? 500 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{node.name}</span>
-      </div>
-    );
-  });
-
-  const shareablePhases = EVOLUTION_PHASES.map((p, i) => ({ ...p, index: i }));
-  const shareableInsights = INSIGHTS.map((ins, i) => ({ ...ins, index: i }));
-
   return (
-    <div>
-      <div style={{ textAlign: "center", marginBottom: mobile ? 24 : 32 }}>
-        <h2 style={title(mobile)}>Export & Share</h2>
-        <p style={lede(mobile)}>Your curated knowledge, ready to go anywhere.</p>
-      </div>
+    <div style={{ maxWidth: 960, margin: "0 auto" }}>
+      <header style={{ marginBottom: SPACE.xl, maxWidth: 680 }}>
+        <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xl : TYPE.xxl, fontWeight: 800, color: C.white, letterSpacing: "-0.01em", margin: 0 }}>Take your atlas <span style={{ color: C.gold }}>with you</span></h1>
+        <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.base : TYPE.md, color: white(0.6), lineHeight: 1.55, margin: `${SPACE.sm}px 0 0` }}>
+          The same {TOPICS.length} topics and {CONNECTIONS.length} connections in four shapes. Each preview is the file itself, generated from your atlas; download or copy any of them.
+        </p>
+      </header>
 
-      {/* Export Format Selector */}
-      <div style={{ display: "grid", gridTemplateColumns: mobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: mobile ? 8 : 10, marginBottom: mobile ? 24 : 32 }}>
-        {EXPORT_FORMATS.map(fmt => {
-          const active = selectedFormat === fmt.id;
-          return (
-            <button key={fmt.id} onClick={() => setSelectedFormat(fmt.id)}
-              style={{
-                background: active ? alpha(C.gold, 0.1) : white(0.025),
-                border: `1px solid ${active ? alpha(C.gold, 0.4) : white(0.06)}`,
-                borderRadius: 10, padding: mobile ? "12px 10px" : "14px 16px", cursor: "pointer",
-                transition: "all 0.25s", textAlign: "center",
+      <section aria-labelledby="ex-formats" style={{ marginBottom: SPACE.xl }}>
+        <h2 id="ex-formats" style={sectionTitle}>Format</h2>
+        <div role="group" aria-label="Format" style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: SPACE.sm }}>
+          {EXPORT_FORMATS.map(f => {
+            const on = f.id === format;
+            const o = OUTPUTS[f.id];
+            return (
+              <button key={f.id} onClick={() => { setFormat(f.id); setStatus(""); }} aria-pressed={on} style={{
+                textAlign: "left", background: on ? alpha(C.gold, 0.1) : white(0.025), border: `1px solid ${on ? C.gold : white(0.1)}`,
+                borderRadius: 10, padding: `${SPACE.md}px ${SPACE.md}px`, cursor: "pointer",
               }}>
-              <div style={{ fontSize: mobile ? 18 : 22, marginBottom: 4, fontFamily: fmt.id === "json" ? MONO : "inherit" }}>{fmt.icon}</div>
-              <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: active ? C.gold : C.white, fontWeight: 600 }}>{fmt.label}</div>
-              <div style={{ fontFamily: BODY, fontSize: mobile ? 9 : 10, color: white(0.3), marginTop: 2 }}>{fmt.desc}</div>
-            </button>
-          );
-        })}
-      </div>
+                <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.base, fontWeight: 700, color: on ? C.gold : C.white }}><span aria-hidden="true">{f.icon} </span>{f.label}</span>
+                <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.sm, color: white(0.65), marginTop: 2 }}>{f.desc}</span>
+                <span style={{ display: "block", fontFamily: MONO, fontSize: TYPE.xs, color: white(0.6), marginTop: SPACE.xs }}>{o.files} file{o.files > 1 ? "s" : ""} · {formatBytes(byteSize(o.text))}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
-      {/* Obsidian Vault Preview */}
-      {selectedFormat === "obsidian" && (
-        <div style={{
-          display: "grid", gridTemplateColumns: mobile ? "1fr" : "280px 1fr", gap: 0,
-          background: white(0.02), border: `1px solid ${white(0.06)}`,
-          borderRadius: 14, overflow: "hidden", marginBottom: mobile ? 24 : 32,
-          minHeight: mobile ? "auto" : 380,
-        }}>
-          {/* File Tree */}
-          <div style={{
-            borderRight: mobile ? "none" : `1px solid ${white(0.06)}`,
-            borderBottom: mobile ? `1px solid ${white(0.06)}` : "none",
-            padding: mobile ? "12px 8px" : "16px 8px",
-            maxHeight: mobile ? 240 : 420, overflowY: "auto",
-          }}>
-            <div style={{ fontFamily: MONO, fontSize: 10, color: white(0.2), textTransform: "uppercase", letterSpacing: "0.1em", padding: "0 10px 8px", borderBottom: `1px solid ${white(0.04)}`, marginBottom: 6 }}>Vault Structure</div>
-            {renderTree(VAULT_TREE)}
-          </div>
-          {/* Markdown Preview */}
-          <div style={{ padding: mobile ? "16px 14px" : "20px 24px", overflowY: "auto", maxHeight: mobile ? 320 : 420 }}>
-            {selectedFile ? (
-              <div className="fade-up">
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, paddingBottom: 10, borderBottom: `1px solid ${white(0.06)}` }}>
-                  <span style={{ fontFamily: MONO, fontSize: 11, color: C.gold, background: alpha(C.gold, 0.1), padding: "2px 8px", borderRadius: 4 }}>.md</span>
-                  <span style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.5) }}>{selectedFile.name}</span>
-                </div>
-                <div style={{ fontFamily: BODY, fontSize: mobile ? 12 : 13, color: white(0.55), lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
-                  {selectedFile.content.split("\n").map((line, i) => {
-                    if (line.startsWith("# ")) return <div key={i} style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 22, color: C.white, fontWeight: 700, margin: "4px 0 8px" }}>{line.slice(2)}</div>;
-                    if (line.startsWith("## ")) return <div key={i} style={{ fontFamily: FONTS, fontSize: mobile ? 15 : 17, color: C.gold, fontWeight: 600, margin: "14px 0 6px" }}>{line.slice(3)}</div>;
-                    if (line.startsWith("- ")) return <div key={i} style={{ paddingLeft: 12, position: "relative" }}><span style={{ position: "absolute", left: 0, color: white(0.2) }}>·</span>{renderWikilinks(line.slice(2))}</div>;
-                    if (line.startsWith("**") && line.includes(":**")) { const [label, ...rest] = line.split(":**"); return <div key={i}><span style={{ color: C.gold, fontWeight: 600 }}>{label.replace(/\*\*/g, "")}:</span> {renderWikilinks(rest.join(":**").replace(/\*\*/g, ""))}</div>; }
-                    if (line.trim() === "") return <div key={i} style={{ height: 8 }} />;
-                    return <div key={i}>{renderWikilinks(line)}</div>;
-                  })}
-                </div>
-              </div>
+      <section aria-labelledby="ex-preview" style={{ background: white(0.02), border: `1px solid ${white(0.08)}`, borderRadius: 14, overflow: "hidden", marginBottom: SPACE.sm }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: SPACE.md, flexWrap: "wrap", padding: `${SPACE.md}px ${SPACE.lg}px`, borderBottom: `1px solid ${white(0.08)}` }}>
+          <h2 id="ex-preview" style={{ margin: 0, fontFamily: MONO, fontSize: TYPE.sm, fontWeight: 600, color: white(0.75), overflowWrap: "anywhere" }}>
+            {format === "obsidian" ? `Vault · ${current.path}` : `${out.name} · ${lines.length} lines`}
+          </h2>
+          <div style={{ display: "flex", gap: SPACE.sm, flexWrap: "wrap" }}>
+            {format === "obsidian" ? (
+              <>
+                <button onClick={() => copy(current.content, current.name)} style={button(C.white)}>Copy note</button>
+                <button onClick={() => save(current.name, current.content, "text/markdown")} style={button(C.gold, true)}>Download note</button>
+              </>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", minHeight: 200, gap: 10 }}>
-                <div style={{ fontSize: 32, opacity: 0.2 }}>📄</div>
-                <div style={{ fontFamily: BODY, fontSize: 13, color: white(0.2) }}>Select a file to preview</div>
-              </div>
+              <>
+                <button onClick={() => copy(out.text, out.name)} style={button(C.white)}>Copy</button>
+                <button onClick={() => save(out.name, out.text, out.type)} style={button(C.gold, true)}>Download {out.name}</button>
+              </>
             )}
           </div>
         </div>
-      )}
 
-      {/* Non-Obsidian format previews */}
-      {selectedFormat !== "obsidian" && (
-        <div style={{
-          background: white(0.02), border: `1px solid ${white(0.06)}`,
-          borderRadius: 14, padding: mobile ? "16px 14px" : "24px 28px", marginBottom: mobile ? 24 : 32,
-          minHeight: 160,
-        }}>
-          <div style={{ fontFamily: MONO, fontSize: 10, color: white(0.2), textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
-            Preview — {EXPORT_FORMATS.find(f => f.id === selectedFormat)?.label}
-          </div>
-          <div style={{ fontFamily: MONO, fontSize: mobile ? 11 : 12, color: white(0.45), lineHeight: 1.7, whiteSpace: "pre-wrap", background: black(0.3), borderRadius: 8, padding: mobile ? "12px 14px" : "16px 20px" }}>
-            {selectedFormat === "markdown" && `# Atlas Knowledge Export
-# Generated: Feb 2026
-
-## Topics (14)
-
-### CourtCollect
-- Category: Product
-- Conversations: 47
-- Words: 128,400
-- Key connections: Tyler Technologies, Gov Tech & Policy
-
-### Job Search
-- Category: Career
-- Conversations: 62
-- Words: 142,000
-- Key connections: Resumes & Cover Letters, Tyler Technologies
-
-### AI Automation
-- Category: Tech
-- Conversations: 34
-- Words: 89,500
-- Key connections: n8n & Airtable, HMPRG Campaigns`}
-            {selectedFormat === "json" && `{
-  "atlas": {
-    "version": "5.0",
-    "exported": "2026-02-07",
-    "stats": {
-      "conversations": 3847,
-      "topics": 14,
-      "connections": 16,
-      "words": 1687900
-    },
-    "topics": [
-      {
-        "id": "courtcollect",
-        "name": "CourtCollect",
-        "category": "product",
-        "conversations": 47,
-        "words": 128400,
-        "connections": ["tyler", "govtech", "webdev"]
-      },
-      ...
-    ]
-  }
-}`}
-            {selectedFormat === "csv" && `topic_id,name,category,conversations,words,first_seen,last_seen,depth
-courtcollect,CourtCollect,product,47,128400,Aug 2024,Feb 2026,4.2
-hmprg,HMPRG Campaigns,client,38,98200,Sep 2024,Feb 2026,3.8
-jobsearch,Job Search,career,62,142000,Dec 2024,Feb 2026,3.5
-gamedev,Dice or Die,creative,23,67800,Oct 2024,Jan 2026,3.9
-keymaster,Keymaster,product,18,52100,Jul 2024,Dec 2025,4.0
-automation,AI Automation,tech,34,89500,Jun 2024,Feb 2026,3.6
-resumes,Resumes & Cover Letters,career,41,95300,Dec 2024,Feb 2026,2.8
-tyler,Tyler Technologies,work,89,234500,Mar 2023,Dec 2025,3.4`}
-          </div>
-        </div>
-      )}
-
-      {/* Export Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: mobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: mobile ? 8 : 10, marginBottom: mobile ? 24 : 32 }}>
-        {[
-          { label: "Topics", value: "14", icon: "◈" },
-          { label: "Connections", value: "16", icon: "◎" },
-          { label: "Files", value: "48", icon: "📄" },
-          { label: "Size", value: "2.4 MB", icon: "💾" },
-        ].map((stat, i) => (
-          <div key={i} style={{ background: white(0.025), border: `1px solid ${white(0.06)}`, borderRadius: 10, padding: mobile ? "10px 12px" : "12px 16px", textAlign: "center" }}>
-            <div style={{ fontSize: 16, marginBottom: 4 }}>{stat.icon}</div>
-            <div style={{ fontFamily: FONTS, fontSize: mobile ? 18 : 22, color: C.white, fontWeight: 700 }}>{stat.value}</div>
-            <div style={{ fontFamily: BODY, fontSize: mobile ? 9 : 10, color: white(0.3) }}>{stat.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Shareable Insight Cards */}
-      <div style={{ marginBottom: 8 }}>
-        <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 17 : 20, color: C.white, marginBottom: 4 }}>Share an Insight</h3>
-        <p style={{ fontFamily: BODY, fontSize: mobile ? 10 : 12, color: white(0.2), marginBottom: 14 }}>Generate a shareable card for any insight or evolution phase.</p>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
-          {shareablePhases.slice(0, mobile ? 3 : 6).map(p => (
-            <button key={`phase-${p.index}`} onClick={() => setShareCard({ type: "phase", data: p })}
-              style={{
-                fontFamily: BODY, fontSize: mobile ? 10 : 11, fontWeight: 500,
-                color: shareCard?.type === "phase" && shareCard?.data?.index === p.index ? C.bg0 : p.color,
-                background: shareCard?.type === "phase" && shareCard?.data?.index === p.index ? p.color : `${p.color}12`,
-                border: `1px solid ${p.color}30`, borderRadius: 20, padding: mobile ? "5px 10px" : "5px 14px",
-                cursor: "pointer", transition: "all 0.2s",
-              }}>{p.title}</button>
-          ))}
-          {shareableInsights.slice(0, mobile ? 2 : 3).map(ins => (
-            <button key={`insight-${ins.index}`} onClick={() => setShareCard({ type: "insight", data: ins })}
-              style={{
-                fontFamily: BODY, fontSize: mobile ? 10 : 11, fontWeight: 500,
-                color: shareCard?.type === "insight" && shareCard?.data?.index === ins.index ? C.bg0 : C.gold,
-                background: shareCard?.type === "insight" && shareCard?.data?.index === ins.index ? C.gold : alpha(C.gold, 0.08),
-                border: `1px solid ${alpha(C.gold, 0.25)}`, borderRadius: 20, padding: mobile ? "5px 10px" : "5px 14px",
-                cursor: "pointer", transition: "all 0.2s",
-              }}>{ins.icon} {ins.title}</button>
-          ))}
-        </div>
-
-        {/* Share Card Preview */}
-        {shareCard && (
-          <div className="fade-up" style={{
-            background: shareCard.type === "phase"
-              ? `linear-gradient(135deg, ${shareCard.data.color}18, ${shareCard.data.color}06, ${alpha(C.bg0, 0.95)})`
-              : `linear-gradient(135deg, ${alpha(C.gold, 0.12)}, ${alpha(C.gold, 0.03)}, ${alpha(C.bg0, 0.95)})`,
-            border: `1px solid ${shareCard.type === "phase" ? shareCard.data.color + "30" : alpha(C.gold, 0.2)}`,
-            borderRadius: 16, padding: mobile ? "24px 20px" : "32px 36px",
-            position: "relative", overflow: "hidden",
-          }}>
-            {/* Decorative background elements */}
-            <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: `radial-gradient(circle, ${shareCard.type === "phase" ? shareCard.data.color : C.gold}08, transparent)` }} />
-            <div style={{ position: "absolute", bottom: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: `radial-gradient(circle, ${shareCard.type === "phase" ? shareCard.data.color : C.gold}05, transparent)` }} />
-
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ fontFamily: MONO, fontSize: 9, color: white(0.25), textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 12 }}>Atlas · Your AI Knowledge Map</div>
-
-              {shareCard.type === "phase" ? (
-                <>
-                  <div style={{ fontFamily: MONO, fontSize: mobile ? 11 : 12, color: shareCard.data.color, marginBottom: 6 }}>{shareCard.data.period}</div>
-                  <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 26 : 34, color: C.white, fontWeight: 800, marginBottom: 10, letterSpacing: "-0.02em" }}>{shareCard.data.title}</h3>
-                  <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: white(0.55), lineHeight: 1.6, marginBottom: 16, maxWidth: 440 }}>{shareCard.data.desc}</p>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                    <span style={{ fontFamily: FONTS, fontSize: mobile ? 32 : 42, fontWeight: 800, color: shareCard.data.color }}>{shareCard.data.conversations}</span>
-                    <span style={lede(mobile)}>conversations</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div style={{ fontSize: mobile ? 36 : 48, marginBottom: 10 }}>{shareCard.data.icon}</div>
-                  <h3 style={{ fontFamily: FONTS, fontSize: mobile ? 24 : 30, color: C.white, fontWeight: 800, marginBottom: 8, letterSpacing: "-0.02em" }}>{shareCard.data.title}</h3>
-                  <p style={{ fontFamily: BODY, fontSize: mobile ? 13 : 15, color: white(0.55), lineHeight: 1.6, marginBottom: 16, maxWidth: 440 }}>{shareCard.data.desc}</p>
-                  <div style={row}>
-                    <div style={{ flex: 1, height: 6, background: white(0.06), borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ width: `${shareCard.data.pct}%`, height: "100%", background: `linear-gradient(90deg, ${C.gold}, ${C.amber})`, borderRadius: 3, transition: "width 0.6s ease" }} />
-                    </div>
-                    <span style={{ fontFamily: MONO, fontSize: mobile ? 13 : 15, color: C.gold, fontWeight: 600 }}>{shareCard.data.pct}%</span>
-                  </div>
-                </>
-              )}
-
-              <div style={{ display: "flex", gap: mobile ? 8 : 12, marginTop: mobile ? 18 : 24 }}>
-                <button style={{
-                  fontFamily: BODY, fontSize: mobile ? 11 : 12, fontWeight: 600,
-                  color: C.bg0, background: C.gold, border: "none", borderRadius: 8,
-                  padding: mobile ? "8px 16px" : "9px 20px", cursor: "pointer",
-                  display: "flex", alignItems: "center", gap: 5,
-                }}>📋 Copy Image</button>
-                <button style={{
-                  fontFamily: BODY, fontSize: mobile ? 11 : 12, fontWeight: 500,
-                  color: white(0.5), background: white(0.06), border: `1px solid ${white(0.1)}`,
-                  borderRadius: 8, padding: mobile ? "8px 16px" : "9px 20px", cursor: "pointer",
-                }}>↗ Share Link</button>
-              </div>
+        {format === "obsidian" ? (
+          <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "260px 1fr" }}>
+            <nav aria-label="Vault files" style={{ padding: SPACE.sm, borderRight: mobile ? "none" : `1px solid ${white(0.08)}`, borderBottom: mobile ? `1px solid ${white(0.08)}` : "none" }}>
+              <Tree nodes={VAULT_TREE} open={open} toggle={(n) => setOpen(o => ({ ...o, [n]: !o[n] }))} selected={file} onSelect={(n) => { setFile(n); setStatus(""); }} />
+            </nav>
+            <div style={{ padding: mobile ? SPACE.md : SPACE.xl, minWidth: 0 }}>
+              <Note content={current.content} mobile={mobile} />
+              <p style={{ margin: `${SPACE.xl}px 0 0`, fontFamily: BODY, fontSize: TYPE.sm, color: white(0.55) }}>
+                The demo vault holds {FILES.length} sample notes. A full export writes a note per topic and per conversation, linked the same way.
+              </p>
             </div>
           </div>
+        ) : (
+          <pre tabIndex={0} aria-label={`${out.name} contents`} style={{ margin: 0, padding: mobile ? SPACE.md : SPACE.lg, background: black(0.3), fontFamily: MONO, fontSize: TYPE.sm, color: white(0.8), lineHeight: 1.6, overflowX: "auto", whiteSpace: "pre" }}>
+            {lines.slice(0, PREVIEW_LINES).join("\n")}
+            {lines.length > PREVIEW_LINES && <span style={{ color: white(0.5) }}>{`\n… ${lines.length - PREVIEW_LINES} more lines in the file`}</span>}
+          </pre>
         )}
-      </div>
+      </section>
+      <p role="status" style={{ minHeight: 20, margin: `0 0 ${SPACE.xl}px`, fontFamily: BODY, fontSize: TYPE.sm, color: C.green }}>{status}</p>
+
+      <section aria-labelledby="ex-share">
+        <h2 id="ex-share" style={sectionTitle}>Share a card</h2>
+        <div role="group" aria-label="Card" style={{ display: "flex", flexWrap: "wrap", gap: SPACE.xs + 2, marginBottom: SPACE.md }}>
+          {cards.map((c, i) => (
+            <button key={c.key} onClick={() => setCard(i)} aria-pressed={i === card} style={{
+              fontFamily: BODY, fontSize: TYPE.sm, fontWeight: 500, color: i === card ? C.bg0 : white(0.8),
+              background: i === card ? c.color : white(0.04), border: `1px solid ${i === card ? c.color : white(0.14)}`,
+              borderRadius: 20, padding: `${SPACE.xs + 1}px ${SPACE.md}px`, cursor: "pointer",
+            }}>{c.title}</button>
+          ))}
+        </div>
+        <figure style={{ margin: 0, background: alpha(shown.color, 0.07), border: `1px solid ${alpha(shown.color, 0.4)}`, borderRadius: 16, padding: mobile ? SPACE.lg : `${SPACE.xl}px ${SPACE.xxl}px` }}>
+          <div style={{ fontFamily: MONO, fontSize: TYPE.xs, color: white(0.6), textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: SPACE.md }}>Atlas · {shown.kicker}</div>
+          <div style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xl : TYPE.xxl, color: C.white, fontWeight: 800, letterSpacing: "-0.02em" }}>{shown.title}</div>
+          <p style={{ fontFamily: BODY, fontSize: TYPE.md, color: white(0.75), lineHeight: 1.55, margin: `${SPACE.sm}px 0 ${SPACE.md}px`, maxWidth: 520 }}>{shown.body}</p>
+          <div style={{ fontFamily: FONTS, fontSize: TYPE.xl, fontWeight: 800, color: shown.color }}>{shown.figure}</div>
+          <figcaption style={{ marginTop: SPACE.lg }}>
+            <button onClick={() => copy(`${shown.title} (${shown.kicker}): ${shown.body} ${shown.figure}.`, "the card as text")} style={button(shown.color, true)}>Copy as text</button>
+          </figcaption>
+        </figure>
+      </section>
     </div>
   );
 };
