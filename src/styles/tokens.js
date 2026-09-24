@@ -13,34 +13,26 @@ export const C = {
   bg1: "#0D0D12",
   bg2: "#131318",
   bg3: "#141418",
-  ink: "#14141C",      // only used translucent (sidebar scrim)
   navy: "#1a1a2e",     // <option> background
   black: "#000",
   white: "#fff",
-  gray: "#666",
 
   // Brand accent (Claude gold) and its neighbors
   gold: "#FBBF24",
   amber: "#F59E0B",
-  amberDeep: "#D97706",
   yellow: "#EAB308",
-  yellowDeep: "#CA8A04",
 
   // Semantic accents
   green: "#10B981",
-  greenDeep: "#059669",
   greenBright: "#22C55E",
   red: "#EF4444",
   redLight: "#F87171",
   rose: "#E11D48",
   blue: "#3B82F6",
-  blueDeep: "#2563EB",
-  blueDeeper: "#1D4ED8",
   sky: "#0EA5E9",
   cyan: "#06B6D4",
   teal: "#14B8A6",
   purple: "#A855F7",
-  purpleDeep: "#7C3AED",
   violet: "#8B5CF6",
   indigo: "#6366F1",
   fuchsia: "#D946EF",
