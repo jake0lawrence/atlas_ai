@@ -9,7 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { FONTS, BODY, CSS } from './styles/base';
 import { container } from './styles/shared';
 import CommandPalette from './components/CommandPalette';
-import Nav from './components/Nav';
+import Nav, { STATIONS } from './components/Nav';
 import SyncOverlay from './components/SyncOverlay';
 import GuidedTour from './components/GuidedTour';
 import BriefingCard from './components/BriefingCard';
@@ -203,6 +203,18 @@ export default function App() {
     return <div key="curationSummary" className="view-transition"><CurationSummary results={curationResults} onComplete={handleCurationSummaryComplete} onNavigate={handleNavigate} mobile={mobile} w={w} /></div>;
   }
 
+  // ─── REWIND ─────────────────────────────────────
+  // A page of its own over whatever view opened it; Back (or Escape) returns there.
+  if (showRewind) {
+    const from = STATIONS.flatMap(st => st.pages).find(p => p.id === view)?.label;
+    return (
+      <div style={{ minHeight: "100vh", background: C.bg0, padding: mobile ? "20px 16px 40px" : "28px 40px 60px" }}>
+        <style>{CSS}</style>
+        <RewindMode onClose={() => setShowRewind(false)} onTopicClick={(t) => { setShowRewind(false); handleTopicClick(t); }} backLabel={from} mobile={mobile} />
+      </div>
+    );
+  }
+
   // ─── DECISION ARCHAEOLOGY ──────────────────────
   if (view === "archaeology" && selectedChain) {
     return (
@@ -294,7 +306,6 @@ export default function App() {
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
       <GuidedTour active={v6TourActive} onClose={() => setV6TourActive(false)} mobile={mobile} steps={V6_TOUR_STEPS} storageKey={V6_TOUR_STORAGE_KEY} />
       {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} mobile={mobile} />}
-      {showRewind && <RewindMode onClose={() => setShowRewind(false)} mobile={mobile} />}
       <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view={view} onNavigate={handleNavigate} mobile={mobile} />
     </div>
     </ErrorBoundary>

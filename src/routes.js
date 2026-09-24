@@ -40,7 +40,7 @@ export const DEEP_LINKS = [
 // page after load (keyboard shortcuts open the palette / sidebar / brief card).
 // `mobile: true` adds the route to the 390-wide baseline; a view's redesign PR
 // flags its own route (V7_PLAN.md, principle 7).
-const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/export', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4', '/archaeology/why-typescript', '/archaeology/nope', '/search']);
+const MOBILE_ROUTES = new Set(['/', '/loading', '/curation', '/curation/topics', '/curation/connections', '/curation/insights', '/curation/summary', '/dashboard', '/companion', '/connections', '/evolution', '/export', '/companion/diff', '/companion/digest', '/companion/live', '/topic/courtcollect', '/topic/courtcollect/conversation/4', '/archaeology/why-typescript', '/archaeology/nope', '/search', '/companion/rewind']);
 export const SWEEP_ROUTES = [
   ...Object.keys(PATH_TO_VIEW).map(path => ({ path, mobile: MOBILE_ROUTES.has(path) })),
   ...DEEP_LINKS.map(({ path }) => ({ path, mobile: MOBILE_ROUTES.has(path) })),
@@ -125,6 +125,17 @@ export const SWEEP_ROUTES = [
   // Export with the CSV preview: the generated file, first lines shown.
   { path: '/export', id: 'export-csv', mobile: true, setup: async (page) => {
     await page.getByRole('button', { name: /CSV/ }).click();
+  } },
+  // Rewind under reduced motion: it opens on the finished map and waits.
+  // (The config's reducedMotion option does not reach matchMedia; emulateMedia does.)
+  { path: '/companion/rewind', id: 'rewind-reduced', mobile: true, setup: async (page) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload({ waitUntil: 'networkidle' });
+  } },
+  // Rewind scrubbed back to the Architect phase with one topic picked.
+  { path: '/companion/rewind', id: 'rewind-architect', mobile: true, setup: async (page) => {
+    await page.getByRole('button', { name: /^The Architect,/ }).click();
+    await page.getByRole('button', { name: /^Keymaster:/ }).click();
   } },
   // A shared search: /search?q= opens the palette with the query typed.
   { path: '/search?q=docker', id: 'search-docker', mobile: true },
