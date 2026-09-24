@@ -117,7 +117,11 @@ export const SWEEP_ROUTES = [
     await page.getByRole('button', { name: /still being written/ }).click();
   } },
   // A decision chain with one step picked on the arc, its card highlighted.
+  // The step scrolls its card into view; the fixed companion tab can land a
+  // pixel off after that (it did in CI, 68 pixels), so it is hidden here as
+  // in companion-answer. Every other route still captures the tab.
   { path: '/archaeology/why-vercel', id: 'archaeology-step', mobile: true, setup: async (page) => {
+    await page.addStyleTag({ content: '[data-tour="companion-sidebar"] { visibility: hidden !important; }' });
     await page.getByRole('button', { name: /^Challenging, / }).click();
     await page.clock.runFor(100).catch(() => page.waitForTimeout(100));
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -140,5 +144,23 @@ export const SWEEP_ROUTES = [
   // A shared search: /search?q= opens the palette with the query typed.
   { path: '/search?q=docker', id: 'search-docker', mobile: true },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
+  // A topic's briefing: from its bubble's hover card on desktop, from the
+  // companion sidebar on a phone (bubbles have no hover card there).
+  { path: '/dashboard', id: 'dashboard-brief', mobile: true, setup: async (page) => {
+    if (page.viewportSize().width < 600) {
+      await page.keyboard.press('Control+/');
+      await page.getByRole('button', { name: 'Brief me: CourtCollect' }).click();
+      return;
+    }
+    await page.clock.runFor(1500).catch(() => page.waitForTimeout(1500)); // the bubbles grow in
+    await page.getByRole('button', { name: /^CourtCollect: / }).hover();
+    await page.getByRole('button', { name: 'Brief me' }).click();
+    // Leave no hover card behind the dialog and no scroll from reaching the bubble.
+    await page.mouse.move(0, 0);
+    await page.getByRole('button', { name: 'Brief me' }).waitFor({ state: 'detached' });
+    await page.evaluate(() => window.scrollTo(0, 0));
+  } },
+  // A sync partway through: two phases done, the third running.
+  { path: '/dashboard', id: 'dashboard-sync', setup: async (page) => { await page.getByRole('button', { name: /Sync$/ }).click(); } },
   { path: '/dashboard', id: 'dashboard-sidebar', setup: async (page) => { await page.keyboard.press('Control+/'); } },
 ];

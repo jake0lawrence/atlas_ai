@@ -102,7 +102,7 @@ const Nav = ({ view, onNavigate, mobile, tablet, lastSyncTime, newCount, isSynci
             {!isSyncing && newCount > 0 && <NewChip count={newCount} />}
             <SyncButton isSyncing={isSyncing} onSync={onSync} size={TYPE.xs} />
             <div ref={menuRef} style={{ position: "relative" }}>
-              <button onClick={() => setMenuOpen(o => !o)} aria-label="Navigation menu" aria-expanded={menuOpen} style={{
+              <button data-tour="nav" onClick={() => setMenuOpen(o => !o)} aria-label="Navigation menu" aria-expanded={menuOpen} style={{
                 ...ACTION_BUTTON, color: C.gold, fontWeight: 600, padding: `${SPACE.sm}px ${SPACE.md}px`,
               }}>
                 <span style={{ fontSize: 16, lineHeight: 1 }}>☰</span>
@@ -194,7 +194,7 @@ const Nav = ({ view, onNavigate, mobile, tablet, lastSyncTime, newCount, isSynci
           {!isSyncing && newCount > 0 && <NewChip count={newCount} />}
           <SyncButton isSyncing={isSyncing} onSync={onSync} />
           {onExport && (
-            <button onClick={onExport} title="Export" aria-current={view === "export" ? "page" : undefined} style={{
+            <button data-tour="export" onClick={onExport} title="Export" aria-current={view === "export" ? "page" : undefined} style={{
               ...ACTION_BUTTON, color: view === "export" ? C.gold : white(0.45),
               border: `1px solid ${view === "export" ? alpha(C.gold, 0.3) : white(0.08)}`,
             }}><span>↗</span>{!tablet && "Export"}</button>

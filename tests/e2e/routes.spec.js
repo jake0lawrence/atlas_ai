@@ -6,7 +6,7 @@
 // changed PNGs in the PR like any other diff.
 import { test, expect } from '@playwright/test';
 import { SWEEP_ROUTES } from '../../src/routes.js';
-import { TOUR_STORAGE_KEY, V6_TOUR_STORAGE_KEY } from '../../src/data/constants.js';
+import { TOUR_STORAGE_KEY } from '../../src/data/constants.js';
 
 // Every view is time-driven somewhere (stat counters, the loading pipeline,
 // staggered reveals). The page runs on a paused fake clock that is advanced by
@@ -34,7 +34,7 @@ for (const route of SWEEP_ROUTES) {
   test(`${id} matches its baseline`, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile' && !route.mobile, 'not in the mobile baseline yet');
     if (!route.tour) {
-      await page.addInitScript(([a, b]) => { localStorage.setItem(a, 'true'); localStorage.setItem(b, 'true'); }, [TOUR_STORAGE_KEY, V6_TOUR_STORAGE_KEY]);
+      await page.addInitScript((key) => { localStorage.setItem(key, 'true'); }, TOUR_STORAGE_KEY);
     }
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
