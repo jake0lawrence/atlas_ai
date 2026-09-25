@@ -4,7 +4,7 @@ import { C, white, MONO, SPACE, TYPE } from '../styles/tokens';
 
 // Stacked monthly bars, Claude over ChatGPT. The axis labels every six months
 // and a text summary (for screen readers) come from the same data.
-const LABEL_MONTHS = new Set(["Jan 23", "Jul 23", "Jan 24", "Jul 24", "Jan 25", "Jul 25", "Jan 26"]);
+const LABEL_MONTHS = new Set(["Jan 23", "Jul 23", "Jan 24", "Jul 24", "Jan 25"]);
 
 const ActivityChart = ({ mobile, summary }) => {
   const [visible, setVisible] = useState(false);
