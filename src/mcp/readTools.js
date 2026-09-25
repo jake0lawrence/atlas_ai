@@ -11,7 +11,7 @@
 import {
   TOPICS, CONNECTIONS, TIMELINE_DATA, INSIGHT_DECISIONS, PIVOT_ENTRIES, CONTRADICTIONS_INITIAL,
 } from '../data/constants.js';
-import { aliasText } from '../privacy.js';
+import { aliasText, privatePath } from '../privacy.js';
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
@@ -34,9 +34,9 @@ const wordsOf = (query) => String(query || "").toLowerCase().split(/\s+/).filter
 
 export function createReadTools({ baseUrl = "http://localhost:5173", privacy = false } = {}) {
   const show = privacy ? aliasText : (s) => s;
-  // Private links carry the alias as a slug (/topic/product-a): they no longer
-  // resolve in the app, which is the price of not naming the topic.
-  const url = (path) => new URL(privacy ? aliasText(path).replace(/ /g, "-").toLowerCase() : path, baseUrl).toString();
+  // Private links carry the stand-in as a slug (/topic/product-a), which the
+  // app resolves back to the topic (privatePath in privacy.js).
+  const url = (path) => new URL(privacy ? privatePath(path) : path, baseUrl).toString();
   const item = ({ id, kind, title, subtitle, snippet, date, topicId, path }) => ({
     id: show(id), kind, title: show(title), subtitle: show(subtitle), snippet: show(snippet), date, topicId: show(topicId), url: url(path),
   });

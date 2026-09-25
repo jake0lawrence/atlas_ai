@@ -296,9 +296,13 @@ over stdio or Streamable HTTP (`--http 8787`); `research/v8-mcp/read-smoke.mjs` 
 both transports with the MCP client and asks PR 2's question, which returns the
 Supabase + Next.js decision first, linked to its own conversation. With
 `ATLAS_PRIVACY=on` (#86) every string it returns, ids and links included, carries the
-stand-ins. Not done: OAuth, a public HTTPS endpoint, and the check against Claude.ai
-itself, which needs the tunnel. The design it follows is below, as written before it
-was built.
+stand-ins. **Hosted** (2026-09-25): `api/mcp.js` serves the same server
+(`src/mcp/server.js`) as a Vercel function at `/api/mcp`, stateless and with JSON
+responses, so it needs no session store; `?privacy=on` on the URL turns on the
+stand-ins for that connection. `read-smoke.mjs <url>` checks a deployed endpoint. Not
+done: OAuth, and the check against Claude.ai itself, which waits on the deployment
+being public (V8_PLAN.md, "Trying it in Claude.ai"). The design it follows is below, as
+written before it was built.
 
 Target: Claude.ai answers "what did I decide about CourtCollect's stack?" from Atlas.
 Four read-only tools, all `readOnlyHint: true`, `openWorldHint: false`, each with a

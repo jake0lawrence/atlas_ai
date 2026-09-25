@@ -2,7 +2,9 @@ import { afterEach, beforeEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
 // jsdom has no layout, no AudioContext and no matchMedia; views touch all three.
+// Server-side tests (@vitest-environment node) have no window at all.
 beforeEach(() => {
+  if (typeof window === 'undefined') return;
   window.matchMedia = window.matchMedia || (() => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
   window.scrollTo = window.scrollTo || (() => {});
   Element.prototype.scrollIntoView = Element.prototype.scrollIntoView || (() => {});
