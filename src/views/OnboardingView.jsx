@@ -15,7 +15,7 @@ const FACTS = [
   { value: "3,847", label: "conversations" },
   { value: String(TOPICS.length), label: "topic clusters" },
   { value: String(CONNECTIONS.length), label: "connections" },
-  { value: "3 yrs", label: "Jan 2023 – Feb 2026" },
+  { value: "2 yrs", label: "Jan 2023 – Feb 2025" },
 ];
 
 const OnboardingView = ({ onStart, mobile }) => {
@@ -50,7 +50,7 @@ const OnboardingView = ({ onStart, mobile }) => {
           </div>
           <div style={{ fontFamily: BODY, fontSize: TYPE.xs, color: alpha(C.gold, 0.6), textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 600, marginBottom: SPACE.md }}>Your mind, mapped</div>
           <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xxl : TYPE.display, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: SPACE.md }}>
-            Three years of AI conversations.<br />
+            Two years of AI conversations.<br />
             <span style={{ color: C.gold }}>One map.</span>
           </h1>
           <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.base : TYPE.md, color: white(0.5), lineHeight: 1.6, maxWidth: 520, margin: "0 auto" }}>

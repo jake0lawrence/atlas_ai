@@ -1,19 +1,19 @@
 import { C } from '../styles/tokens.js'; // with .js so plain Node can load the fixtures (the MCP prototype does)
 export const TOPICS = [
-  { id: "courtcollect", name: "CourtCollect", count: 47, words: 128400, color: C.amber, category: "product", firstSeen: "Aug 2024", lastSeen: "Feb 2026", depth: 4.2, icon: "⚖️", platform: { claude: 38, gpt: 9 } },
-  { id: "hmprg", name: "HMPRG Campaigns", count: 38, words: 98200, color: C.blue, category: "client", firstSeen: "Sep 2024", lastSeen: "Feb 2026", depth: 3.8, icon: "🏥", platform: { claude: 30, gpt: 8 } },
-  { id: "jobsearch", name: "Job Search", count: 62, words: 142000, color: C.red, category: "career", firstSeen: "Dec 2024", lastSeen: "Feb 2026", depth: 3.5, icon: "💼", platform: { claude: 48, gpt: 14 } },
-  { id: "gamedev", name: "Dice or Die", count: 23, words: 67800, color: C.violet, category: "creative", firstSeen: "Oct 2024", lastSeen: "Jan 2026", depth: 3.9, icon: "🎲", platform: { claude: 15, gpt: 8 } },
-  { id: "keymaster", name: "Keymaster", count: 18, words: 52100, color: C.green, category: "product", firstSeen: "Jul 2024", lastSeen: "Dec 2025", depth: 4.0, icon: "🔐", platform: { claude: 14, gpt: 4 } },
-  { id: "automation", name: "AI Automation", count: 34, words: 89500, color: C.pink, category: "tech", firstSeen: "Jun 2024", lastSeen: "Feb 2026", depth: 3.6, icon: "🤖", platform: { claude: 20, gpt: 14 } },
-  { id: "resumes", name: "Resumes & Cover Letters", count: 41, words: 95300, color: C.orange, category: "career", firstSeen: "Dec 2024", lastSeen: "Feb 2026", depth: 2.8, icon: "📄", platform: { claude: 36, gpt: 5 } },
-  { id: "tyler", name: "Tyler Technologies", count: 89, words: 234500, color: C.indigo, category: "work", firstSeen: "Mar 2023", lastSeen: "Dec 2025", depth: 3.4, icon: "🏢", platform: { claude: 31, gpt: 58 } },
-  { id: "obsidian", name: "Knowledge Mgmt", count: 15, words: 41200, color: C.teal, category: "tech", firstSeen: "Nov 2024", lastSeen: "Feb 2026", depth: 4.5, icon: "🧠", platform: { claude: 13, gpt: 2 } },
-  { id: "finance", name: "Personal Finance", count: 28, words: 61400, color: C.lime, category: "personal", firstSeen: "Jun 2023", lastSeen: "Jan 2026", depth: 2.9, icon: "💰", platform: { claude: 10, gpt: 18 } },
-  { id: "n8n", name: "n8n & Airtable", count: 21, words: 58900, color: C.purple, category: "tech", firstSeen: "Aug 2024", lastSeen: "Jan 2026", depth: 3.7, icon: "⚡", platform: { claude: 16, gpt: 5 } },
-  { id: "webdev", name: "Web Development", count: 156, words: 412000, color: C.cyan, category: "tech", firstSeen: "Jan 2023", lastSeen: "Feb 2026", depth: 3.2, icon: "🌐", platform: { claude: 72, gpt: 84 } },
-  { id: "writing", name: "Creative Writing", count: 32, words: 87600, color: C.orangeLight, category: "creative", firstSeen: "Apr 2023", lastSeen: "Jan 2026", depth: 3.1, icon: "✍️", platform: { claude: 12, gpt: 20 } },
-  { id: "govtech", name: "Gov Tech & Policy", count: 44, words: 119000, color: C.slate, category: "domain", firstSeen: "Feb 2023", lastSeen: "Feb 2026", depth: 3.3, icon: "🏛️", platform: { claude: 22, gpt: 22 } },
+  { id: "courtcollect", name: "CourtCollect", count: 47, words: 128400, color: C.amber, category: "product", firstSeen: "Aug 2024", lastSeen: "Feb 2025", depth: 4.2, icon: "⚖️", platform: { claude: 38, gpt: 9 } },
+  { id: "hmprg", name: "HMPRG Campaigns", count: 38, words: 98200, color: C.blue, category: "client", firstSeen: "Sep 2024", lastSeen: "Feb 2025", depth: 3.8, icon: "🏥", platform: { claude: 30, gpt: 8 } },
+  { id: "jobsearch", name: "Job Search", count: 62, words: 142000, color: C.red, category: "career", firstSeen: "Dec 2024", lastSeen: "Feb 2025", depth: 3.5, icon: "💼", platform: { claude: 48, gpt: 14 } },
+  { id: "gamedev", name: "Dice or Die", count: 23, words: 67800, color: C.violet, category: "creative", firstSeen: "Oct 2024", lastSeen: "Jan 2025", depth: 3.9, icon: "🎲", platform: { claude: 15, gpt: 8 } },
+  { id: "keymaster", name: "Keymaster", count: 18, words: 52100, color: C.green, category: "product", firstSeen: "Jul 2024", lastSeen: "Dec 2024", depth: 4.0, icon: "🔐", platform: { claude: 14, gpt: 4 } },
+  { id: "automation", name: "AI Automation", count: 34, words: 89500, color: C.pink, category: "tech", firstSeen: "Jun 2024", lastSeen: "Feb 2025", depth: 3.6, icon: "🤖", platform: { claude: 20, gpt: 14 } },
+  { id: "resumes", name: "Resumes & Cover Letters", count: 41, words: 95300, color: C.orange, category: "career", firstSeen: "Dec 2024", lastSeen: "Feb 2025", depth: 2.8, icon: "📄", platform: { claude: 36, gpt: 5 } },
+  { id: "tyler", name: "Tyler Technologies", count: 89, words: 234500, color: C.indigo, category: "work", firstSeen: "Mar 2023", lastSeen: "Dec 2024", depth: 3.4, icon: "🏢", platform: { claude: 31, gpt: 58 } },
+  { id: "obsidian", name: "Knowledge Mgmt", count: 15, words: 41200, color: C.teal, category: "tech", firstSeen: "Nov 2024", lastSeen: "Feb 2025", depth: 4.5, icon: "🧠", platform: { claude: 13, gpt: 2 } },
+  { id: "finance", name: "Personal Finance", count: 28, words: 61400, color: C.lime, category: "personal", firstSeen: "Jun 2023", lastSeen: "Jan 2025", depth: 2.9, icon: "💰", platform: { claude: 10, gpt: 18 } },
+  { id: "n8n", name: "n8n & Airtable", count: 21, words: 58900, color: C.purple, category: "tech", firstSeen: "Aug 2024", lastSeen: "Jan 2025", depth: 3.7, icon: "⚡", platform: { claude: 16, gpt: 5 } },
+  { id: "webdev", name: "Web Development", count: 156, words: 412000, color: C.cyan, category: "tech", firstSeen: "Jan 2023", lastSeen: "Feb 2025", depth: 3.2, icon: "🌐", platform: { claude: 72, gpt: 84 } },
+  { id: "writing", name: "Creative Writing", count: 32, words: 87600, color: C.orangeLight, category: "creative", firstSeen: "Apr 2023", lastSeen: "Jan 2025", depth: 3.1, icon: "✍️", platform: { claude: 12, gpt: 20 } },
+  { id: "govtech", name: "Gov Tech & Policy", count: 44, words: 119000, color: C.slate, category: "domain", firstSeen: "Feb 2023", lastSeen: "Feb 2025", depth: 3.3, icon: "🏛️", platform: { claude: 22, gpt: 22 } },
 ];
 
 export const CONNECTIONS = [
@@ -181,12 +181,6 @@ export const MONTHLY_ACTIVITY = [
   { month: "Sep 24", gpt: 35, claude: 112 }, { month: "Oct 24", gpt: 31, claude: 118 },
   { month: "Nov 24", gpt: 28, claude: 124 }, { month: "Dec 24", gpt: 34, claude: 131 },
   { month: "Jan 25", gpt: 22, claude: 138 }, { month: "Feb 25", gpt: 18, claude: 142 },
-  { month: "Mar 25", gpt: 16, claude: 148 }, { month: "Apr 25", gpt: 14, claude: 151 },
-  { month: "May 25", gpt: 15, claude: 155 }, { month: "Jun 25", gpt: 12, claude: 158 },
-  { month: "Jul 25", gpt: 11, claude: 162 }, { month: "Aug 25", gpt: 10, claude: 159 },
-  { month: "Sep 25", gpt: 9, claude: 164 }, { month: "Oct 25", gpt: 8, claude: 168 },
-  { month: "Nov 25", gpt: 10, claude: 171 }, { month: "Dec 25", gpt: 12, claude: 175 },
-  { month: "Jan 26", gpt: 8, claude: 180 }, { month: "Feb 26", gpt: 6, claude: 184 },
 ];
 
 // Conversations the ⌘K palette can find. `topicId` files one under a topic
@@ -225,14 +219,13 @@ export const EVOLUTION_PHASES = [
   { period: "Jul – Dec 2023", title: "The Practitioner", desc: "Building real things. Tyler work got sophisticated. Financial planning and creative writing began.", color: C.green, conversations: 483 },
   { period: "Jan – Jun 2024", title: "The Builder", desc: "Launched Keymaster and automation projects. Shifted from 'how' to 'what should I build.' Claude adoption began.", color: C.amber, conversations: 548 },
   { period: "Jul – Dec 2024", title: "The Architect", desc: "CourtCollect, HMPRG campaigns, game design. Multi-project orchestration. Average conversation: 35 messages.", color: C.red, conversations: 726 },
-  { period: "Jan – Jun 2025", title: "The Strategist", desc: "Job search + consulting + product development simultaneously. AI as thinking partner, not just tool.", color: C.purple, conversations: 520 },
-  { period: "Jul 2025 – Feb 2026", title: "The Meta-Thinker", desc: "Designing systems to extract knowledge from your own AI use. Building Atlas. The snake eats its tail.", color: C.pink, conversations: 480 },
+  { period: "Jan – Feb 2025", title: "The Strategist", desc: "Job search + consulting + product development simultaneously. AI as thinking partner, not just tool.", color: C.purple, conversations: 320 },
 ];
 
 export const REDISCOVERIES = [
   { icon: "💡", ago: "3 months ago", text: "You designed a password-strength scoring algorithm using entropy calculation with contextual penalties." },
   { icon: "🎯", ago: "9 months ago", text: "You found that municipal courts lose 23% of collectible revenue to outdated payment systems." },
-  { icon: "🔄", ago: "2 years ago", text: "Your first conversation about AI automation — 'how do I connect APIs without coding.' Look how far that's come." },
+  { icon: "🔄", ago: "8 months ago", text: "Your first conversation about AI automation — 'how do I connect APIs without coding.' Look how far that's come." },
 ];
 
 // ─── ASK ATLAS — COMPANION RESPONSE DATA ───────────────────
@@ -507,7 +500,7 @@ export const BELIEF_DIFFS = [
     icon: "🤖",
     color: C.pink,
     earlier: { label: "Early 2024", date: "2024-03" },
-    current: { label: "Late 2025", date: "2025-11" },
+    current: { label: "Late 2024", date: "2024-11" },
     lines: [
       { type: "removed", text: "ChatGPT is sufficient for all coding tasks" },
       { type: "removed", text: "One model fits every use case" },
@@ -526,7 +519,7 @@ export const BELIEF_DIFFS = [
     icon: "⚡",
     color: C.purple,
     earlier: { label: "Mid 2024", date: "2024-06" },
-    current: { label: "2025", date: "2025-09" },
+    current: { label: "Late 2024", date: "2024-09" },
     lines: [
       { type: "removed", text: "Automate everything with no-code tools" },
       { type: "removed", text: "If it can be automated, it should be" },
@@ -545,7 +538,7 @@ export const BELIEF_DIFFS = [
     icon: "⚖️",
     color: C.amber,
     earlier: { label: "Initial (Aug 2024)", date: "2024-08" },
-    current: { label: "Current (Feb 2026)", date: "2026-02" },
+    current: { label: "Current (Feb 2025)", date: "2025-02" },
     lines: [
       { type: "removed", text: "Monolith with REST API on Railway" },
       { type: "removed", text: "Single PostgreSQL database for everything" },
@@ -770,8 +763,8 @@ export const ARCHAEOLOGY_CHAINS = {
 // ─── MONTHLY THINKING DIGEST DATA ──────────────────────────
 export const DIGEST_DATA = [
   {
-    id: "feb-2026",
-    month: "February 2026",
+    id: "feb-2025",
+    month: "February 2025",
     generating: true,
     stats: { conversations: 18, newTopics: 0, pivots: 0, insights: 2 },
     newTopics: [],
@@ -789,8 +782,8 @@ export const DIGEST_DATA = [
     ],
   },
   {
-    id: "jan-2026",
-    month: "January 2026",
+    id: "jan-2025",
+    month: "January 2025",
     theme: "Heavy CourtCollect Sprint",
     stats: { conversations: 47, newTopics: 0, pivots: 1, insights: 5 },
     newTopics: [],
@@ -818,8 +811,8 @@ export const DIGEST_DATA = [
     ],
   },
   {
-    id: "dec-2025",
-    month: "December 2025",
+    id: "dec-2024",
+    month: "December 2024",
     theme: "The Claude-Native Shift",
     stats: { conversations: 58, newTopics: 0, pivots: 2, insights: 4 },
     newTopics: [],
@@ -847,8 +840,8 @@ export const DIGEST_DATA = [
     ],
   },
   {
-    id: "oct-2025",
-    month: "October 2025",
+    id: "oct-2024",
+    month: "October 2024",
     theme: "Automation Deep-Dive",
     stats: { conversations: 52, newTopics: 0, pivots: 1, insights: 3 },
     newTopics: [],
@@ -858,8 +851,8 @@ export const DIGEST_DATA = [
       { topicId: "hmprg", name: "HMPRG Campaigns", icon: "🏥", color: C.blue, delta: "+5 conversations", detail: "Campaign performance analysis and content calendar" },
     ],
     goneQuiet: [
-      { topicId: "finance", name: "Personal Finance", icon: "💰", color: C.lime, lastActive: "Aug 2025", detail: "Tax strategies settled, no active financial planning" },
-      { topicId: "tyler", name: "Tyler Technologies", icon: "🏢", color: C.indigo, lastActive: "Sep 2025", detail: "Winding down, approaching departure" },
+      { topicId: "finance", name: "Personal Finance", icon: "💰", color: C.lime, lastActive: "Aug 2024", detail: "Tax strategies settled, no active financial planning" },
+      { topicId: "tyler", name: "Tyler Technologies", icon: "🏢", color: C.indigo, lastActive: "Sep 2024", detail: "Winding down, approaching departure" },
     ],
     decisions: [
       { text: "Strategic automation philosophy: automate the boring, hand-craft the critical", topicId: "automation", color: C.pink },
@@ -879,7 +872,7 @@ export const DIGEST_DATA = [
 export const PIVOT_ENTRIES = [
   {
     id: "pivot-claude-shift",
-    date: "Dec 2025",
+    date: "Dec 2024",
     topicId: "webdev",
     topicName: "Web Development",
     topicIcon: "🌐",
@@ -894,7 +887,7 @@ export const PIVOT_ENTRIES = [
   },
   {
     id: "pivot-automation-philosophy",
-    date: "Oct 2025",
+    date: "Oct 2024",
     topicId: "automation",
     topicName: "AI Automation",
     topicIcon: "🤖",
@@ -909,7 +902,7 @@ export const PIVOT_ENTRIES = [
   },
   {
     id: "pivot-keymaster-shelved",
-    date: "Dec 2025",
+    date: "Dec 2024",
     topicId: "keymaster",
     topicName: "Keymaster",
     topicIcon: "🔐",
@@ -924,7 +917,7 @@ export const PIVOT_ENTRIES = [
   },
   {
     id: "pivot-hmprg-budget",
-    date: "Jan 2026",
+    date: "Jan 2025",
     topicId: "hmprg",
     topicName: "HMPRG Campaigns",
     topicIcon: "🏥",
@@ -1030,7 +1023,7 @@ export const BRIEFINGS = {
       { topicId: "webdev", summary: "Landing page optimization draws on web development skills" },
       { topicId: "n8n", summary: "Analytics pipeline built on n8n → Airtable for reporting" },
     ],
-    suggestedPrompt: "Let's review the HMPRG campaign performance for Q1 2026. I want to analyze whether the Instagram-heavy budget allocation is still optimal, discuss the landing page changes and their impact on conversion rates, and plan the next content calendar cycle.",
+    suggestedPrompt: "Let's review the HMPRG campaign performance for Q1 2025. I want to analyze whether the Instagram-heavy budget allocation is still optimal, discuss the landing page changes and their impact on conversion rates, and plan the next content calendar cycle.",
   },
 };
 
@@ -1051,9 +1044,9 @@ export const CONTRADICTIONS_INITIAL = [
       source: { topicId: "courtcollect", topicName: "CourtCollect", title: "Pivoted to Vercel deployment", conversationDate: "Nov 2024" },
     },
     current: {
-      date: "2026-01-28",
+      date: "2025-01-28",
       position: "Recent conversations reference \"the payments microservice\" and \"separate data conversion pipeline\" as distinct services with independent deployment.",
-      source: { topicId: "courtcollect", topicName: "CourtCollect", title: "Josephine TX integration planning", conversationDate: "Jan 2026" },
+      source: { topicId: "courtcollect", topicName: "CourtCollect", title: "Josephine TX integration planning", conversationDate: "Jan 2025" },
     },
     resolution: null,
   },
@@ -1072,9 +1065,9 @@ export const CONTRADICTIONS_INITIAL = [
       source: { topicId: "automation", topicName: "AI Automation", title: "No-code automation strategy", conversationDate: "Jun 2024" },
     },
     current: {
-      date: "2026-01-20",
+      date: "2025-01-20",
       position: "Recent workflows use Claude API with custom Python scripts. Last 5 automation conversations involve writing code, not configuring n8n.",
-      source: { topicId: "automation", topicName: "AI Automation", title: "Claude API integration for n8n workflows", conversationDate: "Jan 2026" },
+      source: { topicId: "automation", topicName: "AI Automation", title: "Claude API integration for n8n workflows", conversationDate: "Jan 2025" },
     },
     resolution: null,
   },
@@ -1093,9 +1086,9 @@ export const CONTRADICTIONS_INITIAL = [
       source: { topicId: "n8n", topicName: "n8n & Airtable", title: "Bluesky → Airtable pipeline", conversationDate: "Aug 2024" },
     },
     current: {
-      date: "2025-10-15",
+      date: "2024-10-15",
       position: "Migrated analytics to Supabase and reporting to direct API integrations. Airtable bases are now read-only archives, but recent conversations still reference \"updating the Airtable base.\"",
-      source: { topicId: "n8n", topicName: "n8n & Airtable", title: "Pipeline migration to Supabase", conversationDate: "Oct 2025" },
+      source: { topicId: "n8n", topicName: "n8n & Airtable", title: "Pipeline migration to Supabase", conversationDate: "Oct 2024" },
     },
     resolution: null,
   },
@@ -1114,9 +1107,9 @@ export const CONTRADICTIONS_INITIAL = [
       source: { topicId: "jobsearch", topicName: "Job Search", title: "Job search strategy refinement", conversationDate: "Jan 2025" },
     },
     current: {
-      date: "2026-02-02",
+      date: "2025-02-02",
       position: "Recent applications include a B2B SaaS company (Veritone) and a health-tech startup outside the GovTech space.",
-      source: { topicId: "jobsearch", topicName: "Job Search", title: "Interview debrief & strategy update", conversationDate: "Feb 2026" },
+      source: { topicId: "jobsearch", topicName: "Job Search", title: "Interview debrief & strategy update", conversationDate: "Feb 2025" },
     },
     resolution: null,
   },
@@ -1143,7 +1136,7 @@ export const FRESHNESS_CONFIG = {
 };
 
 export const MONTH_MAP = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
-export const DEMO_NOW = new Date(2026, 1, 7); // Feb 7 2026 — the demo "today"
+export const DEMO_NOW = new Date(2025, 1, 7); // Feb 7 2025, the demo "today": the day after the timeline's last event
 
 export const getTopicFreshness = (topic) => {
   if (topic.archived) return "archived";
@@ -1169,9 +1162,9 @@ export const RECURATION_COUNTS = {
 
 // New events surfaced after an incremental sync (demo data)
 export const SYNC_NEW_EVENTS = {
-  courtcollect: { date: "2026-02-07", title: "Payment processing edge case fix", summary: "Resolved edge case in partial payment calculations for Josephine TX accounts.", type: "build", messages: 18 },
-  automation: { date: "2026-02-06", title: "Claude API integration for n8n workflows", summary: "Connected Claude API to n8n for automated document classification.", type: "build", messages: 24 },
-  jobsearch: { date: "2026-02-07", title: "Follow-up strategy after second interview", summary: "Prepared targeted follow-up materials with portfolio highlights.", type: "decision", messages: 12 },
+  courtcollect: { date: "2025-02-07", title: "Payment processing edge case fix", summary: "Resolved edge case in partial payment calculations for Josephine TX accounts.", type: "build", messages: 18 },
+  automation: { date: "2025-02-06", title: "Claude API integration for n8n workflows", summary: "Connected Claude API to n8n for automated document classification.", type: "build", messages: 24 },
+  jobsearch: { date: "2025-02-07", title: "Follow-up strategy after second interview", summary: "Prepared targeted follow-up materials with portfolio highlights.", type: "decision", messages: 12 },
 };
 
 // ─── TOPIC CURATION DATA ────────────────────────────────────
@@ -1222,7 +1215,7 @@ export const MERGE_SUGGESTIONS = [
 ];
 
 export const DEMO_PERSONAS = [
-  { id: "power", label: "Power User", convos: "3,847", detail: "3 years · ChatGPT + Claude", icon: "⚡", color: C.gold, enabled: true },
+  { id: "power", label: "Power User", convos: "3,847", detail: "2 years · ChatGPT + Claude", icon: "⚡", color: C.gold, enabled: true },
   { id: "new", label: "New User", convos: "200", detail: "3 months · ChatGPT only", icon: "🌱", color: C.green, enabled: true },
   { id: "team", label: "Team Lead", convos: "—", detail: "Multi-user · Coming soon", icon: "👥", color: C.violet, enabled: false },
 ];
@@ -1233,7 +1226,7 @@ export const LOAD_PIPELINE = [
   { pct: 14, phase: "parse", msg: "Reading Claude export archive...", detail: "Extracting contentChunks from 1,506 conversations" },
   { pct: 21, phase: "normalize", msg: "Normalizing cross-platform schemas...", detail: "Mapping ChatGPT 'mapping' nodes → unified message format" },
   { pct: 28, phase: "normalize", msg: "Deduplicating conversations...", detail: "Removed 0 duplicates across platforms" },
-  { pct: 33, phase: "normalize", msg: "Indexing message timestamps...", detail: "Date range: January 2023 → February 2026" },
+  { pct: 33, phase: "normalize", msg: "Indexing message timestamps...", detail: "Date range: January 2023 → February 2025" },
   { pct: 40, phase: "enrich", msg: "Classifying topics with semantic analysis...", detail: null, discovery: { icon: "🌐", name: "Web Development", count: 156 } },
   { pct: 46, phase: "enrich", msg: "Extracting named entities...", detail: null, discovery: { icon: "🏢", name: "Tyler Technologies", count: 89 } },
   { pct: 52, phase: "enrich", msg: "Identifying decision points...", detail: null, discovery: { icon: "💼", name: "Job Search", count: 62 } },
@@ -1242,7 +1235,7 @@ export const LOAD_PIPELINE = [
   { pct: 70, phase: "enrich", msg: "Detecting evolution phases...", detail: "6 cognitive phases found across 38 months" },
   { pct: 76, phase: "connect", msg: "Computing topic connections...", detail: "16 significant connections at >0.3 strength" },
   { pct: 82, phase: "connect", msg: "Generating cognitive insights...", detail: "You're a Relentless Iterator (84th percentile)" },
-  { pct: 88, phase: "connect", msg: "Building activity timeline...", detail: "Peak month: January 2026 — 188 conversations" },
+  { pct: 88, phase: "connect", msg: "Building activity timeline...", detail: "Peak month: December 2024 — 165 conversations" },
   { pct: 93, phase: "build", msg: "Generating search index...", detail: "2.4M words indexed across 3,847 conversations" },
   { pct: 97, phase: "build", msg: "Rendering knowledge atlas...", detail: null },
   { pct: 100, phase: "build", msg: "Your atlas is ready.", detail: null },
@@ -1258,18 +1251,18 @@ export const PHASE_META = {
 
 export const VAULT_TREE = [
   { type: "folder", name: "Atlas Vault", children: [
-    { type: "file", name: "🗺️ Map of Content.md", content: "# Map of Content\n\nYour curated knowledge atlas — 14 topics, 3,847 conversations.\n\n## Topic Index\n- [[CourtCollect]] — ⚖️ 47 conversations\n- [[HMPRG Campaigns]] — 🏥 38 conversations\n- [[Job Search]] — 💼 62 conversations\n- [[Dice or Die]] — 🎲 23 conversations\n- [[Keymaster]] — 🔐 18 conversations\n- [[AI Automation]] — 🤖 34 conversations\n\n## Connections\n- [[CourtCollect]] ↔ [[Tyler Technologies]] — Domain expertise transferred\n- [[Job Search]] ↔ [[Resumes & Cover Letters]] — Application materials\n- [[n8n & Airtable]] ↔ [[AI Automation]] — Workflow tooling\n\n## Evolution\nSee [[Evolution Timeline]] for your journey from Learner → Meta-Thinker." },
+    { type: "file", name: "🗺️ Map of Content.md", content: "# Map of Content\n\nYour curated knowledge atlas — 14 topics, 3,847 conversations.\n\n## Topic Index\n- [[CourtCollect]] — ⚖️ 47 conversations\n- [[HMPRG Campaigns]] — 🏥 38 conversations\n- [[Job Search]] — 💼 62 conversations\n- [[Dice or Die]] — 🎲 23 conversations\n- [[Keymaster]] — 🔐 18 conversations\n- [[AI Automation]] — 🤖 34 conversations\n\n## Connections\n- [[CourtCollect]] ↔ [[Tyler Technologies]] — Domain expertise transferred\n- [[Job Search]] ↔ [[Resumes & Cover Letters]] — Application materials\n- [[n8n & Airtable]] ↔ [[AI Automation]] — Workflow tooling\n\n## Evolution\nSee [[Evolution Timeline]] for your journey from Learner → Strategist." },
     { type: "folder", name: "CourtCollect", children: [
-      { type: "file", name: "⚖️ CourtCollect.md", content: "# CourtCollect\n\n**Category:** Product · **Depth:** 4.2 · **Status:** Active\n\n47 conversations · 128,400 words · Aug 2024 – Feb 2026\n\n## Key Decisions\n- Architecture: Supabase + Next.js — [[2024-09-15 Architecture decisions]]\n- Pivoted from Docker/Railway → Vercel — [[2024-11-16 Deployment pivot]]\n\n## Connections\n- [[Tyler Technologies]] — Domain expertise transferred (strength: 0.9)\n- [[Gov Tech & Policy]] — Policy requirements (strength: 0.7)\n- [[Web Development]] — Tech stack decisions (strength: 0.6)" },
+      { type: "file", name: "⚖️ CourtCollect.md", content: "# CourtCollect\n\n**Category:** Product · **Depth:** 4.2 · **Status:** Active\n\n47 conversations · 128,400 words · Aug 2024 – Feb 2025\n\n## Key Decisions\n- Architecture: Supabase + Next.js — [[2024-09-15 Architecture decisions]]\n- Pivoted from Docker/Railway → Vercel — [[2024-11-16 Deployment pivot]]\n\n## Connections\n- [[Tyler Technologies]] — Domain expertise transferred (strength: 0.9)\n- [[Gov Tech & Policy]] — Policy requirements (strength: 0.7)\n- [[Web Development]] — Tech stack decisions (strength: 0.6)" },
       { type: "file", name: "2024-09-15 Architecture decisions.md", content: "# Architecture decisions — Supabase + Next.js\n\n**Date:** 2024-09-15 · **Type:** Decision · **Messages:** 42\n\nChose tech stack after evaluating options. Selected Supabase for backend with Next.js frontend.\n\n**Extracted Entities:** Supabase, Next.js, PostgreSQL, Vercel\n\n**Related:** [[CourtCollect]] · [[Web Development]]" },
     ]},
     { type: "folder", name: "Job Search", children: [
-      { type: "file", name: "💼 Job Search.md", content: "# Job Search\n\n**Category:** Career · **Depth:** 3.5 · **Status:** Active\n\n62 conversations · 142,000 words · Dec 2024 – Feb 2026\n\n## Key Decisions\n- Master resume overhaul emphasizing 100+ implementations\n- Strategic applications: OpenGov, Granicus, Veritone, TransUnion\n\n## Connections\n- [[Resumes & Cover Letters]] — Application materials (strength: 0.95)\n- [[Tyler Technologies]] — Experience narratives (strength: 0.7)" },
+      { type: "file", name: "💼 Job Search.md", content: "# Job Search\n\n**Category:** Career · **Depth:** 3.5 · **Status:** Active\n\n62 conversations · 142,000 words · Dec 2024 – Feb 2025\n\n## Key Decisions\n- Master resume overhaul emphasizing 100+ implementations\n- Strategic applications: OpenGov, Granicus, Veritone, TransUnion\n\n## Connections\n- [[Resumes & Cover Letters]] — Application materials (strength: 0.95)\n- [[Tyler Technologies]] — Experience narratives (strength: 0.7)" },
     ]},
     { type: "folder", name: "AI Automation", children: [
-      { type: "file", name: "🤖 AI Automation.md", content: "# AI Automation\n\n**Category:** Tech · **Depth:** 3.6 · **Status:** Active\n\n34 conversations · 89,500 words · Jun 2024 – Feb 2026\n\n## Connections\n- [[n8n & Airtable]] — Workflow tooling (strength: 0.8)\n- [[HMPRG Campaigns]] — Campaign automation (strength: 0.6)\n- [[Knowledge Mgmt]] — PKM + AI integration (strength: 0.5)" },
+      { type: "file", name: "🤖 AI Automation.md", content: "# AI Automation\n\n**Category:** Tech · **Depth:** 3.6 · **Status:** Active\n\n34 conversations · 89,500 words · Jun 2024 – Feb 2025\n\n## Connections\n- [[n8n & Airtable]] — Workflow tooling (strength: 0.8)\n- [[HMPRG Campaigns]] — Campaign automation (strength: 0.6)\n- [[Knowledge Mgmt]] — PKM + AI integration (strength: 0.5)" },
     ]},
-    { type: "file", name: "Evolution Timeline.md", content: "# Evolution Timeline\n\nYour thinking evolution across 6 phases:\n\n## The Learner (Jan – Jun 2023)\nMostly how-to questions. 371 conversations.\n\n## The Practitioner (Jul – Dec 2023)\nBuilding real things. 483 conversations.\n\n## The Builder (Jan – Jun 2024)\nLaunched Keymaster and automation projects. 548 conversations.\n\n## The Architect (Jul – Dec 2024)\nMulti-project orchestration. 726 conversations.\n\n## The Strategist (Jan – Jun 2025)\nAI as thinking partner, not just tool. 520 conversations.\n\n## The Meta-Thinker (Jul 2025 – Feb 2026)\nDesigning systems to extract knowledge. 480 conversations." },
+    { type: "file", name: "Evolution Timeline.md", content: "# Evolution Timeline\n\nYour thinking evolution across 5 phases:\n\n## The Learner (Jan – Jun 2023)\nMostly how-to questions. 371 conversations.\n\n## The Practitioner (Jul – Dec 2023)\nBuilding real things. 483 conversations.\n\n## The Builder (Jan – Jun 2024)\nLaunched Keymaster and automation projects. 548 conversations.\n\n## The Architect (Jul – Dec 2024)\nMulti-project orchestration. 726 conversations.\n\n## The Strategist (Jan – Feb 2025)\nAI as thinking partner, not just tool. 320 conversations." },
   ]},
 ];
 
@@ -1307,7 +1300,7 @@ export const ENTITIES = [
 ];
 
 export const TOUR_STEPS = [
-  { title: "Welcome to Atlas", description: "Atlas turns three years of your AI conversations into topics, the links between them, and the decisions you made along the way. Seven stops show you around.", icon: "🗺️" },
+  { title: "Welcome to Atlas", description: "Atlas turns two years of your AI conversations into topics, the links between them, and the decisions you made along the way. Seven stops show you around.", icon: "🗺️" },
   { title: "Three stations", description: "Curate is where you check what Atlas pulled out of your conversations; nothing reaches the map until you approve it. Atlas is the map. Companion is where you ask it questions and see how your thinking changed.", icon: "◈", target: "[data-tour='nav']" },
   { title: "Your topics", description: "Each bubble is a topic, sized by how many conversations it holds. Click one for its timeline.", icon: "🧠", target: "[data-tour='knowledge-map']" },
   { title: "Rewind", description: "Replay the map growing month by month, from the first topic to all fourteen.", icon: "⏪", target: "[data-tour='rewind-btn']" },
@@ -1430,7 +1423,7 @@ export const PAST_ANALOGIES = [
 // the fixtures and every action to a real destination.
 export const COMPANION_SIDEBAR_SUGGESTIONS = {
   dashboard: [
-    { id: "dash-1", icon: "◐", title: "Keymaster is cooling", description: "You haven't been back to Keymaster since Dec 2025. Its timeline picks up where you left it.", accent: C.teal, actions: [{ label: "Open timeline", topic: "keymaster" }, { label: "Ask Atlas", view: "companion" }] },
+    { id: "dash-1", icon: "◐", title: "Keymaster is cooling", description: "You haven't been back to Keymaster since Dec 2024. Its timeline picks up where you left it.", accent: C.teal, actions: [{ label: "Open timeline", topic: "keymaster" }, { label: "Ask Atlas", view: "companion" }] },
     { id: "dash-2", icon: "💡", title: "Automation and n8n are converging", description: "AI Automation and n8n & Airtable are linked, and your view on automation has shifted since you started.", accent: C.pink, actions: [{ label: "View diff", view: "beliefDiffs" }, { label: "Brief me", brief: "automation" }] },
     { id: "dash-3", icon: "📋", title: "CourtCollect has a briefing ready", description: "47 conversations of decisions and open questions, summed up for the next time you pick it up.", accent: C.amber, actions: [{ label: "Brief me", brief: "courtcollect" }, { label: "Open timeline", topic: "courtcollect" }] },
   ],

@@ -12,7 +12,7 @@ export const monthIndex = (text) => {
   return Number(m[2]) * 12 + MONTHS.indexOf(m[1]);
 };
 
-// "Jan – Jun 2023" or "Jul 2025 – Feb 2026" -> { start, end, label: "Jan 2023" }.
+// "Jan – Jun 2023" or "Jul 2024 – Feb 2025" -> { start, end, label: "Jan 2023" }.
 // A start month without a year takes the end's year.
 export const phaseRange = (period) => {
   const [a, b] = period.split("–").map(s => s.trim());

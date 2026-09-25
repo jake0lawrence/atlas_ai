@@ -89,7 +89,7 @@ describe('the companion sidebar, as data', () => {
   it('only claims what the fixtures say', () => {
     // Knowledge Mgmt was called stale; it is active. Keymaster is the one cooling.
     expect(getTopicFreshness(topic('keymaster'))).toBe('cooling');
-    expect(topic('keymaster').lastSeen).toBe('Dec 2025');
+    expect(topic('keymaster').lastSeen).toBe('Dec 2024');
     expect(topic('courtcollect').count).toBe(47);
     const degree = (id) => neighbors(id).length;
     expect(degree('automation')).toBe(5);

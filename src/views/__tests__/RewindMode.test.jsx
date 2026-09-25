@@ -10,14 +10,14 @@ describe('the rewind, as data', () => {
     expect(monthOf('Jan 23')).toEqual({ key: '2023-01', label: 'Jan 2023' });
     expect(monthOf('Dec 25')).toEqual({ key: '2025-12', label: 'Dec 2025' });
     expect(MONTHS[0].label).toBe('Jan 2023');
-    expect(MONTHS[LAST].label).toBe('Feb 2026');
+    expect(MONTHS[LAST].label).toBe('Feb 2025');
   });
 
   it('uses the phases from Evolution, not its own', () => {
     // The old rewind named its own phases (Genesis, Exploration, ...) by step count.
     for (let i = 0; i < MONTHS.length; i++) expect(stateAt(i).phase, MONTHS[i].label).toBeGreaterThanOrEqual(0);
-    expect(PHASE_STARTS).toEqual([0, 6, 12, 18, 24, 30]);
-    expect(EVOLUTION_PHASES[stateAt(LAST).phase].title).toBe('The Meta-Thinker');
+    expect(PHASE_STARTS).toEqual([0, 6, 12, 18, 24]);
+    expect(EVOLUTION_PHASES[stateAt(LAST).phase].title).toBe('The Strategist');
   });
 
   it('places every timeline event in exactly one month', () => {
@@ -48,10 +48,12 @@ describe('the rewind, as data', () => {
     expect(end.conversations).toBe(MONTHS.reduce((a, m) => a + m.conversations, 0));
   });
 
-  it('knows where the sample timeline ends', () => {
+  it('ends where the timeline ends, with no empty year after it', () => {
+    // The fixtures used to run a year past the timeline; the dates now agree.
     expect(LAST_MILESTONE).toBe('2025-02');
+    expect(MONTHS[LAST].key).toBe(LAST_MILESTONE);
     const after = MONTHS.map((m, i) => [m, stateAt(i)]).filter(([m]) => m.key > LAST_MILESTONE);
-    expect(after.length).toBe(12);
+    expect(after.length).toBe(0);
     for (const [, s] of after) expect(s.events).toEqual([]);
   });
 });
@@ -67,9 +69,9 @@ describe('the rewind page', () => {
       vi.useFakeTimers();
       render(<RewindMode onClose={noop} />);
       act(() => { vi.advanceTimersByTime(5000); });
-      expect(screen.getByRole('slider', { name: 'Month' }).getAttribute('aria-valuetext')).toBe('Feb 2026');
+      expect(screen.getByRole('slider', { name: 'Month' }).getAttribute('aria-valuetext')).toBe('Feb 2025');
       expect(screen.getByRole('button', { name: 'Replay from the start' })).toBeTruthy();
-      expect(screen.getByText(/The sample timeline ends in Feb 2025/)).toBeTruthy();
+      expect(screen.getByText('LLM conversation extraction concept')).toBeTruthy();
     });
 
     it('scrubs, jumps to a phase, and opens a topic', () => {
@@ -119,7 +121,7 @@ describe('the rewind page', () => {
     fireEvent.click(screen.getByRole('button', { name: '5×' }));
     fireEvent.click(screen.getByRole('button', { name: 'Play' }));
     act(() => { vi.advanceTimersByTime(240 * 60); });
-    expect(month()).toBe('Feb 2026');
+    expect(month()).toBe('Feb 2025');
     expect(screen.getByRole('button', { name: 'Replay from the start' })).toBeTruthy();
   });
 });

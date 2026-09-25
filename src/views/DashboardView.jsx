@@ -130,9 +130,9 @@ const DashboardView = ({ mobile, tablet, totalConvos, totalWords, maxCount, onTo
       <header style={{ textAlign: "center", marginBottom: mobile ? SPACE.xl : SPACE.xxl }}>
         <div style={{ fontFamily: BODY, fontSize: TYPE.xs, color: alpha(C.gold, 0.6), textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: SPACE.md, fontWeight: 600 }}>Your AI knowledge atlas</div>
         <h1 style={{ fontFamily: FONTS, fontSize: mobile ? TYPE.xxl : TYPE.display, fontWeight: 800, color: C.white, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-          3 years of thinking,{mobile ? <br /> : " "}<span style={{ color: C.gold }}>mapped</span>
+          Two years of thinking,{mobile ? <br /> : " "}<span style={{ color: C.gold }}>mapped</span>
         </h1>
-        <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.sm : TYPE.base, color: white(0.45), marginTop: SPACE.sm }}>Jan 2023 – Feb 2026 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
+        <p style={{ fontFamily: BODY, fontSize: mobile ? TYPE.sm : TYPE.base, color: white(0.45), marginTop: SPACE.sm }}>Jan 2023 – Feb 2025 · ChatGPT + Claude · {(totalWords / 1000000).toFixed(1)}M words</p>
       </header>
 
       {/* Stat band */}
