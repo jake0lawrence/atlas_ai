@@ -128,7 +128,7 @@ The three questions this section used to ask are measured in
 
 `research/v8-mcp/INTEGRATIONS.md` (sourced 2026-09-24) answers the per-app questions:
 setup steps, read and write, limits, consent controls, and how each renders links.
-**Proposed launch order, pending the owner's sign-off:**
+**Launch order, signed off by the owner on 2026-09-25:**
 
 1. **Claude.** A custom connector works on every plan including Free (one connector),
    takes five steps, and allows writes with approval.
@@ -149,7 +149,51 @@ Share-link forwarding and a browser extension are not recommended: both run into
 terms against automated extraction. The report also proposes merging the two write
 tools, because ChatGPT and Gemini show a dialog per write, and a pause, per-client and
 per-topic controls on Atlas's side. PR 2's read tools exist as a prototype over the
-fixtures (`research/v8-mcp/read-server.mjs`).
+fixtures, served locally by `research/v8-mcp/read-server.mjs` and hosted as a Vercel
+function at `/api/mcp` (stateless Streamable HTTP, no auth, demo persona only). Claude
+goes first, so the Claude.ai check below is the next step.
+
+**Trying it in Claude.ai.** The endpoint only needs to be reachable: the project's
+Vercel deployments, production included, currently sit behind Vercel Authentication,
+which answers every request with a redirect to Vercel's sign-in. Once production is
+public, add it in Claude.ai: Settings > Connectors > Add custom connector, name "Atlas",
+URL `https://<production domain>/api/mcp` (append `?privacy=on` for the stand-ins), Add,
+then ask "What did I decide about CourtCollect's stack?". No OAuth step appears, because
+the prototype has none. `node research/v8-mcp/read-smoke.mjs <url>` checks the same URL
+from a terminal first.
+
+## Privacy mode: the open questions, decided (issue #86, 2026-09-25)
+
+Privacy mode shipped in #95 with five questions left open. The owner asked for the
+usual practice on each; these are the answers, and what they mean for v8.
+
+- **Where it's applied: one enforcement point.** Shipped: a pure `aliasText` plus a
+  DOM shield that rewrites whatever reaches the screen. Views cannot forget it.
+- **Free text: string matching now, entity spans later.** The fixtures carry the entity
+  list. With real archives, the enrichment pass (PR 5) tags entities and their types;
+  the owner marks each one always hide or never hide, and the matcher stays as the
+  backstop for anything the tagger missed.
+- **Money: banded.** Exact figures become the band they fall in ("$800 budget" reads
+  "$500–$1k budget", "$25/mo" reads "under $100/mo"), which keeps the order of
+  magnitude and drops the number. Counts, dates and percentages stay exact: they are
+  not identifying on their own.
+- **Export: follows the mode, and says so.** Shipped. No "are you sure?" dialog on
+  each export: a prompt that always appears gets clicked through, and the notice on the
+  Export view is the ask.
+- **The URL: stand-ins there too.** A topic's address reads `/topic/employer-a`, and
+  that slug opens the topic, so a link copied while presenting still works. Entries
+  already in the browser's history keep the spelling they were made with.
+- **Scope: the switch is per device, the list is per account.** The switch describes
+  the screen in front of you (presenting from a laptop should not change your phone),
+  so it stays in the device's storage. What to hide, and the always and never marks,
+  are the owner's data and move to the account with PR 0's storage. A connected chat
+  app is another screen: its setting belongs to the connection (`?privacy=on` or the
+  server's setting), not to the app's switch.
+
+**Privacy mode is a display filter, not a security boundary.** Anyone at the keyboard
+can turn it off. Sharing Atlas with someone else, or with a model, goes through
+server-side aliasing (as the MCP endpoint's privacy setting does), never through the
+switch.
 
 ## Open questions
 

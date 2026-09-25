@@ -1,6 +1,8 @@
-// Smoke test for read-server.mjs over MCP itself (stdio, then Streamable HTTP):
-// list the tools, then ask PR 2's done-when question the way a client would.
-//   node read-smoke.mjs            (needs `npm install` in this folder)
+// Smoke test for the Atlas read server over MCP itself (stdio, then Streamable
+// HTTP): list the tools, then ask PR 2's done-when question the way a client
+// would. Given a URL, it checks that endpoint instead, such as the hosted one.
+//   node read-smoke.mjs                                   (needs `npm install` here and at the root)
+//   node read-smoke.mjs https://<deployment>/api/mcp
 import { spawn } from "node:child_process";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -25,6 +27,16 @@ async function exercise(label, transport, env = {}) {
   const bad = await client.callTool({ name: "atlas_topic", arguments: { id: "nope" } });
   if (!bad.isError) fail(`${label}: an unknown topic should be an error result`);
   await client.close();
+}
+
+const remote = process.argv[2];
+if (remote) {
+  await exercise(remote, new StreamableHTTPClientTransport(new URL(remote)));
+  const url = new URL(remote);
+  url.searchParams.set("privacy", "on");
+  await exercise(`${remote} (privacy on)`, new StreamableHTTPClientTransport(url), { privacy: true });
+  console.log(process.exitCode ? "smoke: FAILED" : "smoke: ok");
+  process.exit();
 }
 
 await exercise("stdio", new StdioClientTransport({ command: process.execPath, args: [`${here}read-server.mjs`] }));

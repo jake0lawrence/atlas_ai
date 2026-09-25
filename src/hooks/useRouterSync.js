@@ -3,10 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import useStore from '../store';
 import { TOPICS } from '../data/constants';
 import { PATH_TO_VIEW, VIEW_TO_PATH } from '../routes';
+import { privatePath, realPath } from '../privacy';
 
 // ─── Route Mapping ──────────────────────────────────────────
 
-function locationToState(pathname) {
+// Privacy mode (#86) shows topics by their stand-ins in the address bar too
+// (/topic/employer-a); either spelling opens the topic.
+function locationToState(shownPath) {
+  const pathname = realPath(shownPath);
   const convMatch = pathname.match(/^\/topic\/([^/]+)\/conversation\/(\d+)$/);
   if (convMatch) {
     const topic = TOPICS.find(t => t.id === convMatch[1]);
@@ -37,7 +41,9 @@ function locationToState(pathname) {
   return { view: view || 'dashboard' };
 }
 
-function stateToPath({ view, selectedTopic, selectedEvent, selectedChain, showRewind }) {
+const stateToPath = (state, privacy) => (privacy ? privatePath(realStateToPath(state)) : realStateToPath(state));
+
+function realStateToPath({ view, selectedTopic, selectedEvent, selectedChain, showRewind }) {
   if (showRewind) return '/companion/rewind';
   if (view === 'conversation' && selectedEvent)
     return `/topic/${selectedEvent.topicId}/conversation/${selectedEvent.eventIndex}`;
@@ -67,6 +73,7 @@ export default function useRouterSync() {
   const selectedEvent = useStore(s => s.selectedEvent);
   const selectedChain = useStore(s => s.selectedChain);
   const showRewind = useStore(s => s.showRewind);
+  const privacy = useStore(s => s.privacy);
   const topicId = selectedTopic?.id;
   const eventTopicId = selectedEvent?.topicId;
   const eventIndex = selectedEvent?.eventIndex;
@@ -84,8 +91,21 @@ export default function useRouterSync() {
     skipNextUrlSync.current = true;
   }, []);
 
-  // State -> URL: push a history entry when navigation state changes
+  // A real name typed or bookmarked while privacy mode is on: respell it.
+  // Not in the layout effect above, which runs before the router listens.
   useEffect(() => {
+    const { pathname, search } = routerRef.current.location;
+    const shown = privatePath(realPath(pathname));
+    if (useStore.getState().privacy && shown !== pathname) routerRef.current.navigate(shown + search, { replace: true });
+  }, []);
+
+  // State -> URL: push a history entry when navigation state changes. Turning
+  // privacy mode on or off respells the same page, so it replaces the entry.
+  // (Entries already in the history keep the spelling they were made with.)
+  const lastPrivacy = useRef(privacy);
+  useEffect(() => {
+    const respelled = lastPrivacy.current !== privacy;
+    lastPrivacy.current = privacy;
     if (skipNextUrlSync.current) {
       skipNextUrlSync.current = false;
       return;
@@ -93,10 +113,10 @@ export default function useRouterSync() {
     const store = useStore.getState();
     const expectedPath = stateToPath({
       view, selectedTopic: store.selectedTopic, selectedEvent: store.selectedEvent, selectedChain, showRewind,
-    });
+    }, privacy);
     const { navigate: go, location: loc } = routerRef.current;
-    if (expectedPath !== loc.pathname) go(expectedPath);
-  }, [view, topicId, eventTopicId, eventIndex, selectedChain, showRewind]);
+    if (expectedPath !== loc.pathname) go(expectedPath, { replace: respelled });
+  }, [view, topicId, eventTopicId, eventIndex, selectedChain, showRewind, privacy]);
 
   // URL -> State: browser back / forward
   useEffect(() => {
@@ -107,7 +127,7 @@ export default function useRouterSync() {
       selectedEvent: store.selectedEvent,
       selectedChain: store.selectedChain,
       showRewind: store.showRewind,
-    });
+    }, store.privacy);
     if (location.pathname === currentPath) return;
 
     const state = locationToState(location.pathname);
