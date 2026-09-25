@@ -5,6 +5,7 @@ import { ALIASES, aliasText, leaks } from '../../privacy';
 import { shield } from '../PrivacyShield';
 import { searchAll } from '../CommandPalette';
 import ExportPreview from '../../views/ExportPreview';
+import BriefingCard from '../BriefingCard';
 import { ENTITIES, TOPICS } from '../../data/constants';
 import constantsSource from '../../data/constants.js?raw';
 import { PATH_TO_VIEW, DEEP_LINKS } from '../../routes';
@@ -126,6 +127,17 @@ describe('what leaves the page', () => {
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Copy' })); });
     const copied = writeText.mock.calls[0][0];
     expect(copied).toContain('Product A');
+    expect(leaks(copied)).toEqual([]);
+  });
+
+  it('so does a copied briefing', async () => {
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    useStore.setState({ privacy: true });
+    render(<BriefingCard topic={TOPICS.find(t => t.id === 'courtcollect')} onClose={() => {}} />);
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Copy briefing' })); });
+    const copied = writeText.mock.calls[0][0];
+    expect(copied).toMatch(/^PRE-FLIGHT BRIEFING: Product A/);
     expect(leaks(copied)).toEqual([]);
   });
 });
