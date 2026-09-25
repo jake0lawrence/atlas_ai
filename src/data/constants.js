@@ -1,4 +1,4 @@
-import { C } from '../styles/tokens';
+import { C } from '../styles/tokens.js'; // with .js so plain Node can load the fixtures (the MCP prototype does)
 export const TOPICS = [
   { id: "courtcollect", name: "CourtCollect", count: 47, words: 128400, color: C.amber, category: "product", firstSeen: "Aug 2024", lastSeen: "Feb 2026", depth: 4.2, icon: "⚖️", platform: { claude: 38, gpt: 9 } },
   { id: "hmprg", name: "HMPRG Campaigns", count: 38, words: 98200, color: C.blue, category: "client", firstSeen: "Sep 2024", lastSeen: "Feb 2026", depth: 3.8, icon: "🏥", platform: { claude: 30, gpt: 8 } },

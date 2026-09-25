@@ -2,7 +2,7 @@
 // typed, stable stand-in, and aliasText swaps them in any string. Pure, so
 // the DOM shield, the exports, the clipboard and the palette's search all
 // hide the same names the same way.
-import { ENTITIES } from './data/constants';
+import { ENTITIES } from './data/constants.js';
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 

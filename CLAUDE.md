@@ -20,6 +20,7 @@ and there is no backend. `src/main.jsx` is the Vite entry point.
 | `tests/e2e/` | Playwright screenshot baseline of the route table. |
 | `src/data/constants.js` | All demo fixtures (`TOPICS`, `CONNECTIONS`, tour steps, companion responses, ...). |
 | `src/privacy.js` | Privacy mode (#86): `ALIASES` gives every name in `ENTITIES` (fixtures) a typed, stable stand-in ("Employer A", "Person 1"); `aliasText` swaps them in any string, `leaks` finds any left. `components/PrivacyShield.jsx` applies it to everything on screen (text nodes and labeling attributes, before paint); exports, the clipboard and palette search call `aliasText` themselves. Toggle: Alt+Shift+P, the header's ◐ button, the palette, or the phone menu. |
+| `src/mcp/readTools.js` | The v8 MCP server's read tools (`atlas_search`, `atlas_topic`, `atlas_decisions`, `atlas_drift`) as pure functions over the fixtures, honoring privacy mode. Served by the prototype `research/v8-mcp/read-server.mjs` (stdio or `--http`); `read-smoke.mjs` there checks it over MCP. Fixture imports carry `.js` so plain Node can load them. |
 | `src/store.js` | Zustand store: navigation, knowledge-base, sync, curation and companion slices. |
 | `src/hooks/` | `useWindowSize`, `useSound`, `useRouterSync` (URL <-> store sync over the table in `src/routes.js`). |
 

@@ -6,6 +6,12 @@ help.openai.com, openai.com and perplexity.ai blocked automated reading (403 or 
 challenge page). Claims about those vendors come from developers.openai.com or from
 search excerpts of the official page, and are marked that way.
 
+> **Corrections, 2026-09-24** (details and sources in `INTEGRATIONS.md`):
+> Microsoft 365 Copilot is not read-only. Its custom federated connectors are, but a
+> declarative agent with an MCP plugin can create, update and delete data, with
+> confirmation. And Le Chat is now **Mistral Vibe**: same site and accounts, connectors
+> under "Vibe Work", docs at docs.mistral.ai/vibe/work/connectors/mcp-connectors.
+
 ## The finding that matters
 
 **Chat apps connect to MCP from the vendor's cloud, over public HTTPS. None of them can

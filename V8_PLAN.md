@@ -124,6 +124,33 @@ The three questions this section used to ask are measured in
 - **Cost:** a Haiku 4.5 batch backfill runs about $1.20 per typical heavy user and
   about $25 per 10,000 conversations.
 
+## Integrations: which apps, in what order (issue #87)
+
+`research/v8-mcp/INTEGRATIONS.md` (sourced 2026-09-24) answers the per-app questions:
+setup steps, read and write, limits, consent controls, and how each renders links.
+**Proposed launch order, pending the owner's sign-off:**
+
+1. **Claude.** A custom connector works on every plan including Free (one connector),
+   takes five steps, and allows writes with approval.
+2. **ChatGPT.** Developer mode is enough for testing (paid plans, web only, a
+   confirmation on every write). Free and Plus users need a published plugin, whose
+   review forbids tools that ask for raw transcripts, so capture sends decisions and
+   short summaries, not excerpts.
+3. **Mistral Vibe and Grok,** as unlisted "also works" clients. They take the same URL
+   with no review, but their write behavior is not documented well enough to promise
+   capture.
+4. **Gemini.** US adults, personal accounts, English only, Keep Activity on, and every
+   write confirmed.
+5. **Microsoft 365 Copilot,** only for a business customer who asks: a declarative
+   agent someone packages and a tenant admin allows.
+
+History and anyone who cannot connect keep the export import (PR 4), with reminders.
+Share-link forwarding and a browser extension are not recommended: both run into vendor
+terms against automated extraction. The report also proposes merging the two write
+tools, because ChatGPT and Gemini show a dialog per write, and a pause, per-client and
+per-topic controls on Atlas's side. PR 2's read tools exist as a prototype over the
+fixtures (`research/v8-mcp/read-server.mjs`).
+
 ## Open questions
 
 - **Implicit decisions.** The capture eval used decisions stated in one line. Real
