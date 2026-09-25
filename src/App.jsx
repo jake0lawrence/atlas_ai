@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { FONTS, BODY, CSS } from './styles/base';
 import { container } from './styles/shared';
 import CommandPalette from './components/CommandPalette';
+import PrivacyShield from './components/PrivacyShield';
 import Nav, { STATIONS } from './components/Nav';
 import SyncOverlay from './components/SyncOverlay';
 import GuidedTour from './components/GuidedTour';
@@ -37,7 +38,7 @@ import { C, white } from './styles/tokens';
 
 // ─── MAIN APP ───────────────────────────────────────────────
 
-export default function App() {
+function Shell() {
   const { w } = useWindowSize();
   const mobile = w < 640;
   const tablet = w >= 640 && w < 1024;
@@ -82,6 +83,8 @@ export default function App() {
   const storeHandleEventClick = useStore(s => s.handleEventClick);
   const navigateTo = useStore(s => s.navigateTo);
   const toggleCmdPalette = useStore(s => s.toggleCmdPalette);
+  const togglePrivacy = useStore(s => s.togglePrivacy);
+  const privacy = useStore(s => s.privacy);
   useRouterSync();
   const tourLaunched = useRef(false);
   const appTimersRef = useRef([]);
@@ -111,6 +114,12 @@ export default function App() {
         toggleCmdPalette();
         return;
       }
+      // Alt+Shift+P — privacy mode (by key code: on a Mac, Option+P types π)
+      if (e.altKey && e.shiftKey && e.code === "KeyP") {
+        e.preventDefault();
+        togglePrivacy();
+        return;
+      }
       // Cmd+/ / Ctrl+/ — toggle companion sidebar
       if ((e.metaKey || e.ctrlKey) && e.key === "/") {
         e.preventDefault();
@@ -133,7 +142,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleGlobalKey);
     return () => window.removeEventListener("keydown", handleGlobalKey);
-  }, [view, cmdPaletteOpen, companionSidebarOpen, briefingTopic, showRewind, toggleCmdPalette, toggleCompanionSidebar, setShowRewind, setBriefingTopic, setView, setSelectedEvent, setSelectedTopic, setSelectedChain]);
+  }, [view, cmdPaletteOpen, companionSidebarOpen, briefingTopic, showRewind, togglePrivacy, toggleCmdPalette, toggleCompanionSidebar, setShowRewind, setBriefingTopic, setView, setSelectedEvent, setSelectedTopic, setSelectedChain]);
 
   const maxCount = Math.max(...TOPICS.map(t => t.count));
   const totalWords = TOPICS.reduce((a, t) => a + t.words, 0) + 680000;
@@ -233,7 +242,7 @@ export default function App() {
             mobile={mobile}
           />
         </div>
-        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} privacy={privacy} onTogglePrivacy={togglePrivacy} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
         {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />}
         <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="archaeology" {...sidebarActions} mobile={mobile} />
       </>
@@ -249,7 +258,7 @@ export default function App() {
           <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
           <ConversationDrilldown topicId={selectedEvent.topicId} eventIndex={selectedEvent.eventIndex} onBack={() => { const t = TOPICS.find(x => x.id === selectedEvent.topicId); if (t) setSelectedTopic(t); setView("timeline"); setSelectedEvent(null); }} onHome={() => { setView("dashboard"); setSelectedEvent(null); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} />
         </div>
-        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} privacy={privacy} onTogglePrivacy={togglePrivacy} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
         {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />}
         <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="conversation" currentTopic={TOPICS.find(t => t.id === selectedEvent.topicId)} {...sidebarActions} mobile={mobile} />
       </>
@@ -265,7 +274,7 @@ export default function App() {
           <Nav view={view} onNavigate={handleNavigate} mobile={mobile} tablet={tablet} lastSyncTime={lastSyncTime} newCount={newSyncCount} isSyncing={isSyncing} onSync={handleSync} onCmdK={() => setCmdPaletteOpen(true)} onExport={() => handleNavigate("export")} onTour={() => setTourActive(true)} />
           <TimelineView topic={selectedTopic} onBack={() => { setView("dashboard"); setSelectedTopic(null); }} onEventClick={handleEventClick} mobile={mobile} newEvents={syncedNewEvents} />
         </div>
-        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
+        <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} privacy={privacy} onTogglePrivacy={togglePrivacy} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
         {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />}
         <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view="timeline" currentTopic={selectedTopic} {...sidebarActions} mobile={mobile} />
       </>
@@ -296,7 +305,7 @@ export default function App() {
         {view === "beliefDiffs" && <BeliefDiffsView mobile={mobile} onBack={() => setView("dashboard")} onArchaeologyClick={handleArchaeologyClick} />}
         {view === "digest" && <DigestView mobile={mobile} onTopicClick={handleTopicClick} />}
         {view === "liveCapture" && <LiveCaptureView mobile={mobile} onTopicClick={handleTopicClick} />}
-        {view === "export" && <ExportPreview mobile={mobile} w={w} />}
+        {view === "export" && <ExportPreview mobile={mobile} w={w} privacy={privacy} />}
 
         <div style={{ textAlign: "center", marginTop: mobile ? 40 : 60, padding: "18px 0", borderTop: `1px solid ${white(0.04)}` }}>
           <div style={{ fontFamily: FONTS, fontSize: mobile ? 14 : 16, color: white(0.18) }}>This is your mind, mapped.</div>
@@ -304,11 +313,21 @@ export default function App() {
         </div>
       </div>
       <SyncOverlay isSyncing={isSyncing} syncPhase={syncPhase} syncProgress={syncProgress} newCount={newSyncCount || 47} mobile={mobile} />
-      <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
+      <CommandPalette open={cmdPaletteOpen} initialQuery={cmdPaletteQuery} privacy={privacy} onTogglePrivacy={togglePrivacy} onClose={() => setCmdPaletteOpen(false)} onNavigate={handleNavigate} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />
       <GuidedTour active={tourActive} onClose={() => setTourActive(false)} mobile={mobile} />
       {briefingTopic && <BriefingCard topic={briefingTopic} onClose={() => setBriefingTopic(null)} onTopicClick={handleTopicClick} onConversationClick={handleEventClick} mobile={mobile} />}
       <CompanionSidebar isOpen={companionSidebarOpen} onToggle={toggleCompanionSidebar} view={view} {...sidebarActions} mobile={mobile} />
     </div>
     </ErrorBoundary>
+  );
+}
+
+// The shell plus the privacy shield, which watches everything the shell renders.
+export default function App() {
+  return (
+    <>
+      <Shell />
+      <PrivacyShield />
+    </>
   );
 }

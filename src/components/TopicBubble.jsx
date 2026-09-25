@@ -41,8 +41,10 @@ const TopicBubble = ({ topic, maxCount, onClick, onBriefMe, index, mobile, recen
       }}>
       <span style={{ fontSize: size > 80 ? 22 : size > 60 ? 16 : 13 }}>{topic.icon}</span>
       {size > (mobile ? 65 : 75) && (
-        <span style={{ fontFamily: BODY, fontSize: mobile ? 7 : 9, color: white(0.6), marginTop: 1, textAlign: "center", padding: "0 4px", lineHeight: 1.2, fontWeight: 500 }}>
-          {topic.name.length > 12 ? topic.name.slice(0, 10) + "…" : topic.name}
+        // Cut by CSS, not by slicing the string: the full name stays in the DOM,
+        // so privacy mode swaps it whole instead of leaving "Employer A Tech…".
+        <span style={{ display: "block", maxWidth: size - 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: BODY, fontSize: mobile ? 7 : 9, color: white(0.6), marginTop: 1, textAlign: "center", padding: "0 4px", lineHeight: 1.2, fontWeight: 500 }}>
+          {topic.name}
         </span>
       )}
       {hovered && !mobile && (

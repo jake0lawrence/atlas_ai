@@ -4,6 +4,13 @@ import {
   SYNC_NEW_EVENTS,
 } from './data/constants';
 
+// Privacy mode persists per device (#86), read before the first paint so a
+// reload never shows real names first.
+export const PRIVACY_KEY = 'atlas_privacy_mode';
+const readPrivacy = () => {
+  try { return localStorage.getItem(PRIVACY_KEY) === 'on'; } catch (e) { console.warn('privacy mode: could not read the setting:', e); return false; }
+};
+
 const useStore = create((set, get) => ({
 
   // ─── NAVIGATION SLICE ──────────────────────────────────────
@@ -13,6 +20,7 @@ const useStore = create((set, get) => ({
   selectedChain: null,
   showRewind: false,
   cmdPaletteOpen: false,
+  privacy: readPrivacy(),
   cmdPaletteQuery: '',
   briefingTopic: null,
   tourActive: false,
@@ -36,6 +44,11 @@ const useStore = create((set, get) => ({
   handleEventClick: (topicId, eventIndex) => set({
     selectedEvent: { topicId, eventIndex },
     view: 'conversation',
+  }),
+  togglePrivacy: () => set((s) => {
+    const privacy = !s.privacy;
+    try { localStorage.setItem(PRIVACY_KEY, privacy ? 'on' : 'off'); } catch (e) { console.warn('privacy mode: could not save the setting:', e); }
+    return { privacy };
   }),
   toggleCmdPalette: () => set((s) => ({ cmdPaletteOpen: !s.cmdPaletteOpen, cmdPaletteQuery: '' })),
 

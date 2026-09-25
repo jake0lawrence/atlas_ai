@@ -1282,6 +1282,30 @@ export const EXPORT_FORMATS = [
 
 // The one guided tour (v7). A step with a `target` spotlights it when it is on
 // screen and falls back to a centered card when it is not.
+// Privacy mode (#86): the names that identify the owner, typed so the
+// stand-in reads as meant ("Employer A", not "[REDACTED]"). `also` lists
+// shorter forms the fixtures use. Counts, dates and tools are not on it.
+export const ENTITIES = [
+  { name: "Tyler Technologies", type: "Employer", also: ["Tyler"] },
+  { name: "TransUnion", type: "Company" },
+  { name: "Veritone", type: "Company" },
+  { name: "OpenGov", type: "Company" },
+  { name: "Granicus", type: "Company" },
+  { name: "Health and Medicine Policy Research Group", type: "Client", also: ["HMPRG"] },
+  { name: "Elgin Community College", type: "College" },
+  { name: "Josephine TX", type: "City", also: ["Josephine"] },
+  { name: "Clearwater KS", type: "City", also: ["Clearwater"] },
+  { name: "Chicago", type: "City" },
+  { name: "Elgin", type: "City" },
+  { name: "Millennium Park", type: "Landmark" },
+  { name: "Illinois", type: "State", also: ["IL"] },
+  { name: "Gina", type: "Person" },
+  { name: "CRSS", type: "Credential" },
+  { name: "CourtCollect", type: "Product" },
+  { name: "Keymaster", type: "Product" },
+  { name: "Dice or Die", type: "Product" },
+];
+
 export const TOUR_STEPS = [
   { title: "Welcome to Atlas", description: "Atlas turns three years of your AI conversations into topics, the links between them, and the decisions you made along the way. Seven stops show you around.", icon: "🗺️" },
   { title: "Three stations", description: "Curate is where you check what Atlas pulled out of your conversations; nothing reaches the map until you approve it. Atlas is the map. Companion is where you ask it questions and see how your thinking changed.", icon: "◈", target: "[data-tour='nav']" },

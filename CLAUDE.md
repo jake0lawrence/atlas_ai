@@ -19,6 +19,7 @@ and there is no backend. `src/main.jsx` is the Vite entry point.
 | `scripts/sweep.mjs` | Route sweep over a built `dist/` (see Build & Run). |
 | `tests/e2e/` | Playwright screenshot baseline of the route table. |
 | `src/data/constants.js` | All demo fixtures (`TOPICS`, `CONNECTIONS`, tour steps, companion responses, ...). |
+| `src/privacy.js` | Privacy mode (#86): `ALIASES` gives every name in `ENTITIES` (fixtures) a typed, stable stand-in ("Employer A", "Person 1"); `aliasText` swaps them in any string, `leaks` finds any left. `components/PrivacyShield.jsx` applies it to everything on screen (text nodes and labeling attributes, before paint); exports, the clipboard and palette search call `aliasText` themselves. Toggle: Alt+Shift+P, the header's ◐ button, the palette, or the phone menu. |
 | `src/store.js` | Zustand store: navigation, knowledge-base, sync, curation and companion slices. |
 | `src/hooks/` | `useWindowSize`, `useSound`, `useRouterSync` (URL <-> store sync over the table in `src/routes.js`). |
 
@@ -62,6 +63,7 @@ Adding a view: create `src/views/<Name>.jsx`, add its route to `PATH_TO_VIEW` in
 - **Never `pkill`/kill-by-name from the agent shell** (`pkill -f "vite preview"` matches the shell's own command line and kills the session, exit 144). Playwright owns its web server; let it start and stop it (`reuseExistingServer: false`).
 - **Reduced motion goes through `contextOptions`.** The baseline runs with reduced motion (`use.contextOptions.reducedMotion` in `playwright.config.js`). A top-level `use.reducedMotion` is not an option in this Playwright version: it is silently ignored and `matchMedia` reads `false`, which is how every baseline before v7 PR 22 was captured with motion on. A route that needs motion on emulates it in `setup`: `await page.emulateMedia({ reducedMotion: 'no-preference' }); await page.reload()` (see `rewind-motion`).
 - **Highlighting inside an accessible name:** wrap only the matched run (`<mark>`) and leave the rest as plain text nodes. A `<span>` holding " Diffs" loses its leading space in the computed name, so a palette option read as "BeliefDiffs" and `getByRole('option', { name: /Belief Diffs/ })` found nothing.
+- **Never truncate a name by slicing the string.** Privacy mode swaps whole names in the DOM, so `name.slice(0, 10) + "…"` left "Employer A Tech…" behind. Cut with CSS (`overflow: hidden; text-overflow: ellipsis; white-space: nowrap`) and render the full name. A new identifying name goes in `ENTITIES`; `PrivacyShield.test.jsx` renders every route with the mode on and fails on any that shows.
 - **Verifying a refactor:** build `main` and the branch, sweep both, compare. Identical markup on every route is the standard for a no-behavior-change PR. Fixture values that vary run to run (a `Math.random()` in render) break that and the screenshot baseline alike; put them in `src/data/constants.js` instead, as `TOPIC_CONFIDENCE` did for `/curation/topics`.
 
 ## Self-Update Policy

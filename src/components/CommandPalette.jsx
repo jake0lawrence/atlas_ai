@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useId } from "react";
 import { TOPICS, TIMELINE_DATA, SEARCH_RESULTS } from '../data/constants';
+import { aliasText } from '../privacy';
 import { C, alpha, white, black, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
 
 // The one search surface. ⌘K opens it anywhere, the Search action in the
@@ -37,14 +38,17 @@ export const targetOf = (result) => {
 
 // Every word must appear somewhere; a result whose title holds more of the
 // words ranks higher, then the newer one.
-export const searchAll = (query) => {
+// `show` is what the reader sees: with privacy mode on it swaps in the
+// stand-ins, so search matches what is on screen and a real name typed into
+// the box finds nothing (#86).
+export const searchAll = (query, show = (s) => s) => {
   const words = wordsOf(query);
   if (!words.length) return { conversations: [], topics: TOPICS, pages: PAGES };
-  const inTitle = (r) => words.filter(w => r.title.toLowerCase().includes(w)).length;
+  const inTitle = (r) => words.filter(w => show(r.title).toLowerCase().includes(w)).length;
   const conversations = SEARCH_RESULTS
-    .filter(r => hasAll(`${r.query} ${r.title} ${r.preview} ${r.platform}`, words))
+    .filter(r => hasAll(show(`${r.query} ${r.title} ${r.preview} ${r.platform}`), words))
     .sort((a, b) => inTitle(b) - inTitle(a) || b.date.localeCompare(a.date));
-  const topics = TOPICS.filter(t => hasAll(`${t.name} ${t.category}`, words));
+  const topics = TOPICS.filter(t => hasAll(show(`${t.name} ${t.category}`), words));
   const pages = PAGES.filter(p => hasAll(`${p.label} ${p.sub}`, words));
   return { conversations, topics, pages };
 };
@@ -64,11 +68,21 @@ const topicName = (id) => TOPICS.find(t => t.id === id)?.name;
 
 // The groups flattened into the order the arrow keys walk. Browsing (no
 // query yet) leads with the pages; a search leads with what it found.
-export const optionsOf = ({ conversations, topics, pages }, browsing = false) => {
+export const optionsOf = ({ conversations, topics, pages, actions = [] }, browsing = false) => {
   const c = conversations.map(r => ({ key: `c-${r.title}`, group: "conversations", result: r, target: targetOf(r), disabled: !targetOf(r) }));
   const t = topics.map(x => ({ key: `t-${x.id}`, group: "topics", topic: x }));
   const p = pages.map(x => ({ key: `p-${x.id}`, group: "pages", page: x }));
-  return browsing ? [...p, ...t] : [...c, ...t, ...p];
+  const a = actions.map(x => ({ key: `a-${x.id}`, group: "actions", action: x }));
+  return browsing ? [...p, ...a, ...t] : [...c, ...t, ...p, ...a];
+};
+
+// The one action the palette offers: privacy mode, found by its name or by
+// what it does, and listed when browsing.
+export const ACTION_WORDS = "privacy mode hide names stand-ins";
+export const actionsFor = (query, privacy) => {
+  const words = wordsOf(query);
+  if (words.length && !hasAll(ACTION_WORDS, words)) return [];
+  return [{ id: "privacy", icon: "◐", label: privacy ? "Turn privacy mode off" : "Turn privacy mode on", sub: privacy ? "Show the real names again · Alt+Shift+P" : "Employers, people and places become stand-ins · Alt+Shift+P" }];
 };
 
 // Next enabled option from `from` in direction `dir` (1 or -1), clamped at the ends.
@@ -81,6 +95,7 @@ const GROUPS = [
   { id: "conversations", label: "Conversations" },
   { id: "topics", label: "Topics" },
   { id: "pages", label: "Go to" },
+  { id: "actions", label: "Do" },
 ];
 
 // ─── Pieces ─────────────────────────────────────────────────────
@@ -94,17 +109,17 @@ const Hint = ({ children, color = white(0.5) }) => (
   <span style={{ fontFamily: BODY, fontSize: TYPE.xs, color, flexShrink: 0, whiteSpace: "nowrap" }}>{children}</span>
 );
 
-const Row = ({ option, words, active, mobile }) => {
+const Row = ({ option, words, active, mobile, show }) => {
   if (option.group === "conversations") {
     const { result: r, target } = option;
     const platform = r.platform === "Claude" ? C.gold : C.blue;
-    const where = target ? topicName(target.topicId) : "Unfiled";
+    const where = target ? show(topicName(target.topicId)) : "Unfiled";
     return (
       <>
         <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: 4, background: platform, flexShrink: 0, marginTop: 6 }} />
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.base, fontWeight: 600, color: option.disabled ? white(0.7) : C.white }}><Marked text={r.title} words={words} /></span>
-          <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6), lineHeight: 1.45, marginTop: 2 }}><Marked text={r.preview} words={words} /></span>
+          <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.base, fontWeight: 600, color: option.disabled ? white(0.7) : C.white }}><Marked text={show(r.title)} words={words} /></span>
+          <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6), lineHeight: 1.45, marginTop: 2 }}><Marked text={show(r.preview)} words={words} /></span>
           <span style={{ display: "block", fontFamily: MONO, fontSize: TYPE.xs, color: white(0.5), marginTop: SPACE.xs }}>
             <span style={{ color: platform }}>{r.platform}</span> · {formatDate(r.date)} · {where}
           </span>
@@ -121,14 +136,14 @@ const Row = ({ option, words, active, mobile }) => {
       <>
         <span aria-hidden="true" style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>{t.icon}</span>
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.base, fontWeight: 600, color: C.white }}><Marked text={t.name} words={words} /></span>
+          <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.base, fontWeight: 600, color: C.white }}><Marked text={show(t.name)} words={words} /></span>
           <span style={{ display: "block", fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6), marginTop: 2 }}>{t.count} conversations · {t.category}</span>
         </span>
         <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: 4, background: t.color, flexShrink: 0 }} />
       </>
     );
   }
-  const p = option.page;
+  const p = option.page || option.action;
   return (
     <>
       <span aria-hidden="true" style={{ fontFamily: MONO, fontSize: TYPE.md, color: C.gold, width: 22, textAlign: "center", flexShrink: 0 }}>{p.icon}</span>
@@ -154,10 +169,11 @@ const Suggestions = ({ onPick, label }) => (
 
 // ─── The palette ────────────────────────────────────────────────
 // Mounted only while open, so every opening starts from its initial query.
-const Palette = ({ initialQuery = "", onClose, onNavigate, onTopicClick, onConversationClick, mobile }) => {
+const Palette = ({ initialQuery = "", onClose, onNavigate, onTopicClick, onConversationClick, privacy = false, onTogglePrivacy, mobile }) => {
+  const show = privacy ? aliasText : (s) => s;
   const [query, setQuery] = useState(initialQuery);
   const words = wordsOf(query);
-  const found = searchAll(query);
+  const found = { ...searchAll(query, show), actions: actionsFor(query, privacy) };
   const options = optionsOf(found, !words.length);
   const firstEnabled = step(options, -1, 1);
   const [active, setActive] = useState(firstEnabled);
@@ -174,7 +190,7 @@ const Palette = ({ initialQuery = "", onClose, onNavigate, onTopicClick, onConve
 
   const search = (q) => {
     setQuery(q);
-    setActive(step(optionsOf(searchAll(q), !wordsOf(q).length), -1, 1));
+    setActive(step(optionsOf({ ...searchAll(q, show), actions: actionsFor(q, privacy) }, !wordsOf(q).length), -1, 1));
     inputRef.current?.focus();
   };
 
@@ -185,6 +201,7 @@ const Palette = ({ initialQuery = "", onClose, onNavigate, onTopicClick, onConve
       if (t.kind === "conversation") onConversationClick?.(t.topicId, t.eventIndex);
       else onTopicClick?.(TOPICS.find(x => x.id === t.topicId));
     } else if (option.group === "topics") onTopicClick?.(option.topic);
+    else if (option.group === "actions") onTogglePrivacy?.();
     else onNavigate?.(option.page.id);
     onClose();
   };
@@ -198,7 +215,7 @@ const Palette = ({ initialQuery = "", onClose, onNavigate, onTopicClick, onConve
     else if (e.key === "Enter") { e.preventDefault(); open(options[current]); }
   };
 
-  const total = found.conversations.length + found.topics.length + found.pages.length;
+  const total = found.conversations.length + found.topics.length + found.pages.length + found.actions.length;
   const status = !words.length ? "" : total === 0 ? `Nothing matches ${query.trim()}` : `${found.conversations.length} conversations, ${found.topics.length} topics, ${found.pages.length} pages`;
 
   return (
@@ -269,7 +286,7 @@ const Palette = ({ initialQuery = "", onClose, onNavigate, onTopicClick, onConve
                         boxShadow: on ? `inset 2px 0 0 ${C.gold}` : "none",
                       }}
                     >
-                      <Row option={o} words={words} active={on} mobile={mobile} />
+                      <Row option={o} words={words} active={on} mobile={mobile} show={show} />
                     </div>
                   );
                 })}
