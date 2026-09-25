@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TOPICS, CONNECTIONS, INSIGHTS, EVOLUTION_PHASES, VAULT_TREE, EXPORT_FORMATS, DEMO_NOW } from '../data/constants';
+import { aliasText } from '../privacy';
 import { C, alpha, white, black, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
 
 // ─── The export, as data ────────────────────────────────────────
@@ -121,7 +122,7 @@ const Tree = ({ nodes, open, toggle, selected, onSelect, depth = 0 }) => (
 const PREVIEW_LINES = 24;
 
 // ─── The view ───────────────────────────────────────────────────
-const ExportPreview = ({ mobile }) => {
+const ExportPreview = ({ mobile, privacy }) => {
   const [format, setFormat] = useState("obsidian");
   const [open, setOpen] = useState({ "Atlas Vault": true, "CourtCollect": true });
   const [file, setFile] = useState(FILES[0].name);
@@ -136,9 +137,12 @@ const ExportPreview = ({ mobile }) => {
   ];
   const shown = cards[card];
 
-  const save = (name, text, type) => setStatus(download(name, text, type) ? `Downloaded ${name}.` : "This browser can't save files from the page.");
+  // With privacy mode on, what leaves the page carries the same stand-ins as
+  // the screen (#86): the file, its name and anything copied.
+  const hide = (t) => (privacy ? aliasText(t) : t);
+  const save = (name, text, type) => setStatus(download(hide(name), hide(text), type) ? `Downloaded ${hide(name)}.` : "This browser can't save files from the page.");
   const copy = async (text, what) => {
-    try { await navigator.clipboard.writeText(text); setStatus(`Copied ${what}.`); }
+    try { await navigator.clipboard.writeText(hide(text)); setStatus(`Copied ${hide(what)}.`); }
     catch (e) { console.warn("export copy:", e); setStatus("Copy didn't work here. Select the text and copy it instead."); }
   };
 
@@ -210,6 +214,7 @@ const ExportPreview = ({ mobile }) => {
           </pre>
         )}
       </section>
+      {privacy && <p style={{ margin: `0 0 ${SPACE.sm}px`, fontFamily: BODY, fontSize: TYPE.sm, color: white(0.6) }}>Privacy mode is on, so downloads and copies use the same stand-ins as the screen.</p>}
       <p role="status" style={{ minHeight: 20, margin: `0 0 ${SPACE.xl}px`, fontFamily: BODY, fontSize: TYPE.sm, color: C.green }}>{status}</p>
 
       <section aria-labelledby="ex-share">

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { C, alpha, white, black, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
+import useStore from '../store';
 
 // The shell's top bar: wordmark, the three stations, and the actions.
 //
@@ -75,7 +76,21 @@ const NewChip = ({ count }) => (
   }}>+{count} new</span>
 );
 
+// Privacy mode's switch (#86): deliberately quiet, a glyph among the actions,
+// so turning it on does not announce to a viewer that something is hidden.
+// The owner's cue is the half-moon turning over and a small dot.
+const PrivacyToggle = ({ on, onToggle }) => (
+  <button onClick={onToggle} aria-pressed={on} aria-label="Privacy mode (Alt+Shift+P)" title="Privacy mode (Alt+Shift+P)" style={{
+    ...ACTION_BUTTON, position: "relative", fontSize: TYPE.sm, color: white(0.3), padding: `${SPACE.sm}px ${SPACE.sm + 2}px`,
+  }}>
+    <span aria-hidden="true">{on ? "◑" : "◐"}</span>
+    {on && <span aria-hidden="true" style={{ position: "absolute", top: 5, right: 5, width: 4, height: 4, borderRadius: 2, background: alpha(C.gold, 0.7) }} />}
+  </button>
+);
+
 const Nav = ({ view, onNavigate, mobile, tablet, lastSyncTime, newCount, isSyncing, onSync, onCmdK, onExport, onTour }) => {
+  const privacy = useStore(s => s.privacy);
+  const togglePrivacy = useStore(s => s.togglePrivacy);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const station = stationFor(view);
@@ -143,6 +158,11 @@ const Nav = ({ view, onNavigate, mobile, tablet, lastSyncTime, newCount, isSynci
                       border: "none", borderRadius: 8, padding: `${SPACE.md}px ${SPACE.lg}px`, cursor: "pointer",
                     }}><span style={{ width: 18, textAlign: "center" }}>{icon}</span>{label}</button>
                   ))}
+                  <button role="menuitemcheckbox" aria-checked={privacy} onClick={() => { togglePrivacy(); setMenuOpen(false); }} style={{
+                    display: "flex", alignItems: "center", gap: SPACE.md, width: "100%", textAlign: "left",
+                    fontFamily: BODY, fontSize: TYPE.base, color: white(0.55), background: "transparent",
+                    border: "none", borderRadius: 8, padding: `${SPACE.md}px ${SPACE.lg}px`, cursor: "pointer",
+                  }}><span aria-hidden="true" style={{ width: 18, textAlign: "center" }}>{privacy ? "◑" : "◐"}</span>Privacy mode{privacy ? " · on" : ""}</button>
                 </div>
               )}
             </div>
@@ -188,6 +208,7 @@ const Nav = ({ view, onNavigate, mobile, tablet, lastSyncTime, newCount, isSynci
               <span style={{ fontSize: TYPE.sm }}>⌕</span>{!tablet && <span style={{ color: white(0.18) }}>⌘K</span>}
             </button>
           )}
+          <PrivacyToggle on={privacy} onToggle={togglePrivacy} />
           {!tablet && !isSyncing && lastSyncTime && (
             <span style={{ fontFamily: MONO, fontSize: TYPE.xs, color: white(0.2), whiteSpace: "nowrap" }}>Synced {lastSyncTime}</span>
           )}

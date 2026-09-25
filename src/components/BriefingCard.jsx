@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { TOPICS, BRIEFINGS, TIMELINE_DATA } from '../data/constants';
 import FreshnessBadge from './FreshnessBadge';
+import useStore from '../store';
+import { aliasText } from '../privacy';
 import { C, alpha, white, black, FONTS, BODY, MONO, SPACE, TYPE } from '../styles/tokens';
 
 // ─── The briefing, as data ──────────────────────────────────────
@@ -67,6 +69,7 @@ const rowButton = { display: "flex", gap: SPACE.md, alignItems: "center", width:
 
 // ─── The card ───────────────────────────────────────────────────
 const BriefingCard = ({ topic, onClose, onTopicClick, onConversationClick, mobile }) => {
+  const privacy = useStore(s => s.privacy);
   const briefing = BRIEFINGS[topic.id];
   const last = lastActivityOf(topic.id);
   const [status, setStatus] = useState(null);
@@ -79,7 +82,8 @@ const BriefingCard = ({ topic, onClose, onTopicClick, onConversationClick, mobil
 
   const say = (s) => { setStatus(s); clearTimeout(timer.current); timer.current = setTimeout(() => setStatus(null), 2500); };
   const copy = () => {
-    const text = briefingText(topic, briefing);
+    // Pasted into another app, so it carries privacy mode's stand-ins too (#86).
+    const text = privacy ? aliasText(briefingText(topic, briefing)) : briefingText(topic, briefing);
     if (!navigator.clipboard?.writeText) { say("fail"); return; }
     navigator.clipboard.writeText(text).then(() => say("ok")).catch((e) => { console.warn('briefing: clipboard refused:', e); say("fail"); });
   };

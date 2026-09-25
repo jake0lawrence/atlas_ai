@@ -147,6 +147,8 @@ export const SWEEP_ROUTES = [
   } },
   // A shared search: /search?q= opens the palette with the query typed.
   { path: '/search?q=docker', id: 'search-docker', mobile: true },
+  // Privacy mode on (Alt+Shift+P): every employer, person and place a stand-in.
+  { path: '/dashboard', id: 'dashboard-private', mobile: true, setup: async (page) => { await page.keyboard.press('Alt+Shift+KeyP'); } },
   { path: '/dashboard', id: 'dashboard-palette', setup: async (page) => { await page.keyboard.press('Control+k'); } },
   // A topic's briefing: from its bubble's hover card on desktop, from the
   // companion sidebar on a phone (bubbles have no hover card there).
