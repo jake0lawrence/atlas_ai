@@ -5,7 +5,9 @@
   "description": "Evidence for V8_PLAN.md's open questions: a stub Atlas MCP server, a capture-reliability eval, and an enrichment cost measurement.",
   "scripts": {
     "capture-eval": "node capture-eval.mjs",
-    "cost": "node cost.mjs"
+    "cost": "node cost.mjs",
+    "read-server": "node read-server.mjs",
+    "read-smoke": "node read-smoke.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.1",
