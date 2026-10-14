@@ -137,6 +137,10 @@ const OnboardingView = ({ onStart, mobile }) => {
           Your data never leaves your browser.
           {COMING.length > 0 && <> {COMING.map(p => `${p.label} atlases (${p.detail.replace(" · Coming soon", "")}) are coming.`).join(" ")}</>}
         </p>
+        <p style={{ textAlign: "center", fontFamily: BODY, fontSize: TYPE.xs, color: white(0.25), marginTop: SPACE.md, lineHeight: 1.6 }}>
+          A demo: the atlas is simulated, and names show as stand-ins until you switch privacy mode off (◐ in the header).{" "}
+          <a href="https://jakelawrence.xyz" style={{ color: alpha(C.gold, 0.6) }}>Built by Jake Lawrence</a>
+        </p>
       </main>
     </div>
   );

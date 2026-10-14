@@ -24,12 +24,12 @@ describe('the hosted MCP endpoint (api/mcp.js)', () => {
     await client.close();
   });
 
-  it("answers PR 2's question, linking back to the app that serves it", async () => {
+  it("answers PR 2's question, linking back to the app that serves it, under its mount point", async () => {
     const client = await connect();
     const res = await client.callTool({ name: 'atlas_search', arguments: { query: 'courtcollect stack' } });
     const [first] = res.structuredContent.results;
     expect(first.title).toContain('Supabase + Next.js');
-    expect(first.url).toBe('https://atlas.example/topic/courtcollect/conversation/2');
+    expect(first.url).toBe('https://atlas.example/atlas/topic/courtcollect/conversation/2');
     await client.close();
   });
 
@@ -45,7 +45,7 @@ describe('the hosted MCP endpoint (api/mcp.js)', () => {
     const client = await connect(undefined, `${URL_BASE}?privacy=on`);
     const res = await client.callTool({ name: 'atlas_search', arguments: { query: 'product a stack' } });
     const [first] = res.structuredContent.results;
-    expect(first.url).toBe('https://atlas.example/topic/product-a/conversation/2');
+    expect(first.url).toBe('https://atlas.example/atlas/topic/product-a/conversation/2');
     expect(JSON.stringify(res)).not.toMatch(/CourtCollect|Tyler|TransUnion/i);
     await client.close();
   });
@@ -63,5 +63,12 @@ describe('the hosted MCP endpoint (api/mcp.js)', () => {
     expect(privacyFor(new Request(URL_BASE))).toBe(false);
     expect(privacyFor(new Request(`${URL_BASE}?privacy=on`))).toBe(true);
     expect(privacyFor(new Request(URL_BASE), { ATLAS_PRIVACY: 'on' })).toBe(true);
+  });
+
+  it('keeps the deployment setting as a floor a connector URL cannot lower', () => {
+    // The public deployment sets ATLAS_PRIVACY=on; real names must not come back.
+    const env = { ATLAS_PRIVACY: 'on' };
+    expect(privacyFor(new Request(`${URL_BASE}?privacy=off`), env)).toBe(true);
+    expect(privacyFor(new Request(`${URL_BASE}?privacy=`), env)).toBe(true);
   });
 });

@@ -30,11 +30,18 @@ const SETTLE_MS = Number(opt('--settle', 2500)); // StatCard counters finish by 
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json', '.png': 'image/png', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
 
+// The base a dist was built for, read from its index.html ('/atlas' since the
+// app moved under jakelawrence.xyz/atlas; '' for older builds), so a sweep can
+// compare builds from either side of the move.
+const baseOf = (dir) => (/src="(\/[^"]*?)\/?assets\//.exec(fs.readFileSync(path.join(dir, 'index.html'), 'utf8'))?.[1] || '').replace(/\/$/, '');
+
 function serve(dir) {
+  const base = baseOf(dir);
   return new Promise((resolve) => {
     const server = http.createServer((req, res) => {
       const url = new URL(req.url, 'http://x');
-      let file = path.join(dir, url.pathname);
+      const rel = base && url.pathname.startsWith(base) ? url.pathname.slice(base.length) || '/' : url.pathname;
+      let file = path.join(dir, rel);
       if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) file = path.join(dir, 'index.html'); // SPA fallback
       res.setHeader('Content-Type', MIME[path.extname(file)] || 'application/octet-stream');
       fs.createReadStream(file).pipe(res);
@@ -62,6 +69,9 @@ async function sweep() {
   for (const route of SWEEP_ROUTES) {
     const ctx = await browser.newContext({ viewport: VIEWPORT, reducedMotion: 'reduce' });
     const page = await ctx.newPage();
+    // Same starting point as the screenshot baseline: privacy off, so
+    // 'dashboard-private' toggles the stand-ins on.
+    await page.addInitScript(() => { localStorage.setItem('atlas_privacy_mode', 'off'); });
     const errors = [];
     page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
     // Resource failures are reported (with their URL) by `requestfailed` below; the
@@ -70,7 +80,7 @@ async function sweep() {
     page.on('requestfailed', r => { if (!/fonts\.g(oogleapis|static)\.com/.test(r.url())) errors.push(`request: ${r.url()} ${r.failure()?.errorText}`); });
     await page.route(/fonts\.g(oogleapis|static)\.com/, r => r.abort()); // deterministic type
     try {
-      await page.goto(`http://127.0.0.1:${port}${route.path}`, { waitUntil: 'networkidle' });
+      await page.goto(`http://127.0.0.1:${port}${baseOf(DIST)}${route.path}`, { waitUntil: 'networkidle' });
       if (route.setup) await route.setup(page);
       await page.waitForTimeout(SETTLE_MS);
       const [text, html] = await Promise.all([

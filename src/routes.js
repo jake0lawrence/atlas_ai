@@ -1,6 +1,11 @@
 // The route table, shared by the router hook, the render tests, the sweep
 // script and the Playwright screenshot baseline. Change it here only.
 
+// Where the app is mounted: jakelawrence.xyz proxies /atlas/* to this project.
+// Every path below is relative to it (BrowserRouter's basename). Keep it in
+// step with `base` in vite.config.js.
+export const BASE_PATH = '/atlas';
+
 export const PATH_TO_VIEW = {
   '/': 'onboarding',
   '/loading': 'loading',

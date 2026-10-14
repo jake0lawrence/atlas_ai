@@ -5,7 +5,7 @@
 // Update on purpose: `npx playwright test --update-snapshots`, then review the
 // changed PNGs in the PR like any other diff.
 import { test, expect } from '@playwright/test';
-import { SWEEP_ROUTES } from '../../src/routes.js';
+import { SWEEP_ROUTES, BASE_PATH } from '../../src/routes.js';
 import { TOUR_STORAGE_KEY } from '../../src/data/constants.js';
 
 // Every view is time-driven somewhere (stat counters, the loading pipeline,
@@ -23,6 +23,10 @@ test.beforeEach(async ({ page }) => {
   // or without network, and so it does not change when Google reships a font.
   await page.route(/fonts\.g(oogleapis|static)\.com/, r => r.abort());
   await page.addInitScript(SEED_RANDOM);
+  // Visitors start in privacy mode (src/store.js). The baseline captures the
+  // real-name render from a device that turned it off, so 'dashboard-private'
+  // (Alt+Shift+P) still captures the stand-ins.
+  await page.addInitScript(() => { localStorage.setItem('atlas_privacy_mode', 'off'); });
   await page.clock.install({ time: FROZEN_AT });
   await page.clock.pauseAt(FROZEN_AT);
 });
@@ -40,7 +44,7 @@ for (const route of SWEEP_ROUTES) {
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error' && !/^Failed to load resource/.test(m.text())) errors.push(m.text()); });
 
-    await page.goto(route.path, { waitUntil: 'networkidle' });
+    await page.goto(BASE_PATH + route.path, { waitUntil: 'networkidle' });
     if (route.setup) await route.setup(page);
     await page.clock.runFor(SETTLE_MS);
 

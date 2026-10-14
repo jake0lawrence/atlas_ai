@@ -19,6 +19,14 @@ describe('the read tools (V8_PLAN PR 2)', () => {
     expect(decided).toContain('pivot');
   });
 
+  it('keep the mount point of a base URL that has one', () => {
+    const mounted = createReadTools({ baseUrl: 'https://www.jakelawrence.xyz/atlas' });
+    const [first] = mounted.search({ query: 'courtcollect stack' }).results;
+    expect(first.url).toBe('https://www.jakelawrence.xyz/atlas/topic/courtcollect/conversation/2');
+    const slash = createReadTools({ baseUrl: 'https://www.jakelawrence.xyz/atlas/', privacy: true });
+    expect(slash.search({ query: 'stack' }).results[0].url).toMatch(/^https:\/\/www\.jakelawrence\.xyz\/atlas\/topic\//);
+  });
+
   it('link every result to a page the app can open', () => {
     const items = [...tools.search({ query: 'a' , limit: 50 }).results, ...tools.decisions().results, ...tools.drift().results];
     expect(items.length).toBeGreaterThan(20);

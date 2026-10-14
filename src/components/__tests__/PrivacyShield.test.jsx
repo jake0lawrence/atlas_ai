@@ -9,7 +9,7 @@ import BriefingCard from '../BriefingCard';
 import { ENTITIES, TOPICS } from '../../data/constants';
 import constantsSource from '../../data/constants.js?raw';
 import { PATH_TO_VIEW, DEEP_LINKS } from '../../routes';
-import useStore, { PRIVACY_KEY } from '../../store';
+import useStore, { PRIVACY_KEY, readPrivacy } from '../../store';
 import App from '../../App';
 
 const ATTRS = ['aria-label', 'title', 'alt', 'placeholder', 'aria-valuetext', 'aria-description'];
@@ -22,6 +22,29 @@ const flush = () => act(async () => {});
 
 const initialStore = useStore.getState();
 beforeEach(() => { useStore.setState(initialStore, true); localStorage.clear(); });
+
+describe('the default', () => {
+  // vitest.setup.js starts every suite from a device that turned privacy off;
+  // these read the setting as a first-time visitor would.
+  it('is on for a device that never chose', () => {
+    localStorage.removeItem(PRIVACY_KEY);
+    expect(readPrivacy()).toBe(true);
+  });
+
+  it('stays off once a device turns it off, and on once it turns it on', () => {
+    localStorage.setItem(PRIVACY_KEY, 'off');
+    expect(readPrivacy()).toBe(false);
+    localStorage.setItem(PRIVACY_KEY, 'on');
+    expect(readPrivacy()).toBe(true);
+  });
+
+  it('fails safe to on when storage cannot be read', () => {
+    const get = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked'); });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(readPrivacy()).toBe(true);
+    get.mockRestore(); warn.mockRestore();
+  });
+});
 
 describe('the stand-ins', () => {
   it('are typed and stable: people get numbers, the rest letters, per type', () => {
