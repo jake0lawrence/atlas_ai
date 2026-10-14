@@ -11,6 +11,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
 import { createReadTools } from "./readTools.js";
+import { BASE_PATH } from "../routes.js";
 
 // Descriptions say when to call each tool: FINDINGS.md measured that this,
 // not the tool name, is what gets models to use them.
@@ -86,7 +87,7 @@ export async function handleMcpRequest(request, { baseUrl, privacy = false } = {
       { status: 405, headers: { Allow: "POST, OPTIONS" } },
     ));
   }
-  const server = buildServer(createReadTools({ baseUrl: baseUrl || new URL(request.url).origin, privacy }));
+  const server = buildServer(createReadTools({ baseUrl: baseUrl || new URL(BASE_PATH, request.url).toString(), privacy }));
   const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
   await server.connect(transport);
   try {

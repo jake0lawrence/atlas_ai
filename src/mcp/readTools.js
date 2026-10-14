@@ -36,7 +36,10 @@ export function createReadTools({ baseUrl = "http://localhost:5173", privacy = f
   const show = privacy ? aliasText : (s) => s;
   // Private links carry the stand-in as a slug (/topic/product-a), which the
   // app resolves back to the topic (privatePath in privacy.js).
-  const url = (path) => new URL(privacy ? privatePath(path) : path, baseUrl).toString();
+  // Paths are app-relative (/topic/x); the base may carry the mount point
+  // (https://www.jakelawrence.xyz/atlas), which new URL('/topic/x', base) drops.
+  const root = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const url = (path) => new URL((privacy ? privatePath(path) : path).replace(/^\//, ""), root).toString();
   const item = ({ id, kind, title, subtitle, snippet, date, topicId, path }) => ({
     id: show(id), kind, title: show(title), subtitle: show(subtitle), snippet: show(snippet), date, topicId: show(topicId), url: url(path),
   });

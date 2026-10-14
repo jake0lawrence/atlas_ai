@@ -27,7 +27,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
-    url: 'http://127.0.0.1:4173',
+    url: 'http://127.0.0.1:4173/atlas/', // BASE_PATH in src/routes.js
     // Always build fresh: reusing a server that outlived a previous run once
     // captured a baseline from a stale bundle.
     reuseExistingServer: false,
