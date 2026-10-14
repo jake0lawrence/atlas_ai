@@ -62,6 +62,9 @@ async function sweep() {
   for (const route of SWEEP_ROUTES) {
     const ctx = await browser.newContext({ viewport: VIEWPORT, reducedMotion: 'reduce' });
     const page = await ctx.newPage();
+    // Same starting point as the screenshot baseline: privacy off, so
+    // 'dashboard-private' toggles the stand-ins on.
+    await page.addInitScript(() => { localStorage.setItem('atlas_privacy_mode', 'off'); });
     const errors = [];
     page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
     // Resource failures are reported (with their URL) by `requestfailed` below; the

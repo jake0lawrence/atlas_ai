@@ -64,4 +64,11 @@ describe('the hosted MCP endpoint (api/mcp.js)', () => {
     expect(privacyFor(new Request(`${URL_BASE}?privacy=on`))).toBe(true);
     expect(privacyFor(new Request(URL_BASE), { ATLAS_PRIVACY: 'on' })).toBe(true);
   });
+
+  it('keeps the deployment setting as a floor a connector URL cannot lower', () => {
+    // The public deployment sets ATLAS_PRIVACY=on; real names must not come back.
+    const env = { ATLAS_PRIVACY: 'on' };
+    expect(privacyFor(new Request(`${URL_BASE}?privacy=off`), env)).toBe(true);
+    expect(privacyFor(new Request(`${URL_BASE}?privacy=`), env)).toBe(true);
+  });
 });

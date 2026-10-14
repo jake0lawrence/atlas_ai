@@ -1,36 +1,27 @@
 # 🧠 Atlas
 
-**AI Conversation Knowledge Extraction Platform**
+**Your mind, mapped.** Atlas turns two years of ChatGPT and Claude conversations into the topics you keep returning to, the decisions you made, and the connections between them.
 
-Transform your ChatGPT and Claude conversation history into a structured, searchable, visual knowledge base.
+**Live demo: [atlas.jakelawrence.xyz](https://atlas.jakelawrence.xyz)**
 
-## Quick Start
+This is an interactive demo. Every figure on screen comes from fixtures in `src/data/constants.js`; there is no backend. Names show as typed stand-ins ("Employer A", "Person 1") until you switch privacy mode off with ◐ in the header or Alt+Shift+P.
 
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173)
-
-## Build for Production
+## Quick start
 
 ```bash
-npm run build
+npm ci
+npm run dev       # http://localhost:5173
+npm run check     # lint, unit/render tests, build
+npm run test:e2e  # screenshot baseline (Playwright)
 ```
 
-Output goes to `dist/` — deploy this folder to any static host.
+## Deploy
 
-## Tech Stack
+The repo is the Vercel project `atlas-ai`. Every merge to `main` deploys to production at atlas.jakelawrence.xyz; pull requests get preview deploys, which stay behind Vercel Authentication.
 
-- **React 18** — UI framework
-- **Vite** — Build tool
-- **Google Fonts** — Playfair Display, Libre Franklin, JetBrains Mono
+- `vercel.json` rewrites every path except `/api/*` to `index.html`, so deep links like `/topic/courtcollect` load directly.
+- `api/mcp.js` serves the read-only MCP tools at `/api/mcp` (stateless Streamable HTTP, no auth). Production sets `ATLAS_PRIVACY=on`, so the endpoint always answers with stand-ins; `ATLAS_PUBLIC_URL` sets the base for result links. Check it with `node research/v8-mcp/read-smoke.mjs https://atlas.jakelawrence.xyz/api/mcp`.
 
-## Prototype Status
+## Stack
 
-This is the **v4 interactive prototype** with simulated data. The full Atlas pipeline (ingestion → enrichment → export) is under development.
-
----
-
-*This is your mind, mapped.*
+React 18, Vite, Zustand, React Router, inline styles over `src/styles/tokens.js`. Vitest with jsdom, Playwright for screenshots, ESLint 9. Conventions and the source map are in `CLAUDE.md`; plans by version are in `V*_PLAN.md`.

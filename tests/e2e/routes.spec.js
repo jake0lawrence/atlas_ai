@@ -23,6 +23,10 @@ test.beforeEach(async ({ page }) => {
   // or without network, and so it does not change when Google reships a font.
   await page.route(/fonts\.g(oogleapis|static)\.com/, r => r.abort());
   await page.addInitScript(SEED_RANDOM);
+  // Visitors start in privacy mode (src/store.js). The baseline captures the
+  // real-name render from a device that turned it off, so 'dashboard-private'
+  // (Alt+Shift+P) still captures the stand-ins.
+  await page.addInitScript(() => { localStorage.setItem('atlas_privacy_mode', 'off'); });
   await page.clock.install({ time: FROZEN_AT });
   await page.clock.pauseAt(FROZEN_AT);
 });

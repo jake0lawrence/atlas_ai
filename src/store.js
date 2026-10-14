@@ -5,10 +5,11 @@ import {
 } from './data/constants';
 
 // Privacy mode persists per device (#86), read before the first paint so a
-// reload never shows real names first.
+// reload never shows real names first. It is on unless this device turned it
+// off: the public site shows the stand-ins to a first-time visitor.
 export const PRIVACY_KEY = 'atlas_privacy_mode';
-const readPrivacy = () => {
-  try { return localStorage.getItem(PRIVACY_KEY) === 'on'; } catch (e) { console.warn('privacy mode: could not read the setting:', e); return false; }
+export const readPrivacy = () => {
+  try { return localStorage.getItem(PRIVACY_KEY) !== 'off'; } catch (e) { console.warn('privacy mode: could not read the setting:', e); return true; }
 };
 
 const useStore = create((set, get) => ({
