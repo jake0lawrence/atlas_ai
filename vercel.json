@@ -8,6 +8,7 @@
     { "source": "/atlas/assets/:path*", "destination": "/assets/:path*" },
     { "source": "/atlas/:file(favicon\\.svg|og\\.png)", "destination": "/:file" },
     { "source": "/atlas", "destination": "/index.html" },
+    { "source": "/atlas/", "destination": "/index.html" },
     { "source": "/atlas/:path*", "destination": "/index.html" }
   ]
 }
