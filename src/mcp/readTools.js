@@ -8,13 +8,17 @@
 // what ChatGPT needs to build a citation and what Microsoft 365 Copilot infers
 // clickable citations from. With privacy on (#86), every string that leaves
 // Atlas carries the same stand-ins as the screen, ids and urls included.
-import {
-  TOPICS, CONNECTIONS, TIMELINE_DATA, INSIGHT_DECISIONS, PIVOT_ENTRIES, CONTRADICTIONS_INITIAL,
-} from '../data/constants.js';
+import * as FIXTURES from '../data/constants.js';
 import { aliasText, privatePath } from '../privacy.js';
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+
+// The demo persona's knowledge base, which the public endpoint serves. A
+// signed-in caller is served their own store in the same shape (userData.js).
+export const DEMO_DATA = {
+  topics: FIXTURES.TOPICS, connections: FIXTURES.CONNECTIONS, timeline: FIXTURES.TIMELINE_DATA,
+  decisions: FIXTURES.INSIGHT_DECISIONS, pivots: FIXTURES.PIVOT_ENTRIES, contradictions: FIXTURES.CONTRADICTIONS_INITIAL,
+};
 export const DECISION_KINDS = ["decision", "pivot", "milestone"];
 
 // "Dec 2025" -> "2025-12", so pivots sort and filter with the ISO dates.
@@ -25,14 +29,16 @@ const monthToIso = (text) => {
 
 // A conversation link only when the topic's timeline has an event that day
 // (the rule the palette and archaeology use), the topic's timeline otherwise.
-const pathFor = (topicId, date) => {
-  const i = (TIMELINE_DATA[topicId] || []).findIndex(e => e.date === date);
-  return i >= 0 ? `/topic/${topicId}/conversation/${i}` : `/topic/${topicId}`;
-};
 
 const wordsOf = (query) => String(query || "").toLowerCase().split(/\s+/).filter(Boolean);
 
-export function createReadTools({ baseUrl = "http://localhost:5173", privacy = false } = {}) {
+export function createReadTools({ baseUrl = "http://localhost:5173", privacy = false, data = DEMO_DATA } = {}) {
+  const { topics: TOPICS, connections: CONNECTIONS, timeline: TIMELINE_DATA, decisions: INSIGHT_DECISIONS, pivots: PIVOT_ENTRIES, contradictions: CONTRADICTIONS_INITIAL } = data;
+  const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+  const pathFor = (topicId, date) => {
+    const i = (TIMELINE_DATA[topicId] || []).findIndex(e => e.date === date);
+    return i >= 0 ? `/topic/${topicId}/conversation/${i}` : `/topic/${topicId}`;
+  };
   const show = privacy ? aliasText : (s) => s;
   // Private links carry the stand-in as a slug (/topic/product-a), which the
   // app resolves back to the topic (privatePath in privacy.js).
@@ -82,6 +88,7 @@ export function createReadTools({ baseUrl = "http://localhost:5173", privacy = f
       const t = TOPICS.find(x => show(x.id) === id || x.id === id);
       // The error names the valid ids, not the caller's input, so nothing a
       // caller sends is echoed back.
+      if (!t && TOPICS.length === 0) return { error: "This Atlas has no topics yet." };
       if (!t) return { error: `No topic with that id. Topics: ${TOPICS.map(x => show(x.id)).join(", ")}.` };
       return {
         id: show(t.id), name: show(t.name), category: t.category, count: t.count, firstSeen: t.firstSeen, lastSeen: t.lastSeen,
