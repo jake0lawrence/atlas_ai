@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { handleMcpRequest, privacyFor } from '../server';
@@ -16,6 +16,11 @@ async function connect(handle = (request) => endpoint.fetch(request), url = URL_
 }
 
 describe('the hosted MCP endpoint (api/mcp.js)', () => {
+  // These cases read the real names, so the deployment turns privacy off
+  // explicitly; the fail-safe default is tested on its own below.
+  beforeEach(() => vi.stubEnv('ATLAS_PRIVACY', 'off'));
+  afterEach(() => vi.unstubAllEnvs());
+
   it('lists four read-only tools', async () => {
     const client = await connect();
     const { tools } = await client.listTools();
@@ -70,5 +75,26 @@ describe('the hosted MCP endpoint (api/mcp.js)', () => {
     const env = { ATLAS_PRIVACY: 'on' };
     expect(privacyFor(new Request(`${URL_BASE}?privacy=off`), env)).toBe(true);
     expect(privacyFor(new Request(`${URL_BASE}?privacy=`), env)).toBe(true);
+  });
+});
+
+describe('privacy on the hosted endpoint fails safe', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('serves the stand-ins when the deployment does not set ATLAS_PRIVACY at all', async () => {
+    vi.stubEnv('ATLAS_PRIVACY', undefined);
+    const client = await connect();
+    const res = await client.callTool({ name: 'atlas_search', arguments: { query: 'stack' } });
+    expect(res.structuredContent.results.length).toBeGreaterThan(0);
+    expect(JSON.stringify(res)).not.toMatch(/CourtCollect|Tyler|TransUnion/i);
+    await client.close();
+  });
+
+  it('treats any value but "off" as on, an empty string included', async () => {
+    vi.stubEnv('ATLAS_PRIVACY', '');
+    const client = await connect();
+    const res = await client.callTool({ name: 'atlas_search', arguments: { query: 'stack' } });
+    expect(JSON.stringify(res)).not.toMatch(/CourtCollect/i);
+    await client.close();
   });
 });
