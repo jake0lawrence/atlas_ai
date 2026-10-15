@@ -80,7 +80,9 @@ export function createReadTools({ baseUrl = "http://localhost:5173", privacy = f
 
     topic({ id } = {}) {
       const t = TOPICS.find(x => show(x.id) === id || x.id === id);
-      if (!t) return { error: `No topic "${id}". Topics: ${TOPICS.map(x => show(x.id)).join(", ")}.` };
+      // The error names the valid ids, not the caller's input, so nothing a
+      // caller sends is echoed back.
+      if (!t) return { error: `No topic with that id. Topics: ${TOPICS.map(x => show(x.id)).join(", ")}.` };
       return {
         id: show(t.id), name: show(t.name), category: t.category, count: t.count, firstSeen: t.firstSeen, lastSeen: t.lastSeen,
         url: url(`/topic/${t.id}`),

@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { handleMcpRequest, privacyFor } from '../server';
+import { handleMcpRequest, privacyFor, LIMITS } from '../server';
 import endpoint from '../../../api/mcp';
 
 const URL_BASE = 'https://atlas.example/api/mcp';
@@ -42,7 +42,8 @@ describe('the hosted MCP endpoint (api/mcp.js)', () => {
     const client = await connect();
     const res = await client.callTool({ name: 'atlas_topic', arguments: { id: 'nope' } });
     expect(res.isError).toBe(true);
-    expect(res.structuredContent.error).toMatch(/No topic "nope"/);
+    expect(res.structuredContent.error).toMatch(/No topic with that id/);
+    expect(res.structuredContent.error).not.toContain('nope');
     await client.close();
   });
 
@@ -96,5 +97,87 @@ describe('privacy on the hosted endpoint fails safe', () => {
     const res = await client.callTool({ name: 'atlas_search', arguments: { query: 'stack' } });
     expect(JSON.stringify(res)).not.toMatch(/CourtCollect/i);
     await client.close();
+  });
+});
+
+// Bounds (docs/surfaces/HARDENING.md in jakelawrence.xyz): the endpoint is
+// public and unauthenticated by design, so it bounds what a caller
+// can send and what an error can say.
+const rpc = (body, init = {}) => new Request(URL_BASE, {
+  method: 'POST',
+  headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', ...init.headers },
+  body: typeof body === 'string' ? body : JSON.stringify(body),
+});
+const initialize = { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 't', version: '0' } } };
+
+describe('bounding the public MCP endpoint', () => {
+  it('refuses a declared body over the cap without reading it', async () => {
+    const res = await handleMcpRequest(rpc('{}', { headers: { 'content-length': String(LIMITS.bodyBytes + 1) } }));
+    expect(res.status).toBe(413);
+    expect((await res.json()).error.code).toBe(-32600);
+  });
+
+  it('refuses a body over the cap that does not declare its length', async () => {
+    const big = JSON.stringify({ ...initialize, pad: 'x'.repeat(LIMITS.bodyBytes) });
+    const res = await handleMcpRequest(rpc(big));
+    expect(res.status).toBe(413);
+  });
+
+  it('still answers a request under the cap', async () => {
+    const res = await handleMcpRequest(rpc(initialize));
+    expect(res.status).toBe(200);
+    expect((await res.json()).result.serverInfo.name).toBe('atlas');
+  });
+
+  it('rejects a query, topic or id longer than its bound', async () => {
+    const client = await connect();
+    const long = await client.callTool({ name: 'atlas_search', arguments: { query: 'a'.repeat(LIMITS.query + 1) } });
+    expect(long.isError).toBe(true);
+    const topic = await client.callTool({ name: 'atlas_decisions', arguments: { topic: 'a'.repeat(LIMITS.id + 1) } });
+    expect(topic.isError).toBe(true);
+    const id = await client.callTool({ name: 'atlas_topic', arguments: { id: 'a'.repeat(LIMITS.id + 1) } });
+    expect(id.isError).toBe(true);
+    const ok = await client.callTool({ name: 'atlas_search', arguments: { query: 'a'.repeat(LIMITS.query) } });
+    expect(ok.isError).toBeFalsy();
+    await client.close();
+  });
+
+  it('answers malformed JSON with a protocol error, not a crash', async () => {
+    const res = await handleMcpRequest(rpc('{not json'));
+    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(res.status).toBeLessThan(500);
+  });
+
+  it('turns an internal failure into a generic error that quotes nothing', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const secret = 'conversation text that must not leak';
+    // A body stream that fails mid-read (a dropped connection) stands in for
+    // any failure past the method check.
+    const request = rpc(initialize);
+    const broken = new Proxy(request, {
+      get(target, prop) {
+        if (prop === 'arrayBuffer') return () => Promise.reject(new Error(secret));
+        const v = Reflect.get(target, prop, target);
+        return typeof v === 'function' ? v.bind(target) : v;
+      },
+    });
+    const res = await handleMcpRequest(broken);
+    expect(res.status).toBe(500);
+    const text = await res.text();
+    expect(text).toContain('Internal error.');
+    expect(text).not.toContain(secret);
+    expect(JSON.stringify(spy.mock.calls)).not.toContain(secret);
+    spy.mockRestore();
+  });
+
+  it('marks every answer no-store and nosniff', async () => {
+    for (const res of [
+      await handleMcpRequest(rpc(initialize)),
+      await handleMcpRequest(new Request(URL_BASE)),
+      await handleMcpRequest(rpc('{}', { headers: { 'content-length': String(LIMITS.bodyBytes + 1) } })),
+    ]) {
+      expect(res.headers.get('cache-control')).toBe('no-store');
+      expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+    }
   });
 });
