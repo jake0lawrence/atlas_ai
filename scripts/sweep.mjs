@@ -35,6 +35,14 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
 // compare builds from either side of the move.
 const baseOf = (dir) => (/src="(\/[^"]*?)\/?assets\//.exec(fs.readFileSync(path.join(dir, 'index.html'), 'utf8'))?.[1] || '').replace(/\/$/, '');
 
+// The response headers vercel.json sets (CSP, framing, referrer), served here
+// too so a sweep fails on anything the production policy would block: a
+// blocked load shows up as a "Refused to ..." console error.
+const VERCEL = JSON.parse(fs.readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+const headersFor = (pathname) => (VERCEL.headers || [])
+  .filter(rule => new RegExp(`^${rule.source}$`).test(pathname))
+  .flatMap(rule => rule.headers);
+
 function serve(dir) {
   const base = baseOf(dir);
   return new Promise((resolve) => {
@@ -44,6 +52,7 @@ function serve(dir) {
       let file = path.join(dir, rel);
       if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) file = path.join(dir, 'index.html'); // SPA fallback
       res.setHeader('Content-Type', MIME[path.extname(file)] || 'application/octet-stream');
+      for (const { key, value } of headersFor(url.pathname)) res.setHeader(key, value);
       fs.createReadStream(file).pipe(res);
     });
     server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port }));

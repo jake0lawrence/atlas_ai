@@ -18,6 +18,11 @@ import { BASE_PATH } from "../routes.js";
 const READ = { readOnlyHint: true, openWorldHint: false };
 const date = z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/).describe("ISO date, YYYY-MM or YYYY-MM-DD");
 
+// Input bounds. The endpoint is public, so every string a caller sends is
+// capped: a query is a few words, an id is a slug.
+export const LIMITS = { query: 200, id: 64, bodyBytes: 64 * 1024 };
+const slug = (what) => z.string().min(1).max(LIMITS.id).describe(what);
+
 // Structured content for clients that read it, the same JSON as text for the
 // ones that don't (the MCP spec's advice for compatibility).
 const reply = (data) => ({ structuredContent: data, content: [{ type: "text", text: JSON.stringify(data) }], ...(data.error ? { isError: true } : {}) });
@@ -28,21 +33,21 @@ export function buildServer(tools) {
   server.registerTool("atlas_search", {
     title: "Search Atlas",
     description: "Search the user's Atlas, their knowledge base built from past AI conversations: decisions, pivots and conversation summaries across every topic. Use it when the user asks what they decided, said, tried or worked on before. Every word of the query must match. Results link back to Atlas; cite them.",
-    inputSchema: { query: z.string().min(1), topic: z.string().optional().describe("topic id from atlas_topic"), since: date.optional(), limit: z.number().int().min(1).max(50).optional() },
+    inputSchema: { query: z.string().min(1).max(LIMITS.query), topic: slug("topic id from atlas_topic").optional(), since: date.optional(), limit: z.number().int().min(1).max(50).optional() },
     annotations: READ,
   }, async (args) => reply(tools.search(args)));
 
   server.registerTool("atlas_topic", {
     title: "Open an Atlas topic",
     description: "Get one topic from the user's Atlas: its timeline of conversations and decisions, and the topics it connects to. Use it when the user asks about a project or area of their work as a whole.",
-    inputSchema: { id: z.string().min(1).describe("topic id, e.g. courtcollect") },
+    inputSchema: { id: slug("topic id, e.g. courtcollect") },
     annotations: READ,
   }, async (args) => reply(tools.topic(args)));
 
   server.registerTool("atlas_decisions", {
     title: "List decisions in Atlas",
     description: "List the decisions, pivots and milestones the user made, oldest first, optionally for one topic or since a date. Use it when the user asks what they decided about something, or how a decision changed over time.",
-    inputSchema: { topic: z.string().optional(), since: date.optional(), type: z.enum(["decision", "pivot", "milestone"]).optional() },
+    inputSchema: { topic: slug("topic id from atlas_topic").optional(), since: date.optional(), type: z.enum(["decision", "pivot", "milestone"]).optional() },
     annotations: READ,
   }, async (args) => reply(tools.decisions(args)));
 
@@ -64,9 +69,12 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id, Last-Event-ID",
 };
 
+// Answers are per request and never cached; the body is JSON, never sniffed.
+const HARDENING = { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" };
+
 const withCors = (response) => {
   const headers = new Headers(response.headers);
-  for (const [k, v] of Object.entries(CORS)) headers.set(k, v);
+  for (const [k, v] of Object.entries({ ...CORS, ...HARDENING })) headers.set(k, v);
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 };
 
@@ -74,6 +82,18 @@ const withCors = (response) => {
 // on the connector URL. It changes what the tools return, not who may call.
 export const privacyFor = (request, env = {}) =>
   env.ATLAS_PRIVACY === "on" || new URL(request.url).searchParams.get("privacy") === "on";
+
+const rpcError = (status, code, message) =>
+  withCors(Response.json({ jsonrpc: "2.0", error: { code, message }, id: null }, { status }));
+
+// The body, read once and capped at LIMITS.bodyBytes. A declared length over
+// the cap is refused unread; a chunked body is measured as it is read.
+async function readCapped(request) {
+  const declared = Number(request.headers.get("content-length"));
+  if (declared > LIMITS.bodyBytes) return null;
+  const bytes = new Uint8Array(await request.arrayBuffer());
+  return bytes.byteLength > LIMITS.bodyBytes ? null : bytes;
+}
 
 // One MCP request in, one Response out. Result links point at `baseUrl`, the
 // app that serves this endpoint unless told otherwise.
@@ -87,12 +107,21 @@ export async function handleMcpRequest(request, { baseUrl, privacy = false } = {
       { status: 405, headers: { Allow: "POST, OPTIONS" } },
     ));
   }
-  const server = buildServer(createReadTools({ baseUrl: baseUrl || new URL(BASE_PATH, request.url).toString(), privacy }));
-  const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
-  await server.connect(transport);
+  let server;
   try {
-    return withCors(await transport.handleRequest(request));
+    const body = await readCapped(request);
+    if (!body) return rpcError(413, -32600, `Request too large: the limit is ${LIMITS.bodyBytes} bytes.`);
+    const capped = new Request(request.url, { method: "POST", headers: request.headers, body });
+    server = buildServer(createReadTools({ baseUrl: baseUrl || new URL(BASE_PATH, request.url).toString(), privacy }));
+    const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+    await server.connect(transport);
+    return withCors(await transport.handleRequest(capped));
+  } catch (e) {
+    // The caller gets a generic answer; the log gets the error's kind, never
+    // its message, which can quote the request.
+    console.error("atlas mcp: request failed:", e?.name || "Error");
+    return rpcError(500, -32603, "Internal error.");
   } finally {
-    await server.close();
+    await server?.close();
   }
 }
