@@ -63,16 +63,17 @@ export function buildServer(tools) {
 
 // Read-only public data, so any origin may call it (browser-based clients
 // such as the MCP Inspector need this; the chat apps call server to server).
-const CORS = {
+export const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id, Last-Event-ID",
+  "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization, Mcp-Protocol-Version, Mcp-Session-Id, Last-Event-ID",
+  "Access-Control-Expose-Headers": "WWW-Authenticate, Mcp-Session-Id",
 };
 
 // Answers are per request and never cached; the body is JSON, never sniffed.
 const HARDENING = { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" };
 
-const withCors = (response) => {
+export const withCors = (response) => {
   const headers = new Headers(response.headers);
   for (const [k, v] of Object.entries({ ...CORS, ...HARDENING })) headers.set(k, v);
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
@@ -97,7 +98,9 @@ async function readCapped(request) {
 
 // One MCP request in, one Response out. Result links point at `baseUrl`, the
 // app that serves this endpoint unless told otherwise.
-export async function handleMcpRequest(request, { baseUrl, privacy = false } = {}) {
+// `data` is the knowledge base the tools read: the demo persona unless the
+// caller passes another (the signed-in endpoint passes the user's own).
+export async function handleMcpRequest(request, { baseUrl, privacy = false, data } = {}) {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   // Stateless: no server-initiated stream to open (GET) or session to end
   // (DELETE). The spec's answer is 405, which clients read as "POST only".
@@ -112,7 +115,7 @@ export async function handleMcpRequest(request, { baseUrl, privacy = false } = {
     const body = await readCapped(request);
     if (!body) return rpcError(413, -32600, `Request too large: the limit is ${LIMITS.bodyBytes} bytes.`);
     const capped = new Request(request.url, { method: "POST", headers: request.headers, body });
-    server = buildServer(createReadTools({ baseUrl: baseUrl || new URL(BASE_PATH, request.url).toString(), privacy }));
+    server = buildServer(createReadTools({ baseUrl: baseUrl || new URL(BASE_PATH, request.url).toString(), privacy, ...(data ? { data } : {}) }));
     const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     await server.connect(transport);
     return withCors(await transport.handleRequest(capped));
