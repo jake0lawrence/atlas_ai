@@ -1,22 +1,30 @@
 import { useState, useRef } from "react";
 import { BODY, MONO } from '../styles/base';
 import { C, white } from '../styles/tokens';
+import { checkExport, EXPORT_TYPES } from '../upload';
 
 const DropZone = ({ platform, icon, color, subtitle, accepted, onFile, mobile }) => {
   const [dragOver, setDragOver] = useState(false);
+  const [rejected, setRejected] = useState(null);
   const inputRef = useRef(null);
 
+  const take = (file) => {
+    const reason = checkExport(file);
+    setRejected(reason);
+    if (!reason) onFile(file.name);
+  };
   const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); setDragOver(true); };
   const handleDragLeave = (e) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); };
   const handleDrop = (e) => {
     e.preventDefault(); e.stopPropagation(); setDragOver(false);
     const files = e.dataTransfer?.files;
-    if (files?.length) onFile(files[0].name);
+    if (files?.length) take(files[0]);
   };
   const handleClick = () => { if (!accepted) inputRef.current?.click(); };
   const handleInputChange = (e) => {
     const f = e.target.files?.[0];
-    if (f) onFile(f.name);
+    if (f) take(f);
+    e.target.value = "";
   };
 
   return (
@@ -33,7 +41,7 @@ const DropZone = ({ platform, icon, color, subtitle, accepted, onFile, mobile })
         textAlign: "center", position: "relative", overflow: "hidden",
       }}
     >
-      <input ref={inputRef} type="file" style={{ display: "none" }} onChange={handleInputChange} accept=".json,.zip" />
+      <input ref={inputRef} type="file" style={{ display: "none" }} onChange={handleInputChange} accept={EXPORT_TYPES.join(",")} />
 
       {accepted ? (
         <div className="fade-up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -55,6 +63,7 @@ const DropZone = ({ platform, icon, color, subtitle, accepted, onFile, mobile })
             <span style={{ fontSize: 14 }}>📂</span>
             {mobile ? "Tap to browse" : "Drop file or click to browse"}
           </div>
+          {rejected && <div role="alert" style={{ fontFamily: BODY, fontSize: 12, color: C.red, marginTop: 10 }}>{rejected}</div>}
         </>
       )}
     </div>
