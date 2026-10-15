@@ -153,6 +153,14 @@ fixtures, served locally by `research/v8-mcp/read-server.mjs` and hosted as a Ve
 function at `/api/mcp` (stateless Streamable HTTP, no auth, demo persona only). Claude
 goes first, so the Claude.ai check below is the next step.
 
+**Sign-in (2026-10-15).** The OAuth half of PR 2 exists. jakelawrence.xyz is the
+authorization server (`/atlas-oauth`: RFC 8414 metadata, PKCE S256, CIMD and
+dynamic registration, resource-bound access tokens, a consent screen over the
+site's own sign-in, open to any account). Atlas serves a second endpoint,
+`/atlas/api/user/mcp`, that takes only those tokens and reads the subject's own
+store (`src/mcp/userData.js`), empty until PR 1. The public `/api/mcp` stays
+tokenless and demo-only.
+
 **Trying it in Claude.ai.** The endpoint only needs to be reachable: the project's
 Vercel deployments, production included, currently sit behind Vercel Authentication,
 which answers every request with a redirect to Vercel's sign-in. Once production is
